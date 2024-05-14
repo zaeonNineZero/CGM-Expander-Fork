@@ -108,6 +108,8 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         private GripType gripType = GripType.ONE_HANDED;
         private int maxAmmo;
         @Optional
+        private int overCapacityAmmo = 0;
+        @Optional
         private int reloadAmount = 1;
         @Optional
         private int reloadRate = 10;
@@ -129,6 +131,8 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         private boolean alwaysSpread;
         @Optional
         private float spread;
+        @Optional
+        private double adsSpeed = 1;
 
         @Override
         public CompoundTag serializeNBT()
@@ -138,6 +142,7 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             tag.putInt("Rate", this.rate);
             tag.putString("GripType", this.gripType.getId().toString());
             tag.putInt("MaxAmmo", this.maxAmmo);
+            tag.putInt("OverCapacityAmmo", this.overCapacityAmmo);
             tag.putInt("ReloadSpeed", this.reloadAmount);
             tag.putInt("ReloadRate", this.reloadRate);
             tag.putBoolean("UseMagReload", this.useMagReload);
@@ -149,6 +154,7 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             tag.putInt("ProjectileAmount", this.projectileAmount);
             tag.putBoolean("AlwaysSpread", this.alwaysSpread);
             tag.putFloat("Spread", this.spread);
+            tag.putDouble("ADSSpeed", this.adsSpeed);
             return tag;
         }
 
@@ -170,6 +176,11 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             if(tag.contains("MaxAmmo", Tag.TAG_ANY_NUMERIC))
             {
                 this.maxAmmo = tag.getInt("MaxAmmo");
+                this.overCapacityAmmo = (int) Math.round((double) tag.getInt("MaxAmmo")*1.5);
+            }
+            if(tag.contains("OverCapacityAmmo", Tag.TAG_ANY_NUMERIC))
+            {
+                this.overCapacityAmmo = tag.getInt("OverCapacityAmmo");
             }
             if(tag.contains("ReloadSpeed", Tag.TAG_ANY_NUMERIC))
             {
@@ -215,12 +226,17 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             {
                 this.spread = tag.getFloat("Spread");
             }
+            if(tag.contains("ADSSpeed", Tag.TAG_ANY_NUMERIC))
+            {
+                this.adsSpeed = tag.getDouble("ADSSpeed");
+            }
         }
 
         public JsonObject toJsonObject()
         {
             Preconditions.checkArgument(this.rate > 0, "Rate must be more than zero");
             Preconditions.checkArgument(this.maxAmmo > 0, "Max ammo must be more than zero");
+            Preconditions.checkArgument(this.overCapacityAmmo > 0, "Over Capacity bonus ammo must be more than zero");
             Preconditions.checkArgument(this.reloadAmount >= 1, "Reload amount must be more than or equal to zero");
             Preconditions.checkArgument(this.reloadRate >= 1, "Reload rate must be more than or equal to zero");
             Preconditions.checkArgument(this.magReloadTime >= 1, "Mag reload time must be more than or equal to zero");
@@ -230,11 +246,13 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             Preconditions.checkArgument(this.recoilAdsReduction >= 0.0F && this.recoilAdsReduction <= 1.0F, "Recoil ads reduction must be between 0.0 and 1.0");
             Preconditions.checkArgument(this.projectileAmount >= 1, "Projectile amount must be more than or equal to one");
             Preconditions.checkArgument(this.spread >= 0.0F, "Spread must be more than or equal to zero");
+            Preconditions.checkArgument(this.adsSpeed > 0.0, "ADS Speed must be more than zero");
             JsonObject object = new JsonObject();
             if(this.auto) object.addProperty("auto", true);
             object.addProperty("rate", this.rate);
             object.addProperty("gripType", this.gripType.getId().toString());
             object.addProperty("maxAmmo", this.maxAmmo);
+            object.addProperty("overCapacityAmmo", this.overCapacityAmmo);
             if(this.reloadAmount != 1) object.addProperty("reloadAmount", this.reloadAmount);
             if(this.reloadRate != 10) object.addProperty("reloadRate", this.reloadRate);
             if(this.useMagReload != false) object.addProperty("useMagReload", this.useMagReload);
@@ -246,6 +264,7 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             if(this.projectileAmount != 1) object.addProperty("projectileAmount", this.projectileAmount);
             if(this.alwaysSpread) object.addProperty("alwaysSpread", true);
             if(this.spread != 0.0F) object.addProperty("spread", this.spread);
+            if(this.adsSpeed != 1) object.addProperty("adsSpeed", this.adsSpeed);
             return object;
         }
 
@@ -259,6 +278,7 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             general.rate = this.rate;
             general.gripType = this.gripType;
             general.maxAmmo = this.maxAmmo;
+            general.overCapacityAmmo = this.overCapacityAmmo;
             general.reloadAmount = this.reloadAmount;
             general.reloadRate = this.reloadRate;
             general.useMagReload = this.useMagReload;
@@ -270,6 +290,7 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             general.projectileAmount = this.projectileAmount;
             general.alwaysSpread = this.alwaysSpread;
             general.spread = this.spread;
+            general.adsSpeed = this.adsSpeed;
             return general;
         }
 
@@ -303,6 +324,14 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         public int getMaxAmmo()
         {
             return this.maxAmmo;
+        }
+
+        /**
+         * @return The bonus to MaxAmmo provided by one level of the Over Capacity enchantment.
+         */
+        public int getOverCapacityAmmo()
+        {
+            return this.overCapacityAmmo;
         }
 
         /**
@@ -392,6 +421,14 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         public float getSpread()
         {
             return this.spread;
+        }
+
+        /**
+         * @return The base speed modifier to the gun's aiming speed.
+         */
+        public double getADSSpeed()
+        {
+            return this.adsSpeed;
         }
     }
 

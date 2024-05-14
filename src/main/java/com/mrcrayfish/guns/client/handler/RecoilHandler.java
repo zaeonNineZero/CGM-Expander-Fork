@@ -111,14 +111,14 @@ public class RecoilHandler
         ItemCooldowns tracker = Minecraft.getInstance().player.getCooldowns();
         float cooldown = tracker.getCooldownPercent(gunItem, Minecraft.getInstance().getFrameTime());
         cooldown = cooldown >= modifiedGun.getGeneral().getRecoilDurationOffset() ? (cooldown - modifiedGun.getGeneral().getRecoilDurationOffset()) / (1.0F - modifiedGun.getGeneral().getRecoilDurationOffset()) : 0.0F;
-        if(cooldown >= 0.8)
+        if(cooldown >= 0.85)
         {
-            float amount = 1.0F * ((1.0F - cooldown) / 0.2F);
+            float amount = 1.0F * ((1.0F - (cooldown*0.98F)) / 0.2F);
             this.gunRecoilNormal = 1 - (--amount) * amount * amount * amount;
         }
         else
         {
-            float amount = (cooldown / 0.8F);
+            float amount = (cooldown / 0.85F);
             this.gunRecoilNormal = amount < 0.5 ? 2 * amount * amount : -1 + (4 - 2 * amount) * amount;
         }
 

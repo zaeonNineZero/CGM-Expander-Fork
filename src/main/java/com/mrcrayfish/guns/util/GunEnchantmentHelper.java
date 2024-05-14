@@ -58,7 +58,8 @@ public class GunEnchantmentHelper
     public static int getMagReloadSpeed(ItemStack weapon)
     {
         Gun modifiedGun = ((GunItem) weapon.getItem()).getModifiedGun(weapon);
-        int speed = modifiedGun.getGeneral().getMagReloadTime() * (modifiedGun.getGeneral().getMaxAmmo()/getAmmoCapacity(weapon,modifiedGun));
+        float rawSpeed = modifiedGun.getGeneral().getMagReloadTime() * ((float) getAmmoCapacity(weapon,modifiedGun)/(float) modifiedGun.getGeneral().getMaxAmmo());
+        int speed = (int) rawSpeed;
         
         int level = EnchantmentHelper.getItemEnchantmentLevel(ModEnchantments.QUICK_HANDS.get(), weapon);
         if(level > 0)
@@ -82,8 +83,14 @@ public class GunEnchantmentHelper
 
     public static double getAimDownSightSpeed(ItemStack weapon)
     {
+    	if(!(weapon.getItem() instanceof GunItem))
+            return 1;
+    	
         int level = EnchantmentHelper.getItemEnchantmentLevel(ModEnchantments.LIGHTWEIGHT.get(), weapon);
-        return level > 0 ? 1.5 : 1.0;
+        Gun modifiedGun = ((GunItem) weapon.getItem()).getModifiedGun(weapon);
+        double speed = modifiedGun.getGeneral().getADSSpeed();
+        speed += Math.max(Math.min((level)*0.5,2.5),0.01);
+        return Math.max(speed,0.01);
     }
 
     public static int getAmmoCapacity(ItemStack weapon, Gun modifiedGun)

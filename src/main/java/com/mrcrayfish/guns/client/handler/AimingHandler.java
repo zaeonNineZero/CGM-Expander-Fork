@@ -195,6 +195,9 @@ public class AimingHandler
 
         if(mc.player.isSpectator())
             return false;
+        
+        if(mc.player.isSprinting())
+            return false;
 
         if(Debug.isForceAim())
             return true;

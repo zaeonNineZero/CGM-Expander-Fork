@@ -511,7 +511,7 @@ public class GunRenderingHandler
         }
         float kickReduction = 1.0F - GunModifierHelper.getKickReduction(item);
         float recoilReduction = 1.0F - GunModifierHelper.getRecoilModifier(item);
-        double kick = gun.getGeneral().getRecoilKick() * 0.0625 * recoilNormal * RecoilHandler.get().getAdsRecoilReduction(gun);
+        double kick = gun.getGeneral().getRecoilKick() * 0.0625 * (recoilNormal) * RecoilHandler.get().getAdsRecoilReduction(gun);
         float recoilLift = (float) (gun.getGeneral().getRecoilAngle() * recoilNormal) * (float) RecoilHandler.get().getAdsRecoilReduction(gun);
         float recoilSwayAmount = (float) (2F + 1F * (1.0 - AimingHandler.get().getNormalisedAdsProgress()));
         float recoilSway = (float) ((RecoilHandler.get().getGunRecoilRandom() * recoilSwayAmount - recoilSwayAmount / 2F) * recoilNormal);
@@ -827,7 +827,7 @@ public class GunRenderingHandler
         int side = hand.getOpposite() == HumanoidArm.RIGHT ? 1 : -1;
         poseStack.translate(translateX * side, 0, 0);
 
-        float interval = GunEnchantmentHelper.getRealReloadSpeed(stack);
+        float interval = GunEnchantmentHelper.getReloadInterval(stack);
         float reload = ((mc.player.tickCount - ReloadHandler.get().getStartReloadTick() + mc.getFrameTime()) % interval) / interval;
         float percent = 1.0F - reload;
         if(percent >= 0.5F)
