@@ -110,6 +110,8 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         @Optional
         private int reloadAmount = 1;
         @Optional
+        private double reloadRate = 1;
+        @Optional
         private float recoilAngle;
         @Optional
         private float recoilKick;
@@ -133,6 +135,7 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             tag.putString("GripType", this.gripType.getId().toString());
             tag.putInt("MaxAmmo", this.maxAmmo);
             tag.putInt("ReloadSpeed", this.reloadAmount);
+            tag.putDouble("ReloadRate", this.reloadRate);
             tag.putFloat("RecoilAngle", this.recoilAngle);
             tag.putFloat("RecoilKick", this.recoilKick);
             tag.putFloat("RecoilDurationOffset", this.recoilDurationOffset);
@@ -165,6 +168,10 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             if(tag.contains("ReloadSpeed", Tag.TAG_ANY_NUMERIC))
             {
                 this.reloadAmount = tag.getInt("ReloadSpeed");
+            }
+            if(tag.contains("ReloadRate", Tag.TAG_ANY_NUMERIC))
+            {
+                this.reloadRate = tag.getDouble("ReloadRate");
             }
             if(tag.contains("RecoilAngle", Tag.TAG_ANY_NUMERIC))
             {
@@ -213,6 +220,7 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             object.addProperty("gripType", this.gripType.getId().toString());
             object.addProperty("maxAmmo", this.maxAmmo);
             if(this.reloadAmount != 1) object.addProperty("reloadAmount", this.reloadAmount);
+            if(this.reloadRate != 1) object.addProperty("reloadRate", this.reloadRate);
             if(this.recoilAngle != 0.0F) object.addProperty("recoilAngle", this.recoilAngle);
             if(this.recoilKick != 0.0F) object.addProperty("recoilKick", this.recoilKick);
             if(this.recoilDurationOffset != 0.0F) object.addProperty("recoilDurationOffset", this.recoilDurationOffset);
@@ -234,6 +242,7 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             general.gripType = this.gripType;
             general.maxAmmo = this.maxAmmo;
             general.reloadAmount = this.reloadAmount;
+            general.reloadRate = this.reloadRate;
             general.recoilAngle = this.recoilAngle;
             general.recoilKick = this.recoilKick;
             general.recoilDurationOffset = this.recoilDurationOffset;
@@ -282,6 +291,14 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         public int getReloadAmount()
         {
             return this.reloadAmount;
+        }
+
+        /**
+         * @return The speed of each reload cycle - the lower the value, the faster each reload cycle.
+         */
+        public double getReloadRate()
+        {
+            return this.reloadRate;
         }
 
         /**

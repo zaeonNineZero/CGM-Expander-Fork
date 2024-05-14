@@ -78,12 +78,6 @@ public class ShootingHandler
             {
                 event.setSwingHand(false);
                 event.setCanceled(true);
-                this.fire(player, heldItem);
-                Gun gun = gunItem.getModifiedGun(heldItem);
-                if(!gun.getGeneral().isAuto())
-                {
-                    KeyBinds.getShootMapping().setDown(false);
-                }
             }
         }
         else if(Config.CLIENT.controls.flipControls.get() ? event.isAttack() : event.isUseItem())
@@ -184,9 +178,10 @@ public class ShootingHandler
                 if(KeyBinds.getShootMapping().isDown())
                 {
                     Gun gun = ((GunItem) heldItem.getItem()).getModifiedGun(heldItem);
-                    if(gun.getGeneral().isAuto())
+                    this.fire(player, heldItem);
+                    if(!gun.getGeneral().isAuto())
                     {
-                        this.fire(player, heldItem);
+                    	KeyBinds.getShootMapping().setDown(false);
                     }
                 }
             }

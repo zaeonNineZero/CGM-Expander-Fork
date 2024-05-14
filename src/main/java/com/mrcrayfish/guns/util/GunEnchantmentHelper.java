@@ -2,6 +2,7 @@ package com.mrcrayfish.guns.util;
 
 import com.mrcrayfish.guns.common.Gun;
 import com.mrcrayfish.guns.init.ModEnchantments;
+import com.mrcrayfish.guns.item.GunItem;
 import com.mrcrayfish.guns.particles.TrailData;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
@@ -33,11 +34,15 @@ public class GunEnchantmentHelper
 
     public static int getReloadInterval(ItemStack weapon)
     {
-        int interval = 10;
+        int baseInterval = 10;
+        Gun modifiedGun = ((GunItem) weapon.getItem()).getModifiedGun(weapon);
+        double reloadRate = modifiedGun.getGeneral().getReloadRate();
+        
+        int interval = (int) Math.round(baseInterval*reloadRate);
         int level = EnchantmentHelper.getItemEnchantmentLevel(ModEnchantments.QUICK_HANDS.get(), weapon);
         if(level > 0)
         {
-            interval -= 3 * level;
+            interval -= Math.round((3*reloadRate) * level);
         }
         return Math.max(interval, 1);
     }
