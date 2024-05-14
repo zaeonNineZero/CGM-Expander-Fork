@@ -1,26 +1,20 @@
-# eclipse
-bin
-*.launch
-.settings
-.metadata
+# Build and Bins
+.gradle/
+bin/
+build/
+run/*
+
+# IDEs
+.settings/
 .classpath
 .project
 
-# idea
-out
-*.ipr
-*.iws
-*.iml
-.idea
+# Launching
+runClient.launch
+runData.launch
+runGameTestServer.launch
+runServer.launch
 
-# gradle
-build
-.gradle
-
-# other
-eclipse
-run
-logs
-libs
-
-classes
+# Misc
+cgm-1.3.4-1.19.2.jar
+SourceTree.lnk
