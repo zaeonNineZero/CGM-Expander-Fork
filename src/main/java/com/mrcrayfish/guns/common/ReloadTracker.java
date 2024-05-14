@@ -76,32 +76,47 @@ public class ReloadTracker
     private boolean canReload(Player player)
     {
         int deltaTicks = player.tickCount - this.startTick;
-        int interval = GunEnchantmentHelper.getReloadInterval(this.stack);
+        int interval = GunEnchantmentHelper.getRealReloadSpeed(this.stack);
         return deltaTicks > 0 && deltaTicks % interval == 0;
     }
 
     private void increaseAmmo(Player player)
     {
+    	int ammoLoaded = 0;
         AmmoContext context = Gun.findAmmo(player, this.gun.getProjectile().getItem());
-        ItemStack ammo = context.stack();
-        if(!ammo.isEmpty())
-        {
-            int amount = Math.min(ammo.getCount(), this.gun.getGeneral().getReloadAmount());
-            CompoundTag tag = this.stack.getTag();
-            if(tag != null)
-            {
-                int maxAmmo = GunEnchantmentHelper.getAmmoCapacity(this.stack, this.gun);
-                amount = Math.min(amount, maxAmmo - tag.getInt("AmmoCount"));
-                tag.putInt("AmmoCount", tag.getInt("AmmoCount") + amount);
-            }
-            ammo.shrink(amount);
+    	boolean outOfAmmo = false;
 
-            // Trigger that the container changed
-            Container container = context.container();
-            if(container != null)
+    	int attempts = 0;
+        int maxAmmo = GunEnchantmentHelper.getAmmoCapacity(this.stack, this.gun);
+    	int trueReloadAmount = (this.gun.getGeneral().getUseMagReload() ? maxAmmo : this.gun.getGeneral().getReloadAmount());
+        while (ammoLoaded<this.gun.getGeneral().getReloadAmount() && attempts<64 && !outOfAmmo)
+        {
+        	attempts++;
+        	ItemStack ammo = context.stack();
+            if(!ammo.isEmpty())
             {
-                container.setChanged();
+                int amount = Math.min(ammo.getCount(), trueReloadAmount);
+                CompoundTag tag = this.stack.getTag();
+                if(tag != null)
+                {
+                    amount = Math.min(amount, maxAmmo - tag.getInt("AmmoCount"));
+                    tag.putInt("AmmoCount", tag.getInt("AmmoCount") + amount);
+                    ammoLoaded += amount;
+                }
+                ammo.shrink(amount);
+
+                // Trigger that the container changed
+                Container container = context.container();
+                if(container != null)
+                {
+                    container.setChanged();
+                }
             }
+            else
+            outOfAmmo = true;
+            
+            if (ammoLoaded<this.gun.getGeneral().getReloadAmount() && !outOfAmmo)
+            context = Gun.findAmmo(player, this.gun.getProjectile().getItem());
         }
 
         ResourceLocation reloadSound = this.gun.getSounds().getReload();
@@ -142,6 +157,7 @@ public class ReloadTracker
                 }
                 if(tracker.canReload(player))
                 {
+                	
                     tracker.increaseAmmo(player);
                     if(tracker.isWeaponFull() || tracker.hasNoAmmo(player))
                     {

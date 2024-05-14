@@ -88,7 +88,7 @@ public class GunModifiers
         @Override
         public float kickModifier()
         {
-            return 0.3F;
+            return 0.35F;
         }
 
         @Override
@@ -109,31 +109,25 @@ public class GunModifiers
         @Override
         public float recoilModifier()
         {
-            return 0.1F;
+            return 0.18F;
         }
 
         @Override
         public float kickModifier()
         {
-            return 0.1F;
+            return 0.25F;
         }
 
         @Override
         public float modifyProjectileSpread(float spread)
         {
-            return spread * 0.25F;
+            return spread * 0.35F;
         }
 
         @Override
         public double modifyAimDownSightSpeed(double speed)
         {
-            return speed * 0.5F;
-        }
-
-        @Override
-        public int modifyFireRate(int rate)
-        {
-            return Mth.clamp((int) (rate * 1.25), rate + 1, Integer.MAX_VALUE);
+            return speed * 0.67F;
         }
     };
 

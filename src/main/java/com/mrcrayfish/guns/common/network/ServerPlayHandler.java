@@ -75,8 +75,8 @@ public class ServerPlayHandler
         if(player.isSpectator())
             return;
 
-        if(player.getUseItem().getItem() == Items.SHIELD)
-            return;
+        //if(player.getUseItem().getItem() == Items.SHIELD)
+        //    return;
 
         Level world = player.level;
         ItemStack heldItem = player.getItemInHand(InteractionHand.MAIN_HAND);
@@ -265,7 +265,8 @@ public class ServerPlayHandler
         if(stack.getItem() instanceof GunItem)
         {
             CompoundTag tag = stack.getTag();
-            if(tag != null && tag.contains("AmmoCount", Tag.TAG_INT))
+            Gun modifiedGun = ((GunItem) stack.getItem()).getModifiedGun(stack);
+            if(tag != null && tag.contains("AmmoCount", Tag.TAG_INT) && !tag.getBoolean("IgnoreAmmo") && !Gun.hasUnlimitedReloads(stack))
             {
                 int count = tag.getInt("AmmoCount");
                 tag.putInt("AmmoCount", 0);

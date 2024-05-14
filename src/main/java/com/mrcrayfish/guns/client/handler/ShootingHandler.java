@@ -7,6 +7,7 @@ import com.mrcrayfish.guns.common.GripType;
 import com.mrcrayfish.guns.common.Gun;
 import com.mrcrayfish.guns.compat.PlayerReviveHelper;
 import com.mrcrayfish.guns.event.GunFireEvent;
+import com.mrcrayfish.guns.init.ModSyncedDataKeys;
 import com.mrcrayfish.guns.item.GunItem;
 import com.mrcrayfish.guns.network.PacketHandler;
 import com.mrcrayfish.guns.network.message.C2SMessageShoot;
@@ -196,11 +197,17 @@ public class ShootingHandler
         if(!Gun.hasAmmo(heldItem) && !player.isCreative())
             return;
         
+        if(ModSyncedDataKeys.RELOADING.getValue(player)) //*NEW* Disallow firing while reloading.
+            return;
+        
         if(player.isSpectator())
             return;
-
-        if(player.getUseItem().getItem() == Items.SHIELD)
+        
+        if(player.isSprinting()) //*NEW* Disallow firing while sprinting.
             return;
+
+        //if(player.getUseItem().getItem() == Items.SHIELD)
+        //    return;
 
         ItemCooldowns tracker = player.getCooldowns();
         if(!tracker.isOnCooldown(heldItem.getItem()))

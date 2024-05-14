@@ -204,6 +204,38 @@ public final class PropertyHelper
         return Vec3.ZERO;
     }
 
+    public static int getMuzzleFlashType(ItemStack weapon, Gun modifiedGun)
+    {
+        DataObject weaponObject = getObjectByPath(weapon, WEAPON_KEY);
+        if(weaponObject.has("muzzleFlash", DataType.OBJECT))
+        {
+            DataObject muzzleObject = weaponObject.getDataObject("muzzleFlash");
+            if(muzzleObject.has("type", DataType.NUMBER))
+            {
+                int type = muzzleObject.getDataNumber("type").asInt();
+                return type;
+            }
+            return 0;
+        }
+        return 0;
+    }
+
+    public static int getMuzzleFlashVariant(ItemStack weapon, Gun modifiedGun)
+    {
+        DataObject weaponObject = getObjectByPath(weapon, WEAPON_KEY);
+        if(weaponObject.has("muzzleFlash", DataType.OBJECT))
+        {
+            DataObject muzzleObject = weaponObject.getDataObject("muzzleFlash");
+            if(muzzleObject.has("variant", DataType.NUMBER))
+            {
+                int variant = muzzleObject.getDataNumber("variant").asInt();
+                return variant;
+            }
+            return 0;
+        }
+        return 0;
+    }
+
     public static Vec3 getMuzzleFlashScale(ItemStack weapon, Gun modifiedGun)
     {
         DataObject weaponObject = getObjectByPath(weapon, WEAPON_KEY);

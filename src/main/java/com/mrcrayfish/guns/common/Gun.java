@@ -110,7 +110,11 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         @Optional
         private int reloadAmount = 1;
         @Optional
-        private double reloadRate = 1;
+        private int reloadRate = 10;
+        @Optional
+        private boolean useMagReload = false;
+        @Optional
+        private int magReloadTime = 20;
         @Optional
         private float recoilAngle;
         @Optional
@@ -135,7 +139,9 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             tag.putString("GripType", this.gripType.getId().toString());
             tag.putInt("MaxAmmo", this.maxAmmo);
             tag.putInt("ReloadSpeed", this.reloadAmount);
-            tag.putDouble("ReloadRate", this.reloadRate);
+            tag.putInt("ReloadRate", this.reloadRate);
+            tag.putBoolean("UseMagReload", this.useMagReload);
+            tag.putInt("MagReloadTime", this.magReloadTime);
             tag.putFloat("RecoilAngle", this.recoilAngle);
             tag.putFloat("RecoilKick", this.recoilKick);
             tag.putFloat("RecoilDurationOffset", this.recoilDurationOffset);
@@ -171,7 +177,15 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             }
             if(tag.contains("ReloadRate", Tag.TAG_ANY_NUMERIC))
             {
-                this.reloadRate = tag.getDouble("ReloadRate");
+                this.reloadRate = tag.getInt("ReloadRate");
+            }
+            if(tag.contains("UseMagReload", Tag.TAG_ANY_NUMERIC))
+            {
+                this.useMagReload = tag.getBoolean("UseMagReload");
+            }
+            if(tag.contains("MagReloadTime", Tag.TAG_ANY_NUMERIC))
+            {
+                this.magReloadTime = tag.getInt("MagReloadTime");
             }
             if(tag.contains("RecoilAngle", Tag.TAG_ANY_NUMERIC))
             {
@@ -207,7 +221,9 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         {
             Preconditions.checkArgument(this.rate > 0, "Rate must be more than zero");
             Preconditions.checkArgument(this.maxAmmo > 0, "Max ammo must be more than zero");
-            Preconditions.checkArgument(this.reloadAmount >= 1, "Reload angle must be more than or equal to zero");
+            Preconditions.checkArgument(this.reloadAmount >= 1, "Reload amount must be more than or equal to zero");
+            Preconditions.checkArgument(this.reloadRate >= 1, "Reload rate must be more than or equal to zero");
+            Preconditions.checkArgument(this.magReloadTime >= 1, "Mag reload time must be more than or equal to zero");
             Preconditions.checkArgument(this.recoilAngle >= 0.0F, "Recoil angle must be more than or equal to zero");
             Preconditions.checkArgument(this.recoilKick >= 0.0F, "Recoil kick must be more than or equal to zero");
             Preconditions.checkArgument(this.recoilDurationOffset >= 0.0F && this.recoilDurationOffset <= 1.0F, "Recoil duration offset must be between 0.0 and 1.0");
@@ -220,7 +236,9 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             object.addProperty("gripType", this.gripType.getId().toString());
             object.addProperty("maxAmmo", this.maxAmmo);
             if(this.reloadAmount != 1) object.addProperty("reloadAmount", this.reloadAmount);
-            if(this.reloadRate != 1) object.addProperty("reloadRate", this.reloadRate);
+            if(this.reloadRate != 10) object.addProperty("reloadRate", this.reloadRate);
+            if(this.useMagReload != false) object.addProperty("useMagReload", this.useMagReload);
+            if(this.magReloadTime != 20) object.addProperty("magReloadTime", this.magReloadTime);
             if(this.recoilAngle != 0.0F) object.addProperty("recoilAngle", this.recoilAngle);
             if(this.recoilKick != 0.0F) object.addProperty("recoilKick", this.recoilKick);
             if(this.recoilDurationOffset != 0.0F) object.addProperty("recoilDurationOffset", this.recoilDurationOffset);
@@ -243,6 +261,8 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             general.maxAmmo = this.maxAmmo;
             general.reloadAmount = this.reloadAmount;
             general.reloadRate = this.reloadRate;
+            general.useMagReload = this.useMagReload;
+            general.magReloadTime = this.magReloadTime;
             general.recoilAngle = this.recoilAngle;
             general.recoilKick = this.recoilKick;
             general.recoilDurationOffset = this.recoilDurationOffset;
@@ -294,11 +314,27 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         }
 
         /**
-         * @return The speed of each reload cycle - the lower the value, the faster each reload cycle.
+         * @return The speed of each reload cycle in ticks. The lower the value, the faster each reload cycle.
          */
-        public double getReloadRate()
+        public int getReloadRate()
         {
             return this.reloadRate;
+        }
+
+        /**
+         * @return Whether to use the new magazine-style reload, where all ammo is loaded at the end of the reload cycle.
+         */
+        public boolean getUseMagReload()
+        {
+            return this.useMagReload;
+        }
+
+        /**
+         * @return The speed of magazine reloads in ticks. The lower the value, shorter the reload time.
+         */
+        public int getMagReloadTime()
+        {
+            return this.magReloadTime;
         }
 
         /**
@@ -1538,7 +1574,8 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
 
     public static AmmoContext findAmmo(Player player, ResourceLocation id)
     {
-        if(player.isCreative())
+    	ItemStack gunStack = player.getInventory().getSelected();
+        if(player.isCreative() || hasUnlimitedReloads(gunStack))
         {
             Item item = ForgeRegistries.ITEMS.getValue(id);
             ItemStack ammo = item != null ? new ItemStack(item, Integer.MAX_VALUE) : ItemStack.EMPTY;
@@ -1557,6 +1594,12 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             return BackpackHelper.findAmmo(player, id);
         }
         return AmmoContext.NONE;
+    }
+
+    public static boolean hasUnlimitedReloads(ItemStack gunStack)
+    {
+        CompoundTag tag = gunStack.getOrCreateTag();
+        return tag.getBoolean("UnlimitedReloads") || tag.getBoolean("UnlimitReload");
     }
 
     public static boolean isAmmo(ItemStack stack, ResourceLocation id)

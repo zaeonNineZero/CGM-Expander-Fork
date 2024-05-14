@@ -83,6 +83,7 @@ public class GunRenderingHandler
     }
 
     public static final ResourceLocation MUZZLE_FLASH_TEXTURE = new ResourceLocation(Reference.MOD_ID, "textures/effect/muzzle_flash.png");
+    public static final ResourceLocation MUZZLE_FLASH_TEXTURE_1 = new ResourceLocation(Reference.MOD_ID, "textures/effect/muzzle_flash_1.png");
 
     private final Random random = new Random();
     private final Set<Integer> entityIdForMuzzleFlash = new HashSet<>();
@@ -785,15 +786,28 @@ public class GunRenderingHandler
 
         // Center the texture
         poseStack.translate(-0.5, -0.5, 0);
+        
+        int flashType = PropertyHelper.getMuzzleFlashType(weapon, modifiedGun);
+        int flashVariant = PropertyHelper.getMuzzleFlashVariant(weapon, modifiedGun);
 
         float minU = weapon.isEnchanted() ? 0.5F : 0.0F;
         float maxU = weapon.isEnchanted() ? 1.0F : 0.5F;
+        float minC = 0.0F;
+        float maxC = 1.0F;
+        
+        if (flashType==1)
+        {
+        	int variant = Math.max(Math.min(flashVariant,7),0);
+        	minC = (float) (variant)*(0.125F);
+        	maxC = (float) (variant+1)*(0.125F);
+        }
+        
         Matrix4f matrix = poseStack.last().pose();
-        VertexConsumer builder = buffer.getBuffer(GunRenderType.getMuzzleFlash());
-        builder.vertex(matrix, 0, 0, 0).color(1.0F, 1.0F, 1.0F, 1.0F).uv(maxU, 1.0F).uv2(15728880).endVertex();
-        builder.vertex(matrix, 1, 0, 0).color(1.0F, 1.0F, 1.0F, 1.0F).uv(minU, 1.0F).uv2(15728880).endVertex();
-        builder.vertex(matrix, 1, 1, 0).color(1.0F, 1.0F, 1.0F, 1.0F).uv(minU, 0).uv2(15728880).endVertex();
-        builder.vertex(matrix, 0, 1, 0).color(1.0F, 1.0F, 1.0F, 1.0F).uv(maxU, 0).uv2(15728880).endVertex();
+        VertexConsumer builder = buffer.getBuffer(GunRenderType.getMuzzleFlash(flashType));
+        builder.vertex(matrix, 0, 0, 0).color(1.0F, 1.0F, 1.0F, 1.0F).uv(maxU, maxC).uv2(15728880).endVertex();
+        builder.vertex(matrix, 1, 0, 0).color(1.0F, 1.0F, 1.0F, 1.0F).uv(minU, maxC).uv2(15728880).endVertex();
+        builder.vertex(matrix, 1, 1, 0).color(1.0F, 1.0F, 1.0F, 1.0F).uv(minU, minC).uv2(15728880).endVertex();
+        builder.vertex(matrix, 0, 1, 0).color(1.0F, 1.0F, 1.0F, 1.0F).uv(maxU, minC).uv2(15728880).endVertex();
 
         poseStack.popPose();
     }
@@ -813,7 +827,7 @@ public class GunRenderingHandler
         int side = hand.getOpposite() == HumanoidArm.RIGHT ? 1 : -1;
         poseStack.translate(translateX * side, 0, 0);
 
-        float interval = GunEnchantmentHelper.getReloadInterval(stack);
+        float interval = GunEnchantmentHelper.getRealReloadSpeed(stack);
         float reload = ((mc.player.tickCount - ReloadHandler.get().getStartReloadTick() + mc.getFrameTime()) % interval) / interval;
         float percent = 1.0F - reload;
         if(percent >= 0.5F)
