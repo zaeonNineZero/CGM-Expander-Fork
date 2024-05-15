@@ -58,7 +58,7 @@ public class GunEnchantmentHelper
     public static int getMagReloadSpeed(ItemStack weapon)
     {
         Gun modifiedGun = ((GunItem) weapon.getItem()).getModifiedGun(weapon);
-        float rawSpeed = modifiedGun.getGeneral().getMagReloadTime() * ((float) getAmmoCapacity(weapon,modifiedGun)/(float) modifiedGun.getGeneral().getMaxAmmo());
+        float rawSpeed = modifiedGun.getGeneral().getMagReloadTime() * (1F + 0.5F*((float) EnchantmentHelper.getItemEnchantmentLevel(ModEnchantments.OVER_CAPACITY.get(), weapon)));
         int speed = (int) rawSpeed;
         
         int level = EnchantmentHelper.getItemEnchantmentLevel(ModEnchantments.QUICK_HANDS.get(), weapon);

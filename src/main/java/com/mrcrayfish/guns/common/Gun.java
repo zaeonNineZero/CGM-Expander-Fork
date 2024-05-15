@@ -15,6 +15,7 @@ import com.mrcrayfish.guns.debug.client.screen.EditorScreen;
 import com.mrcrayfish.guns.debug.client.screen.widget.DebugButton;
 import com.mrcrayfish.guns.debug.client.screen.widget.DebugSlider;
 import com.mrcrayfish.guns.debug.client.screen.widget.DebugToggle;
+import com.mrcrayfish.guns.item.GunItem;
 import com.mrcrayfish.guns.item.ScopeItem;
 import com.mrcrayfish.guns.item.attachment.IAttachment;
 import com.mrcrayfish.guns.item.attachment.impl.Scope;
@@ -110,6 +111,8 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         @Optional
         private int overCapacityAmmo = 0;
         @Optional
+        private boolean infiniteAmmo = false;
+        @Optional
         private int reloadAmount = 1;
         @Optional
         private int reloadRate = 10;
@@ -117,6 +120,8 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         private boolean useMagReload = false;
         @Optional
         private int magReloadTime = 20;
+        @Optional
+        private float reloadAllowedCooldown = 1F;
         @Optional
         private float recoilAngle;
         @Optional
@@ -147,6 +152,7 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             tag.putInt("ReloadRate", this.reloadRate);
             tag.putBoolean("UseMagReload", this.useMagReload);
             tag.putInt("MagReloadTime", this.magReloadTime);
+            tag.putFloat("ReloadAllowedCooldown", this.reloadAllowedCooldown);
             tag.putFloat("RecoilAngle", this.recoilAngle);
             tag.putFloat("RecoilKick", this.recoilKick);
             tag.putFloat("RecoilDurationOffset", this.recoilDurationOffset);
@@ -197,6 +203,10 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             {
                 this.magReloadTime = tag.getInt("MagReloadTime");
             }
+            if(tag.contains("ReloadAllowedCooldown", Tag.TAG_ANY_NUMERIC))
+            {
+                this.reloadAllowedCooldown = tag.getFloat("ReloadAllowedCooldown");
+            }
             if(tag.contains("RecoilAngle", Tag.TAG_ANY_NUMERIC))
             {
                 this.recoilAngle = tag.getFloat("RecoilAngle");
@@ -239,6 +249,7 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             Preconditions.checkArgument(this.reloadAmount >= 1, "Reload amount must be more than or equal to zero");
             Preconditions.checkArgument(this.reloadRate >= 1, "Reload rate must be more than or equal to zero");
             Preconditions.checkArgument(this.magReloadTime >= 1, "Mag reload time must be more than or equal to zero");
+            Preconditions.checkArgument(this.reloadAllowedCooldown >= 0.0F && this.reloadAllowedCooldown <= 1.0F, "Reload allowed cooldown must be between 0.0 and 1.0");
             Preconditions.checkArgument(this.recoilAngle >= 0.0F, "Recoil angle must be more than or equal to zero");
             Preconditions.checkArgument(this.recoilKick >= 0.0F, "Recoil kick must be more than or equal to zero");
             Preconditions.checkArgument(this.recoilDurationOffset >= 0.0F && this.recoilDurationOffset <= 1.0F, "Recoil duration offset must be between 0.0 and 1.0");
@@ -252,10 +263,12 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             object.addProperty("gripType", this.gripType.getId().toString());
             object.addProperty("maxAmmo", this.maxAmmo);
             object.addProperty("overCapacityAmmo", this.overCapacityAmmo);
+            if(this.infiniteAmmo != false) object.addProperty("infiniteAmmo", this.infiniteAmmo);
             if(this.reloadAmount != 1) object.addProperty("reloadAmount", this.reloadAmount);
             if(this.reloadRate != 10) object.addProperty("reloadRate", this.reloadRate);
             if(this.useMagReload != false) object.addProperty("useMagReload", this.useMagReload);
             if(this.magReloadTime != 20) object.addProperty("magReloadTime", this.magReloadTime);
+            if(this.reloadAllowedCooldown != 1) object.addProperty("reloadAllowedCooldown", this.reloadAllowedCooldown);
             if(this.recoilAngle != 0.0F) object.addProperty("recoilAngle", this.recoilAngle);
             if(this.recoilKick != 0.0F) object.addProperty("recoilKick", this.recoilKick);
             if(this.recoilDurationOffset != 0.0F) object.addProperty("recoilDurationOffset", this.recoilDurationOffset);
@@ -278,10 +291,12 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             general.gripType = this.gripType;
             general.maxAmmo = this.maxAmmo;
             general.overCapacityAmmo = this.overCapacityAmmo;
+            general.infiniteAmmo = this.infiniteAmmo;
             general.reloadAmount = this.reloadAmount;
             general.reloadRate = this.reloadRate;
             general.useMagReload = this.useMagReload;
             general.magReloadTime = this.magReloadTime;
+            general.reloadAllowedCooldown = this.reloadAllowedCooldown;
             general.recoilAngle = this.recoilAngle;
             general.recoilKick = this.recoilKick;
             general.recoilDurationOffset = this.recoilDurationOffset;
@@ -334,6 +349,15 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         }
 
         /**
+         * @return The bonus to MaxAmmo provided by one level of the Over Capacity enchantment.
+         */
+        public boolean getInfiniteAmmo()
+        {
+            return this.infiniteAmmo;
+        }
+
+
+        /**
          * @return The amount of ammo to add to the weapon each reload cycle
          */
         public int getReloadAmount()
@@ -363,6 +387,14 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         public int getMagReloadTime()
         {
             return this.magReloadTime;
+        }
+
+        /**
+         * @return The amount of recoil this gun produces upon firing in degrees
+         */
+        public float getReloadAllowedCooldown()
+        {
+            return this.reloadAllowedCooldown;
         }
 
         /**
@@ -1646,7 +1678,8 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
     public static boolean hasAmmo(ItemStack gunStack)
     {
         CompoundTag tag = gunStack.getOrCreateTag();
-        return tag.getBoolean("IgnoreAmmo") || tag.getInt("AmmoCount") > 0;
+        Gun modifiedGun = ((GunItem) gunStack.getItem()).getModifiedGun(gunStack);
+        return tag.getBoolean("IgnoreAmmo") || modifiedGun.getGeneral().getInfiniteAmmo() || tag.getInt("AmmoCount") > 0;
     }
 
     public static float getFovModifier(ItemStack stack, Gun modifiedGun)
