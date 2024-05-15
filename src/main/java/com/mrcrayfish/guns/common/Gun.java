@@ -176,7 +176,6 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             if(tag.contains("MaxAmmo", Tag.TAG_ANY_NUMERIC))
             {
                 this.maxAmmo = tag.getInt("MaxAmmo");
-                this.overCapacityAmmo = (int) Math.round((double) tag.getInt("MaxAmmo")*1.5);
             }
             if(tag.contains("OverCapacityAmmo", Tag.TAG_ANY_NUMERIC))
             {
