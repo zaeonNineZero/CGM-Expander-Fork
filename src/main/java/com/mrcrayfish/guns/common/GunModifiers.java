@@ -23,6 +23,21 @@ public class GunModifiers
         }
     };
 
+    public static final IGunModifier REDUCED_VELOCITY = new IGunModifier() // New!!
+    {
+        @Override
+        public double modifyProjectileSpeed(double speed)
+        {
+            return speed * 0.8;
+        }
+        
+        @Override
+        public float modifyProjectileDamage(float damage)
+        {
+            return damage * 0.95F;
+        }
+    };
+
     public static final IGunModifier REDUCED_DAMAGE = new IGunModifier()
     {
         @Override
