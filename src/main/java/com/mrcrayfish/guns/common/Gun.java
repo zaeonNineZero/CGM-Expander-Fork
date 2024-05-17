@@ -141,7 +141,7 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         @Optional
         private float spread;
         @Optional
-        private float restingSpread;
+        private float restingSpread = 0F;
         @Optional
         private float spreadAdsReduction = 0.5F;
         @Optional

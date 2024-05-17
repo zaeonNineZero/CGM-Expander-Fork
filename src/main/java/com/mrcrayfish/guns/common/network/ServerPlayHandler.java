@@ -95,7 +95,7 @@ public class ServerPlayHandler
                 ShootTracker tracker = ShootTracker.getShootTracker(player);
                 if(tracker.hasCooldown(item) && tracker.getRemaining(item) > Config.SERVER.cooldownThreshold.get())
                 {
-                    GunMod.LOGGER.warn(player.getName().getContents() + "(" + player.getUUID() + ") tried to fire before cooldown finished or server is lagging? Remaining milliseconds: " + tracker.getRemaining(item));
+                    GunMod.LOGGER.warn(player.getName().getContents() + "(" + player.getUUID() + ") tried to fire before cooldown finished! Is the server lagging? Remaining milliseconds: " + tracker.getRemaining(item));
                     return;
                 }
                 tracker.putCooldown(heldItem, item, modifiedGun);

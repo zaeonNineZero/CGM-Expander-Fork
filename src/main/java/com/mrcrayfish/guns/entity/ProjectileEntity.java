@@ -163,6 +163,7 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
     private Vec3 getDirection(LivingEntity shooter, ItemStack weapon, GunItem item, Gun modifiedGun)
     {
         float gunSpread = GunModifierHelper.getModifiedSpread(weapon, modifiedGun.getGeneral().getSpread());
+        float minSpread = GunModifierHelper.getModifiedSpread(weapon, modifiedGun.getGeneral().getRestingSpread());
 
         if(gunSpread == 0F)
         {
@@ -171,14 +172,14 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
 
         if(shooter instanceof Player)
         {
-            if(!modifiedGun.getGeneral().isAlwaysSpread())
+            if(!modifiedGun.getGeneral().isAlwaysSpread() || minSpread != 0)
             {
-                gunSpread *= SpreadTracker.get((Player) shooter).getSpread(item);
+                gunSpread = Mth.lerp(minSpread,gunSpread,SpreadTracker.get((Player) shooter).getSpread(item));
             }
 
             if(ModSyncedDataKeys.AIMING.getValue((Player) shooter))
             {
-                gunSpread *= 0.5F;
+                gunSpread *= modifiedGun.getGeneral().getSpreadAdsReduction();
             }
         }
 
