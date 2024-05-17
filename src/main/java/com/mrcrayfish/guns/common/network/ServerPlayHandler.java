@@ -112,10 +112,15 @@ public class ServerPlayHandler
 
                 int count = modifiedGun.getGeneral().getProjectileAmount();
                 Gun.Projectile projectileProps = modifiedGun.getProjectile();
+                ResourceLocation projectileItem = (projectileProps.getProjectileItem());
                 ProjectileEntity[] spawnedProjectiles = new ProjectileEntity[count];
                 for(int i = 0; i < count; i++)
                 {
-                    IProjectileFactory factory = ProjectileManager.getInstance().getFactory(projectileProps.getItem());
+                    IProjectileFactory factory = ProjectileManager.getInstance().getFactory(projectileItem);
+                    IProjectileFactory override = (projectileProps.getProjectileOverride() != null ? ProjectileManager.getInstance().getOverride(projectileProps.getProjectileOverride()) : null);
+                    if (override != null)
+                    factory = override;
+                    
                     ProjectileEntity projectileEntity = factory.create(world, player, heldItem, item, modifiedGun);
                     projectileEntity.setWeapon(heldItem);
                     projectileEntity.setAdditionalDamage(Gun.getAdditionalDamage(heldItem));

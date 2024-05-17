@@ -115,6 +115,10 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         @Optional
         private int reloadAmount = 1;
         @Optional
+        private int itemsPerAmmo = 1;
+        @Optional
+        private int ammoPerItem = 1;
+        @Optional
         private int reloadRate = 10;
         @Optional
         private boolean useMagReload = false;
@@ -137,6 +141,10 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         @Optional
         private float spread;
         @Optional
+        private float restingSpread;
+        @Optional
+        private float spreadAdsReduction = 0.5F;
+        @Optional
         private double adsSpeed = 1;
 
         @Override
@@ -149,6 +157,8 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             tag.putInt("MaxAmmo", this.maxAmmo);
             tag.putInt("OverCapacityAmmo", this.overCapacityAmmo);
             tag.putInt("ReloadSpeed", this.reloadAmount);
+            tag.putInt("ItemsPerAmmo", this.itemsPerAmmo);
+            tag.putInt("AmmoPerItem", this.ammoPerItem);
             tag.putInt("ReloadRate", this.reloadRate);
             tag.putBoolean("UseMagReload", this.useMagReload);
             tag.putInt("MagReloadTime", this.magReloadTime);
@@ -160,6 +170,8 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             tag.putInt("ProjectileAmount", this.projectileAmount);
             tag.putBoolean("AlwaysSpread", this.alwaysSpread);
             tag.putFloat("Spread", this.spread);
+            tag.putFloat("RestingSpread", this.restingSpread);
+            tag.putFloat("SpreadAdsReduction", this.spreadAdsReduction);
             tag.putDouble("ADSSpeed", this.adsSpeed);
             return tag;
         }
@@ -190,6 +202,14 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             if(tag.contains("ReloadSpeed", Tag.TAG_ANY_NUMERIC))
             {
                 this.reloadAmount = tag.getInt("ReloadSpeed");
+            }
+            if(tag.contains("ItemsPerAmmo", Tag.TAG_ANY_NUMERIC))
+            {
+                this.itemsPerAmmo = tag.getInt("ItemsPerAmmo");
+            }
+            if(tag.contains("AmmoPerItem", Tag.TAG_ANY_NUMERIC))
+            {
+                this.ammoPerItem = tag.getInt("AmmoPerItem");
             }
             if(tag.contains("ReloadRate", Tag.TAG_ANY_NUMERIC))
             {
@@ -235,6 +255,14 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             {
                 this.spread = tag.getFloat("Spread");
             }
+            if(tag.contains("RestingSpread", Tag.TAG_ANY_NUMERIC))
+            {
+                this.restingSpread = tag.getFloat("RestingSpread");
+            }
+            if(tag.contains("SpreadAdsReduction", Tag.TAG_ANY_NUMERIC))
+            {
+                this.spreadAdsReduction = tag.getFloat("SpreadAdsReduction");
+            }
             if(tag.contains("ADSSpeed", Tag.TAG_ANY_NUMERIC))
             {
                 this.adsSpeed = tag.getDouble("ADSSpeed");
@@ -246,16 +274,20 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             Preconditions.checkArgument(this.rate > 0, "Rate must be more than zero");
             Preconditions.checkArgument(this.maxAmmo > 0, "Max ammo must be more than zero");
             Preconditions.checkArgument(this.overCapacityAmmo > 0, "Over Capacity bonus ammo must be more than zero");
-            Preconditions.checkArgument(this.reloadAmount >= 1, "Reload amount must be more than or equal to zero");
-            Preconditions.checkArgument(this.reloadRate >= 1, "Reload rate must be more than or equal to zero");
-            Preconditions.checkArgument(this.magReloadTime >= 1, "Mag reload time must be more than or equal to zero");
+            Preconditions.checkArgument(this.reloadAmount >= 1, "Reload amount must be more than or equal to one");
+            Preconditions.checkArgument(this.itemsPerAmmo >= 1, "Items Per Ammo must be more than or equal to one");
+            Preconditions.checkArgument(this.ammoPerItem >= 1, "Ammo Per Item must be more than or equal to one");
+            Preconditions.checkArgument(this.reloadRate >= 1, "Reload rate must be more than or equal to one");
+            Preconditions.checkArgument(this.magReloadTime >= 1, "Mag reload time must be more than or equal to one");
             Preconditions.checkArgument(this.reloadAllowedCooldown >= 0.0F && this.reloadAllowedCooldown <= 1.0F, "Reload allowed cooldown must be between 0.0 and 1.0");
             Preconditions.checkArgument(this.recoilAngle >= 0.0F, "Recoil angle must be more than or equal to zero");
             Preconditions.checkArgument(this.recoilKick >= 0.0F, "Recoil kick must be more than or equal to zero");
             Preconditions.checkArgument(this.recoilDurationOffset >= 0.0F && this.recoilDurationOffset <= 1.0F, "Recoil duration offset must be between 0.0 and 1.0");
-            Preconditions.checkArgument(this.recoilAdsReduction >= 0.0F && this.recoilAdsReduction <= 1.0F, "Recoil ads reduction must be between 0.0 and 1.0");
+            Preconditions.checkArgument(this.recoilAdsReduction >= 0.0F && this.recoilAdsReduction <= 1.0F, "Recoil ADS reduction must be between 0.0 and 1.0");
             Preconditions.checkArgument(this.projectileAmount >= 1, "Projectile amount must be more than or equal to one");
             Preconditions.checkArgument(this.spread >= 0.0F, "Spread must be more than or equal to zero");
+            Preconditions.checkArgument(this.restingSpread >= 0.0F, "Spread must be more than or equal to zero");
+            Preconditions.checkArgument(this.spreadAdsReduction >= 0.0F && this.spreadAdsReduction <= 1.0F, "Spread ADS reduction must be between 0.0 and 1.0");
             Preconditions.checkArgument(this.adsSpeed > 0.0, "ADS Speed must be more than zero");
             JsonObject object = new JsonObject();
             if(this.auto) object.addProperty("auto", true);
@@ -265,6 +297,8 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             object.addProperty("overCapacityAmmo", this.overCapacityAmmo);
             if(this.infiniteAmmo != false) object.addProperty("infiniteAmmo", this.infiniteAmmo);
             if(this.reloadAmount != 1) object.addProperty("reloadAmount", this.reloadAmount);
+            if(this.itemsPerAmmo != 1) object.addProperty("itemsPerAmmo", this.itemsPerAmmo);
+            if(this.ammoPerItem != 1) object.addProperty("ammoPerItem", this.ammoPerItem);
             if(this.reloadRate != 10) object.addProperty("reloadRate", this.reloadRate);
             if(this.useMagReload != false) object.addProperty("useMagReload", this.useMagReload);
             if(this.magReloadTime != 20) object.addProperty("magReloadTime", this.magReloadTime);
@@ -276,6 +310,8 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             if(this.projectileAmount != 1) object.addProperty("projectileAmount", this.projectileAmount);
             if(this.alwaysSpread) object.addProperty("alwaysSpread", true);
             if(this.spread != 0.0F) object.addProperty("spread", this.spread);
+            if(this.restingSpread != 0.0F) object.addProperty("restingSpread", this.spread);
+            if(this.spreadAdsReduction != 0.5F) object.addProperty("spreadAdsReduction", this.spread);
             if(this.adsSpeed != 1) object.addProperty("adsSpeed", this.adsSpeed);
             return object;
         }
@@ -293,6 +329,8 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             general.overCapacityAmmo = this.overCapacityAmmo;
             general.infiniteAmmo = this.infiniteAmmo;
             general.reloadAmount = this.reloadAmount;
+            general.ammoPerItem = this.ammoPerItem;
+            general.reloadAmount = this.reloadAmount;
             general.reloadRate = this.reloadRate;
             general.useMagReload = this.useMagReload;
             general.magReloadTime = this.magReloadTime;
@@ -304,6 +342,8 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             general.projectileAmount = this.projectileAmount;
             general.alwaysSpread = this.alwaysSpread;
             general.spread = this.spread;
+            general.restingSpread = this.restingSpread;
+            general.spreadAdsReduction = this.spreadAdsReduction;
             general.adsSpeed = this.adsSpeed;
             return general;
         }
@@ -364,6 +404,22 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         {
             return this.reloadAmount;
         }
+        
+        /**
+         * @return The amount of ammo to add to the weapon each reload cycle
+         */
+        public int getItemsPerAmmo()
+        {
+            return this.itemsPerAmmo;
+        }
+        
+        /**
+         * @return The amount of ammo to add to the weapon each reload cycle
+         */
+        public int getAmmoPerItem()
+        {
+            return this.ammoPerItem;
+        }
 
         /**
          * @return The speed of each reload cycle in ticks. The lower the value, the faster each reload cycle.
@@ -422,7 +478,7 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         }
 
         /**
-         * @return The amount of reduction applied when aiming down this weapon's sight
+         * @return The amount of recoil reduction applied when aiming with this weapon.
          */
         public float getRecoilAdsReduction()
         {
@@ -455,6 +511,22 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         }
 
         /**
+         * @return The resting spread of the gun - using this overrides the alwaysSpread parameter.
+         */
+        public float getRestingSpread()
+        {
+            return this.restingSpread;
+        }
+
+        /**
+         * @return The amount of spread reduction applied when aiming with this weapon.
+         */
+        public float getSpreadAdsReduction()
+        {
+            return this.spreadAdsReduction;
+        }
+
+        /**
          * @return The base speed modifier to the gun's aiming speed.
          */
         public double getADSSpeed()
@@ -467,6 +539,10 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
     {
         private ResourceLocation item = new ResourceLocation(Reference.MOD_ID, "basic_ammo");
         @Optional
+        private ResourceLocation projectileItem;
+        @Optional
+        private String projectileOverride;
+        @Optional
         private boolean visible;
         private float damage;
         private float size;
@@ -474,6 +550,8 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         private int life;
         @Optional
         private boolean gravity;
+        @Optional
+        private double gravityStrength = 1.0;
         @Optional
         private boolean damageReduceOverLife;
         @Optional
@@ -486,12 +564,15 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         {
             CompoundTag tag = new CompoundTag();
             tag.putString("Item", this.item.toString());
+            tag.putString("ProjectileItem", this.projectileItem.toString());
+            tag.putString("ProjectileOverride", this.projectileOverride.toString());
             tag.putBoolean("Visible", this.visible);
             tag.putFloat("Damage", this.damage);
             tag.putFloat("Size", this.size);
             tag.putDouble("Speed", this.speed);
             tag.putInt("Life", this.life);
             tag.putBoolean("Gravity", this.gravity);
+            tag.putDouble("GravityStrength", this.gravityStrength);
             tag.putBoolean("DamageReduceOverLife", this.damageReduceOverLife);
             tag.putInt("TrailColor", this.trailColor);
             tag.putDouble("TrailLengthMultiplier", this.trailLengthMultiplier);
@@ -504,6 +585,14 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             if(tag.contains("Item", Tag.TAG_STRING))
             {
                 this.item = new ResourceLocation(tag.getString("Item"));
+            }
+            if(tag.contains("ProjectileItem", Tag.TAG_STRING))
+            {
+                this.projectileItem = new ResourceLocation(tag.getString("ProjectileItem"));
+            }
+            if(tag.contains("ProjectileOverride", Tag.TAG_STRING))
+            {
+                this.projectileOverride = tag.getString("ProjectileOverride");
             }
             if(tag.contains("Visible", Tag.TAG_ANY_NUMERIC))
             {
@@ -529,6 +618,10 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             {
                 this.gravity = tag.getBoolean("Gravity");
             }
+            if(tag.contains("GravityStrength", Tag.TAG_ANY_NUMERIC))
+            {
+                this.gravityStrength = tag.getDouble("GravityStrength");
+            }
             if(tag.contains("DamageReduceOverLife", Tag.TAG_ANY_NUMERIC))
             {
                 this.damageReduceOverLife = tag.getBoolean("DamageReduceOverLife");
@@ -552,12 +645,15 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             Preconditions.checkArgument(this.trailLengthMultiplier >= 0.0, "Projectile trail length multiplier must be more than or equal to zero");
             JsonObject object = new JsonObject();
             object.addProperty("item", this.item.toString());
+            object.addProperty("projectileItem", this.projectileItem.toString());
+            object.addProperty("projectileOverride", this.projectileOverride.toString());
             if(this.visible) object.addProperty("visible", true);
             object.addProperty("damage", this.damage);
             object.addProperty("size", this.size);
             object.addProperty("speed", this.speed);
             object.addProperty("life", this.life);
             if(this.gravity) object.addProperty("gravity", true);
+            if(this.gravityStrength != 1) object.addProperty("gravityStrength", true);
             if(this.damageReduceOverLife) object.addProperty("damageReduceOverLife", this.damageReduceOverLife);
             if(this.trailColor != 0xFFD289) object.addProperty("trailColor", this.trailColor);
             if(this.trailLengthMultiplier != 1.0) object.addProperty("trailLengthMultiplier", this.trailLengthMultiplier);
@@ -568,12 +664,15 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         {
             Projectile projectile = new Projectile();
             projectile.item = this.item;
+            projectile.projectileItem = this.projectileItem;
+            projectile.projectileOverride = this.projectileOverride;
             projectile.visible = this.visible;
             projectile.damage = this.damage;
             projectile.size = this.size;
             projectile.speed = this.speed;
             projectile.life = this.life;
             projectile.gravity = this.gravity;
+            projectile.gravityStrength = this.gravityStrength;
             projectile.damageReduceOverLife = this.damageReduceOverLife;
             projectile.trailColor = this.trailColor;
             projectile.trailLengthMultiplier = this.trailLengthMultiplier;
@@ -586,6 +685,29 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         public ResourceLocation getItem()
         {
             return this.item;
+        }
+
+        /**
+         * @return The registry id of the item rendered as the projectile.
+         * This requires using the "Projectile" entity either through using the "projectileEntity"
+         * parameter or by only using items without custom projectiles tied to them.
+         */
+        public ResourceLocation getProjectileItem()
+        {
+        	if (this.projectileItem != null)
+            return this.projectileItem;
+        	else
+        	return this.item;
+        }
+
+        /**
+         * @return The id of a projectile factory override.
+         * This bypasses the normal projectile factory process, allowing any projectile
+         * factory to be called regardless of the ammo item used.
+         */
+        public String getProjectileOverride()
+        {
+            return this.projectileOverride;
         }
 
         /**

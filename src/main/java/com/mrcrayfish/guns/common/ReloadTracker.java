@@ -84,26 +84,31 @@ public class ReloadTracker
     {
     	int ammoLoaded = 0;
         AmmoContext context = Gun.findAmmo(player, this.gun.getProjectile().getItem());
-    	boolean outOfAmmo = false;
+    	boolean endReload = false;
 
     	int attempts = 0;
+    	int itemsLoaded = 0;
         int maxAmmo = GunEnchantmentHelper.getAmmoCapacity(this.stack, this.gun);
+    	int ammoPerItem = this.gun.getGeneral().getAmmoPerItem();
     	int trueReloadAmount = (this.gun.getGeneral().getUseMagReload() ? maxAmmo : this.gun.getGeneral().getReloadAmount());
-        while (ammoLoaded<this.gun.getGeneral().getReloadAmount() && attempts<64 && !outOfAmmo)
+        while (ammoLoaded<this.gun.getGeneral().getReloadAmount() && attempts<64 && !endReload)
         {
         	attempts++;
         	ItemStack ammo = context.stack();
             if(!ammo.isEmpty())
             {
-                int amount = Math.min(ammo.getCount(), trueReloadAmount);
+            	int amount = Math.min(ammo.getCount(), trueReloadAmount);
                 CompoundTag tag = this.stack.getTag();
                 if(tag != null)
                 {
                     amount = Math.min(amount, maxAmmo - tag.getInt("AmmoCount"));
                     tag.putInt("AmmoCount", tag.getInt("AmmoCount") + amount);
                     ammoLoaded += amount;
+                    
+                    if (tag.getInt("AmmoCount") >= maxAmmo)
+                    endReload = true;
                 }
-                ammo.shrink(amount);
+                ammo.shrink((int) Math.ceil(amount/ammoPerItem));
 
                 // Trigger that the container changed
                 Container container = context.container();
@@ -113,9 +118,9 @@ public class ReloadTracker
                 }
             }
             else
-            outOfAmmo = true;
+            endReload = true;
             
-            if (ammoLoaded<this.gun.getGeneral().getReloadAmount() && !outOfAmmo)
+            if (ammoLoaded<this.gun.getGeneral().getReloadAmount() && !endReload)
             context = Gun.findAmmo(player, this.gun.getProjectile().getItem());
         }
 
