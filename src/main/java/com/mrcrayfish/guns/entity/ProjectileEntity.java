@@ -111,7 +111,7 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
         this.general = modifiedGun.getGeneral();
         this.projectile = modifiedGun.getProjectile();
         this.entitySize = new EntityDimensions(this.projectile.getSize(), this.projectile.getSize(), false);
-        this.modifiedGravity = modifiedGun.getProjectile().isGravity() ? GunModifierHelper.getModifiedProjectileGravity(weapon, -0.04) : 0.0;
+        this.modifiedGravity = modifiedGun.getProjectile().isGravity() ? GunModifierHelper.getModifiedProjectileGravity(weapon, -0.04 * modifiedGun.getProjectile().getGravity()) : 0.0;
         this.life = GunModifierHelper.getModifiedProjectileLife(weapon, this.projectile.getLife());
 
         /* Get speed and set motion */
@@ -174,12 +174,12 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
         {
             if(!modifiedGun.getGeneral().isAlwaysSpread() || minSpread != 0)
             {
-                gunSpread = Mth.lerp(minSpread,gunSpread,SpreadTracker.get((Player) shooter).getSpread(item));
+                gunSpread = Mth.lerp(SpreadTracker.get((Player) shooter).getSpread(item),minSpread,gunSpread);
             }
 
             if(ModSyncedDataKeys.AIMING.getValue((Player) shooter))
             {
-                gunSpread *= modifiedGun.getGeneral().getSpreadAdsReduction();
+                gunSpread *= 1-(modifiedGun.getGeneral().getSpreadAdsReduction());
             }
         }
 

@@ -539,7 +539,7 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
     {
         private ResourceLocation item = new ResourceLocation(Reference.MOD_ID, "basic_ammo");
         @Optional
-        private ResourceLocation projectileItem;
+        private ResourceLocation projectileItem = item;
         @Optional
         private String projectileOverride;
         @Optional
@@ -565,7 +565,11 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             CompoundTag tag = new CompoundTag();
             tag.putString("Item", this.item.toString());
             tag.putString("ProjectileItem", this.projectileItem.toString());
+            
+            if (projectileOverride != null)  // Null check to prevent issues
             tag.putString("ProjectileOverride", this.projectileOverride.toString());
+            else tag.putString("ProjectileOverride", "null");
+            
             tag.putBoolean("Visible", this.visible);
             tag.putFloat("Damage", this.damage);
             tag.putFloat("Size", this.size);
@@ -585,6 +589,7 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             if(tag.contains("Item", Tag.TAG_STRING))
             {
                 this.item = new ResourceLocation(tag.getString("Item"));
+                this.projectileItem = new ResourceLocation(tag.getString("Item"));
             }
             if(tag.contains("ProjectileItem", Tag.TAG_STRING))
             {
@@ -645,8 +650,10 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             Preconditions.checkArgument(this.trailLengthMultiplier >= 0.0, "Projectile trail length multiplier must be more than or equal to zero");
             JsonObject object = new JsonObject();
             object.addProperty("item", this.item.toString());
-            object.addProperty("projectileItem", this.projectileItem.toString());
-            object.addProperty("projectileOverride", this.projectileOverride.toString());
+            object.addProperty("projectileItem", this.item.toString());
+            if(projectileItem!=item) object.addProperty("projectileItem", this.projectileItem.toString());
+            if(projectileOverride!=null) object.addProperty("projectileOverride", this.projectileOverride.toString());
+            else object.addProperty("projectileOverride", "null");
             if(this.visible) object.addProperty("visible", true);
             object.addProperty("damage", this.damage);
             object.addProperty("size", this.size);
@@ -688,21 +695,17 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         }
 
         /**
-         * @return The registry id of the item rendered as the projectile.
-         * This requires using the "Projectile" entity either through using the "projectileEntity"
-         * parameter or by only using items without custom projectiles tied to them.
+         * @return The registry id of the item used for selecting the projectile factory.
+         * This allows the selection of any existing projectile factory.
          */
         public ResourceLocation getProjectileItem()
         {
-        	if (this.projectileItem != null)
-            return this.projectileItem;
-        	else
-        	return this.item;
+        	return this.projectileItem;
         }
 
         /**
          * @return The id of a projectile factory override.
-         * This bypasses the normal projectile factory process, allowing any projectile
+         * This bypasses the normal projectile factory registry, allowing any projectile
          * factory to be called regardless of the ammo item used.
          */
         public String getProjectileOverride()
@@ -756,6 +759,14 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         public boolean isGravity()
         {
             return this.gravity;
+        }
+
+        /**
+         * @return The speed the projectile moves every tick
+         */
+        public double getGravity()
+        {
+            return this.gravityStrength;
         }
 
         /**
