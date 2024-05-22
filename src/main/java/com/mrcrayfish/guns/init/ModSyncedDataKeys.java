@@ -30,4 +30,16 @@ public class ModSyncedDataKeys
             .defaultValueSupplier(() -> false)
             .resetOnDeath()
             .build();
+
+    public static final SyncedDataKey<Player, Integer> SWITCHTIME = SyncedDataKey.builder(SyncedClassKey.PLAYER, Serializers.INTEGER)
+            .id(new ResourceLocation(Reference.MOD_ID, "switchtime"))
+            .defaultValueSupplier(() -> 0)
+            .resetOnDeath()
+            .build();
+
+    public static final SyncedDataKey<Player, Integer> RAMPUPSHOT = SyncedDataKey.builder(SyncedClassKey.PLAYER, Serializers.INTEGER)
+            .id(new ResourceLocation(Reference.MOD_ID, "rampupshot"))
+            .defaultValueSupplier(() -> 0)
+            .resetOnDeath()
+            .build();
 }

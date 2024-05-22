@@ -1,12 +1,15 @@
 package com.mrcrayfish.guns.util;
 
 import com.mrcrayfish.guns.common.Gun;
+import com.mrcrayfish.guns.common.SpreadTracker;
 import com.mrcrayfish.guns.init.ModEnchantments;
+import com.mrcrayfish.guns.init.ModSyncedDataKeys;
 import com.mrcrayfish.guns.item.GunItem;
 import com.mrcrayfish.guns.particles.TrailData;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
@@ -80,6 +83,58 @@ public class GunEnchantmentHelper
             rate -= Mth.clamp(newRate, 0, rate);
         }
         return rate;
+    }
+
+    public static int getRampUpRate(Player player,ItemStack weapon, int baseRate)
+    {
+        Gun modifiedGun = ((GunItem) weapon.getItem()).getModifiedGun(weapon);
+        if (EnchantmentHelper.getItemEnchantmentLevel(ModEnchantments.TRIGGER_FINGER.get(), weapon) > 0)
+        	return baseRate;
+
+        int maxRate = getRampUpMaxRate(weapon, baseRate);
+        int minRate = getRampUpMinRate(maxRate);
+        int newRate = baseRate;
+        int level = EnchantmentHelper.getItemEnchantmentLevel(ModEnchantments.RAMP_UP.get(), weapon);
+        if(level > 0 || modifiedGun.getGeneral().hasDoRampUp())
+        {
+        	int rampUpShot = ModSyncedDataKeys.RAMPUPSHOT.getValue(player);
+        	float rampLog = (float) (Math.log((float) rampUpShot+1)/Math.log((float) getRampUpMaxShots()));
+        	//float rampDiv = ((float) rampUpShot)/((float) getRampUpMaxShots());
+        	//float rampFactor = (rampLog+rampDiv)/2;
+        	float rampFactor = rampLog;
+        	float rampedRate = (float) Math.ceil((float) Mth.lerp(rampFactor,minRate,maxRate));
+            newRate = (int) Math.max(rampedRate, maxRate);
+        }
+        return newRate;
+    }
+    
+    public static int getRampUpMaxShots()
+    {
+    	 return 9;
+    }
+    
+    public static int getRampUpMinRate(int rate)
+    {
+    	 return rate+3;
+    }
+    
+    public static int getRampUpMaxRate(ItemStack weapon, int rate)
+    {
+    	int level = EnchantmentHelper.getItemEnchantmentLevel(ModEnchantments.RAMP_UP.get(), weapon); 
+    	if (level<1)
+        	return rate;
+    	int maxRate = (int) Math.ceil((float) (rate/1.5)-0.5);
+        	return Math.max(maxRate, 1);
+    }
+    
+    public static int getRampUpMaxRate(ItemStack weapon, Gun modifiedGun)
+    {
+        int rate = modifiedGun.getGeneral().getRate();
+    	int level = EnchantmentHelper.getItemEnchantmentLevel(ModEnchantments.RAMP_UP.get(), weapon); 
+    	if (level<1)
+        	return rate;
+    	int maxRate = (int) Math.ceil((float) (rate/1.5)-0.5);
+        	return Math.max(maxRate, 1);
     }
 
     public static double getAimDownSightSpeed(ItemStack weapon)

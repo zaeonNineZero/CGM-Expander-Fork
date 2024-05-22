@@ -132,7 +132,7 @@ public class GunModifierHelper
             IGunModifier[] modifiers = getModifiers(weapon, IAttachment.Type.values()[i]);
             for(IGunModifier modifier : modifiers)
             {
-                kickReduction *= Mth.clamp(modifier.kickModifier(), 0.0F, 1.0F);
+                kickReduction *= Mth.clamp((modifier.kickModifier()*0.8F)+0.2F, 0.0F, 1.0F);
             }
         }
         return 1.0F - kickReduction;

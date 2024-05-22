@@ -16,6 +16,7 @@ import com.mrcrayfish.guns.client.util.PropertyHelper;
 import com.mrcrayfish.guns.client.util.RenderUtil;
 import com.mrcrayfish.guns.common.GripType;
 import com.mrcrayfish.guns.common.Gun;
+import com.mrcrayfish.guns.common.ReloadTracker;
 import com.mrcrayfish.guns.common.properties.SightAnimation;
 import com.mrcrayfish.guns.event.GunFireEvent;
 import com.mrcrayfish.guns.init.ModSyncedDataKeys;
@@ -26,6 +27,8 @@ import com.mrcrayfish.guns.item.attachment.IBarrel;
 import com.mrcrayfish.guns.item.attachment.impl.Scope;
 import com.mrcrayfish.guns.util.GunEnchantmentHelper;
 import com.mrcrayfish.guns.util.GunModifierHelper;
+
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
@@ -37,10 +40,13 @@ import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
@@ -533,7 +539,8 @@ public class GunRenderingHandler
         }
     }
 
-    @SubscribeEvent
+    @SuppressWarnings("resource")
+	@SubscribeEvent
     public void onTick(TickEvent.RenderTickEvent event)
     {
         if(event.phase.equals(TickEvent.Phase.START))
@@ -588,34 +595,68 @@ public class GunRenderingHandler
             return;
         }
 
-        if(Config.CLIENT.display.cooldownIndicator.get() && heldItem.getItem() instanceof GunItem)
+        if(heldItem.getItem() instanceof GunItem)
         {
-            Gun gun = ((GunItem) heldItem.getItem()).getGun();
-            if(!gun.getGeneral().isAuto())
+        	renderGunInfoHUD(event, heldItem);
+
+            if(Config.CLIENT.display.cooldownIndicator.get())
             {
-                float coolDown = player.getCooldowns().getCooldownPercent(heldItem.getItem(), event.renderTickTime);
-                if(coolDown > 0.0F)
-                {
-                    float scale = 3;
-                    Window window = mc.getWindow();
-                    int i = (int) ((window.getGuiScaledHeight() / 2 - 7 - 60) / scale);
-                    int j = (int) Math.ceil((window.getGuiScaledWidth() / 2 - 8 * scale) / scale);
+            	Gun gun = ((GunItem) heldItem.getItem()).getGun();
+            	if(!gun.getGeneral().isAuto())
+            	{
+                	float coolDown = player.getCooldowns().getCooldownPercent(heldItem.getItem(), event.renderTickTime);
+                	if(coolDown > 0.0F)
+                	{
+                    	float scale = 3;
+                    	Window window = mc.getWindow();
+                    	int i = (int) ((window.getGuiScaledHeight() / 2 - 7 - 60) / scale);
+                    	int j = (int) Math.ceil((window.getGuiScaledWidth() / 2 - 8 * scale) / scale);
 
-                    RenderSystem.enableBlend();
-                    RenderSystem.defaultBlendFunc();
-                    RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-                    RenderSystem.setShader(GameRenderer::getPositionTexShader);
-                    RenderSystem.setShaderTexture(0, GuiComponent.GUI_ICONS_LOCATION);
+                    	RenderSystem.enableBlend();
+                    	RenderSystem.defaultBlendFunc();
+                    	RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+                    	RenderSystem.setShader(GameRenderer::getPositionTexShader);
+                    	RenderSystem.setShaderTexture(0, GuiComponent.GUI_ICONS_LOCATION);
 
-                    PoseStack stack = new PoseStack();
-                    stack.scale(scale, scale, scale);
-                    int progress = (int) Math.ceil((coolDown + 0.05) * 17.0F) - 1;
-                    Screen.blit(stack, j, i, 36, 94, 16, 4, 256, 256);
-                    Screen.blit(stack, j, i, 52, 94, progress, 4, 256, 256);
+                    	PoseStack stack = new PoseStack();
+                    	stack.scale(scale, scale, scale);
+                    	int progress = (int) Math.ceil((coolDown + 0.05) * 17.0F) - 1;
+                    	Screen.blit(stack, j, i, 36, 94, 16, 4, 256, 256);
+                    	Screen.blit(stack, j, i, 52, 94, progress, 4, 256, 256);
 
-                    RenderSystem.disableBlend();
-                }
-            }
+                    	RenderSystem.disableBlend();
+                	}
+            	}
+        	}
+        }
+    }
+
+    @SuppressWarnings("resource")
+	public void renderGunInfoHUD(TickEvent.RenderTickEvent event, ItemStack heldItem)
+    {
+    	Gun gun = ((GunItem) heldItem.getItem()).getGun();
+        CompoundTag tagCompound = heldItem.getTag();
+        if (Minecraft.getInstance().screen != null)
+        	return;
+        if(tagCompound != null)
+        {
+            Window window = Minecraft.getInstance().getWindow();
+
+            int ammoPosX = (int) (window.getGuiScaledWidth()*0.88);
+            int ammoPosY = (int) (window.getGuiScaledHeight()*0.8);
+
+            PoseStack poseStack = new PoseStack();
+            int currentAmmo = tagCompound.getInt("AmmoCount");
+            MutableComponent ammoCountValue = (Component.literal(currentAmmo + " / " + GunEnchantmentHelper.getAmmoCapacity(heldItem, gun)).withStyle(ChatFormatting.BOLD));
+            if (Gun.hasInfiniteAmmo(heldItem))
+            	ammoCountValue = (Component.literal("∞ / ∞").withStyle(ChatFormatting.BOLD));
+            GuiComponent.drawString(poseStack, Minecraft.getInstance().font, ammoCountValue, ammoPosX, ammoPosY, (currentAmmo>0 ? 0xFFFFFF : 0xFF5555));
+
+	        /*int inventoryAmmo = ReloadTracker.getInventoryAmmo(Gun.findAmmo(Minecraft.getInstance().player, gun.getProjectile().getItem()));
+            MutableComponent reserveAmmoValue = (Component.literal("( " + GunEnchantmentHelper.getAmmoCapacity(heldItem, gun) + " )").withStyle(ChatFormatting.BOLD));
+            GuiComponent.drawString(poseStack, Minecraft.getInstance().font, reserveAmmoValue, ammoPosX, ammoPosY+10, 0xFFFFFF);*/
+
+            RenderSystem.disableBlend();
         }
     }
 
@@ -827,7 +868,7 @@ public class GunRenderingHandler
         int side = hand.getOpposite() == HumanoidArm.RIGHT ? 1 : -1;
         poseStack.translate(translateX * side, 0, 0);
 
-        float interval = GunEnchantmentHelper.getReloadInterval(stack);
+        float interval = GunEnchantmentHelper.getRealReloadSpeed(stack);
         float reload = ((mc.player.tickCount - ReloadHandler.get().getStartReloadTick() + mc.getFrameTime()) % interval) / interval;
         float percent = 1.0F - reload;
         if(percent >= 0.5F)
@@ -854,11 +895,14 @@ public class GunRenderingHandler
             poseStack.translate(-side * 5 * 0.0625, 15 * 0.0625, -1 * 0.0625);
             poseStack.mulPose(Vector3f.XP.rotationDegrees(180F));
             poseStack.scale(0.75F, 0.75F, 0.75F);
-            ItemStack ammo = new ItemStack(item, modifiedGun.getGeneral().getReloadAmount());
+            int amount = (modifiedGun.getGeneral().getUseMagReload() ? modifiedGun.getGeneral().getMaxAmmo() : modifiedGun.getGeneral().getReloadAmount());
+            int ammoPerItem = modifiedGun.getGeneral().getAmmoPerItem();
+            double itemCount = Math.ceil((float) (amount/ammoPerItem));
+            ItemStack ammo = new ItemStack(item, (int) Math.max(itemCount, 1));
             BakedModel model = RenderUtil.getModel(ammo);
             boolean isModel = model.isGui3d();
             this.random.setSeed(Item.getId(item));
-            int count = Math.min(modifiedGun.getGeneral().getReloadAmount(), 5);
+            int count = Math.min((int) Math.max(itemCount, 1), 5);
             for(int i = 0; i < count; ++i)
             {
                 poseStack.pushPose();

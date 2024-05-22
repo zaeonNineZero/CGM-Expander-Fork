@@ -11,6 +11,7 @@ import com.mrcrayfish.guns.util.GunEnchantmentHelper;
 import com.mrcrayfish.guns.util.GunModifierHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
+import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
@@ -23,9 +24,18 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.client.extensions.common.IClientItemExtensions;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.CapabilityManager;
+import net.minecraftforge.common.capabilities.CapabilityToken;
+import net.minecraftforge.common.capabilities.ICapabilityProvider;
+import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.energy.CapabilityEnergy;
+import net.minecraftforge.energy.IEnergyStorage;
 import net.minecraftforge.registries.ForgeRegistries;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -51,6 +61,12 @@ public class GunItem extends Item implements IColored, IMeta
     public Gun getGun()
     {
         return this.gun;
+    }
+
+    @Nullable
+    @Override
+    public ICapabilityProvider initCapabilities(ItemStack stack, @Nullable CompoundTag nbt){
+        return new GunEnergyStorage(stack);
     }
 
     @Override
@@ -91,9 +107,15 @@ public class GunItem extends Item implements IColored, IMeta
 
         if(tagCompound != null)
         {
-            if(tagCompound.getBoolean("IgnoreAmmo"))
+            if(Gun.usesEnergy(stack))
             {
-                tooltip.add(Component.translatable("info.cgm.ignore_ammo").withStyle(ChatFormatting.AQUA));
+                    int energy = tagCompound.getInt("Energy");
+                	tooltip.add(Component.translatable("info.cgm.energy", ChatFormatting.WHITE.toString() + energy + "/" + modifiedGun.getGeneral().getEnergyCapacity()).withStyle(ChatFormatting.AQUA));
+            }
+        	if(Gun.hasInfiniteAmmo(stack))
+            {
+                if(!Gun.usesEnergy(stack))
+                	tooltip.add(Component.translatable("info.cgm.ignore_ammo").withStyle(ChatFormatting.AQUA));
             }
             else
             {
@@ -118,6 +140,7 @@ public class GunItem extends Item implements IColored, IMeta
         {
             ItemStack stack = new ItemStack(this);
             stack.getOrCreateTag().putInt("AmmoCount", this.gun.getGeneral().getMaxAmmo());
+            stack.getOrCreateTag().putInt("Energy", 0);
             stacks.add(stack);
         }
     }
@@ -210,5 +233,100 @@ public class GunItem extends Item implements IColored, IMeta
                 return new GunItemStackRenderer();
             }
         });
+    }
+    
+    // Everything below is related to energy storage and transfer mechanics via Forge's EnergyStorage capability.
+
+    public static void setCurrentEnergy(ItemStack stack, int Amount)
+    {
+    	stack.getOrCreateTag().putInt("Energy", Amount);
+    }
+
+    public static int getCurrentEnergy(ItemStack stack)
+    {
+    	return stack.getOrCreateTag().getInt("Energy");
+    }
+
+    public static int getEnergyCapacity(ItemStack stack)
+    {
+    	GunItem gunItem = (GunItem) stack.getItem();
+    	Gun modifiedGun = gunItem.getModifiedGun(stack);
+    	return modifiedGun.getGeneral().getEnergyCapacity();
+    }
+
+    public static int getTransferCap(ItemStack stack)
+    {
+    	GunItem gunItem = (GunItem) stack.getItem();
+    	Gun modifiedGun = gunItem.getModifiedGun(stack);
+    	return modifiedGun.getGeneral().getEnergyCapacity()/80;
+    }
+    
+    public static class GunEnergyStorage implements IEnergyStorage, ICapabilityProvider {
+
+        
+        private final LazyOptional<IEnergyStorage> user = LazyOptional.of(() -> this);
+        private final ItemStack stack;
+        
+        public GunEnergyStorage(ItemStack stack){
+            this.stack = stack;
+        }
+    
+        public void setCurrentEnergy(int amount){
+            GunItem.setCurrentEnergy(this.stack, amount);
+        }
+    
+        @Override
+        public int getEnergyStored(){
+            return GunItem.getCurrentEnergy(this.stack);
+        }
+    
+        @Override
+        public int getMaxEnergyStored(){
+            return GunItem.getEnergyCapacity(this.stack);
+        }
+    
+        @Override
+        public boolean canExtract(){
+            return this.getEnergyStored() > 0;
+        }
+    
+        @Override
+        public boolean canReceive(){
+            return this.getEnergyStored() < this.getMaxEnergyStored();
+        }
+    
+        @Override
+        public int receiveEnergy(int receiveEnergy, boolean simulate){
+            if (!canReceive()){
+                return 0;
+            }
+        
+            int stored = this.getEnergyStored();
+            int energyReceived = Math.min(this.getMaxEnergyStored() - stored, Math.min(GunItem.getTransferCap(this.stack), receiveEnergy));
+            if (!simulate){
+                this.setCurrentEnergy(stored + energyReceived);
+            }
+            return energyReceived;
+        }
+    
+        @Override
+        public int extractEnergy(int extractEnergy, boolean simulate){
+            if (!canExtract()){
+                return 0;
+            }
+        
+            int stored = this.getEnergyStored();
+            int energyExtracted = Math.min(stored, Math.min(GunItem.getTransferCap(this.stack), extractEnergy));
+            if (!simulate){
+                this.setCurrentEnergy(stored - energyExtracted);
+            }
+            return energyExtracted;
+        }
+        
+        @Nonnull
+        @Override
+        public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side){
+            return CapabilityEnergy.ENERGY.orEmpty(cap, user);
+        }
     }
 }

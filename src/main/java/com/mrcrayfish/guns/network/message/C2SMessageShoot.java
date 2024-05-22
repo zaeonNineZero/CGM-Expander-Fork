@@ -3,6 +3,8 @@ package com.mrcrayfish.guns.network.message;
 import com.mrcrayfish.framework.api.network.MessageContext;
 import com.mrcrayfish.framework.api.network.message.PlayMessage;
 import com.mrcrayfish.guns.common.network.ServerPlayHandler;
+import com.mrcrayfish.guns.init.ModSyncedDataKeys;
+
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
@@ -56,6 +58,7 @@ public class C2SMessageShoot extends PlayMessage<C2SMessageShoot>
             if(player != null)
             {
                 ServerPlayHandler.handleShoot(message, player);
+                ModSyncedDataKeys.RAMPUPSHOT.setValue(player, ModSyncedDataKeys.RAMPUPSHOT.getValue(player)+1);
             }
         });
         context.setHandled(true);

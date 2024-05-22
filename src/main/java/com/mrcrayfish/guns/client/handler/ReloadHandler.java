@@ -121,6 +121,7 @@ public class ReloadHandler
             else
             {
                 ModSyncedDataKeys.RELOADING.setValue(player, false);
+                ModSyncedDataKeys.SWITCHTIME.setValue(player, 6);
                 PacketHandler.getPlayChannel().sendToServer(new C2SMessageReload(false));
                 this.reloadingSlot = -1;
             }

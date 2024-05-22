@@ -128,7 +128,7 @@ public class WorkbenchCategory implements IRecipeCategory<WorkbenchRecipe>
         stack.pushPose();
         {
             stack.mulPoseMatrix(poseStack.last().pose());
-            stack.translate(81, 40, 0);
+            stack.translate(81, 40, 64);
             stack.scale(40F, 40F, 40F);
             stack.mulPose(Vector3f.XP.rotationDegrees(-5F));
             float partialTicks = Minecraft.getInstance().getFrameTime();

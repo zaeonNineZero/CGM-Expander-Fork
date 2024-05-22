@@ -8,6 +8,7 @@ import com.mrcrayfish.guns.enchantment.LightweightEnchantment;
 import com.mrcrayfish.guns.enchantment.OverCapacityEnchantment;
 import com.mrcrayfish.guns.enchantment.PuncturingEnchantment;
 import com.mrcrayfish.guns.enchantment.QuickHandsEnchantment;
+import com.mrcrayfish.guns.enchantment.RampUpEnchantment;
 import com.mrcrayfish.guns.enchantment.ReclaimedEnchantment;
 import com.mrcrayfish.guns.enchantment.TriggerFingerEnchantment;
 import net.minecraft.world.item.enchantment.Enchantment;
@@ -31,5 +32,6 @@ public class ModEnchantments
     public static final RegistryObject<Enchantment> ACCELERATOR = REGISTER.register("accelerator", AcceleratorEnchantment::new);
     public static final RegistryObject<Enchantment> PUNCTURING = REGISTER.register("puncturing", PuncturingEnchantment::new);
     public static final RegistryObject<Enchantment> FIRE_STARTER = REGISTER.register("fire_starter", FireStarterEnchantment::new);
+    public static final RegistryObject<Enchantment> RAMP_UP = REGISTER.register("ramp_up", RampUpEnchantment::new);
     //Gravity Impulse (3 levels) - nearby entities will get knocked away from the target location
 }

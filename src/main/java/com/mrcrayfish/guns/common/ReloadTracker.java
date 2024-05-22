@@ -91,7 +91,7 @@ public class ReloadTracker
         int maxAmmo = GunEnchantmentHelper.getAmmoCapacity(this.stack, this.gun);
     	int ammoPerItem = this.gun.getGeneral().getAmmoPerItem();
     	int trueReloadAmount = (this.gun.getGeneral().getUseMagReload() ? maxAmmo : this.gun.getGeneral().getReloadAmount());
-        while (ammoLoaded<this.gun.getGeneral().getReloadAmount() && attempts<64 && !endReload)
+        while (ammoLoaded<trueReloadAmount && attempts<64 && !endReload)
         {
         	attempts++;
         	ItemStack ammo = context.stack();
@@ -120,7 +120,7 @@ public class ReloadTracker
             else
             endReload = true;
             
-            if (ammoLoaded<this.gun.getGeneral().getReloadAmount() && !endReload)
+            if ((ammoLoaded<trueReloadAmount || this.gun.getGeneral().getUseMagReload()) && !endReload)
             context = Gun.findAmmo(player, this.gun.getProjectile().getItem());
         }
 
@@ -135,14 +135,10 @@ public class ReloadTracker
             PacketHandler.getPlayChannel().sendToNearbyPlayers(() -> LevelLocation.create(player.level, soundX, soundY, soundZ, radius), message);
         }
     }
-
-    @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event)
+    
+    public static void attemptReload(Player player)
     {
-        if(event.phase == TickEvent.Phase.START && !event.player.level.isClientSide)
-        {
-            Player player = event.player;
-            if(ModSyncedDataKeys.RELOADING.getValue(player))
+        	if(ModSyncedDataKeys.RELOADING.getValue(player))
             {
                 if(!RELOAD_TRACKER_MAP.containsKey(player))
                 {
@@ -162,15 +158,16 @@ public class ReloadTracker
                 }
                 if(tracker.canReload(player))
                 {
-                	
                     tracker.increaseAmmo(player);
-                    if(tracker.isWeaponFull() || tracker.hasNoAmmo(player))
+                    final Gun gun = tracker.gun;
+                    if(tracker.isWeaponFull() || tracker.hasNoAmmo(player) || gun.getGeneral().getUseMagReload())
                     {
                         RELOAD_TRACKER_MAP.remove(player);
                         ModSyncedDataKeys.RELOADING.setValue(player, false);
+                        //ModSyncedDataKeys.SWITCHTIME.setValue(player, gun.getGeneral().getPostReloadCooldown());
+                        ModSyncedDataKeys.SWITCHTIME.setValue(player, 8);
 
                         final Player finalPlayer = player;
-                        final Gun gun = tracker.gun;
                         DelayedTask.runAfter(4, () ->
                         {
                             ResourceLocation cockSound = gun.getSounds().getCock();
@@ -191,6 +188,22 @@ public class ReloadTracker
             {
                 RELOAD_TRACKER_MAP.remove(player);
             }
+    }
+
+    @SubscribeEvent
+    public static void onPlayerTick(TickEvent.PlayerTickEvent event)
+    {
+        if(event.phase == TickEvent.Phase.START && !event.player.level.isClientSide)
+        {
+            Player player = event.player;
+            // Reload logic
+            attemptReload(player);
+            
+            /*//Reload and weapon switch cooldown logic
+            int switch_cooldown = ModSyncedDataKeys.SWITCHTIME.getValue(player);
+            if (switch_cooldown > 0)
+            switch_cooldown--;
+            ModSyncedDataKeys.SWITCHTIME.setValue(player, switch_cooldown);*/
         }
     }
 

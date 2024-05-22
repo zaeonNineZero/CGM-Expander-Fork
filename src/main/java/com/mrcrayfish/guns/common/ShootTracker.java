@@ -1,6 +1,7 @@
 package com.mrcrayfish.guns.common;
 
 import com.google.common.collect.Maps;
+import com.mrcrayfish.guns.init.ModEnchantments;
 import com.mrcrayfish.guns.item.GunItem;
 import com.mrcrayfish.guns.util.GunEnchantmentHelper;
 import com.mrcrayfish.guns.util.GunModifierHelper;
@@ -9,6 +10,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.Map;
@@ -51,10 +54,14 @@ public class ShootTracker
      * @param item        a gun item
      * @param modifiedGun the modified gun get of the specified gun
      */
-    public void putCooldown(ItemStack weapon, GunItem item, Gun modifiedGun)
+    public void putCooldown(Player player, ItemStack weapon, GunItem item, Gun modifiedGun)
     {
         int rate = GunEnchantmentHelper.getRate(weapon, modifiedGun);
         rate = GunModifierHelper.getModifiedRate(weapon, rate);
+        rate = GunEnchantmentHelper.getRampUpRate(player, weapon, rate);
+        //*NEW* Baked-in leeway for the Ramp Up effect due to rapidly changing rates of fire.
+        if (EnchantmentHelper.getItemEnchantmentLevel(ModEnchantments.RAMP_UP.get(), weapon) > 0 || modifiedGun.getGeneral().hasDoRampUp())
+        	rate=Math.max(rate-1, 1);
         this.cooldownMap.put(item, Pair.of(Util.getMillis(), rate * 50));
     }
 

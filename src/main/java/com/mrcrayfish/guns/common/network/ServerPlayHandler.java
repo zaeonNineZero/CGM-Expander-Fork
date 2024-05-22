@@ -75,8 +75,8 @@ public class ServerPlayHandler
         if(player.isSpectator())
             return;
 
-        //if(player.getUseItem().getItem() == Items.SHIELD)
-        //    return;
+        if(player.getUseItem().getItem() == Items.SHIELD)
+            return;
 
         Level world = player.level;
         ItemStack heldItem = player.getItemInHand(InteractionHand.MAIN_HAND);
@@ -91,6 +91,11 @@ public class ServerPlayHandler
                 /* Updates the yaw and pitch with the clients current yaw and pitch */
                 player.setYRot(Mth.wrapDegrees(message.getRotationYaw()));
                 player.setXRot(Mth.clamp(message.getRotationPitch(), -90F, 90F));
+                
+                if(ModSyncedDataKeys.SWITCHTIME.getValue(player) > 0) // Disallow firing during the weapon switch/reload time - server-side fallback.
+                {
+                	return;
+                }
 
                 ShootTracker tracker = ShootTracker.getShootTracker(player);
                 if(tracker.hasCooldown(item) && tracker.getRemaining(item) > Config.SERVER.cooldownThreshold.get())
@@ -98,7 +103,7 @@ public class ServerPlayHandler
                     GunMod.LOGGER.warn(player.getName().getContents() + "(" + player.getUUID() + ") tried to fire before cooldown finished! Is the server lagging? Remaining milliseconds: " + tracker.getRemaining(item));
                     return;
                 }
-                tracker.putCooldown(heldItem, item, modifiedGun);
+                tracker.putCooldown(player, heldItem, item, modifiedGun);
 
                 if(ModSyncedDataKeys.RELOADING.getValue(player))
                 {
@@ -179,13 +184,17 @@ public class ServerPlayHandler
                 if(!player.isCreative())
                 {
                     CompoundTag tag = heldItem.getOrCreateTag();
-                    if(!tag.getBoolean("IgnoreAmmo"))
+                    if(!Gun.hasInfiniteAmmo(heldItem))
                     {
                         int level = EnchantmentHelper.getItemEnchantmentLevel(ModEnchantments.RECLAIMED.get(), heldItem);
-                        if(level == 0 || player.level.random.nextInt(4 - Mth.clamp(level, 1, 2)) != 0)
+                        if(level == 0 || player.level.random.nextInt(4 - Mth.clamp(level, 1, 3)) != 0)
                         {
                             tag.putInt("AmmoCount", Math.max(0, tag.getInt("AmmoCount") - 1));
                         }
+                    }
+                    if (Gun.usesEnergy(heldItem))
+                    {
+                    	tag.putInt("Energy", Math.max(0, tag.getInt("Energy") - modifiedGun.getGeneral().getEnergyPerShot()));
                     }
                 }
 
@@ -215,6 +224,44 @@ public class ServerPlayHandler
         }
         return modifiedGun.getSounds().getFire();
     }
+    
+    /**
+     * Plays the reload start sound of the gun.
+     * This is only intended for use on the logical server.
+     *
+     * @param player the player who is performing the reload
+     */
+    /*public static void playReloadStartSound(ServerPlayer player)
+    {
+        ItemStack heldItem = player.getItemInHand(InteractionHand.MAIN_HAND);
+    	if(heldItem.getItem() instanceof GunItem item)
+        {
+            Gun modifiedGun = item.getModifiedGun(heldItem);
+            if(modifiedGun != null)
+            {
+                ResourceLocation reloadSound = getReloadStartSound(heldItem, modifiedGun);
+            	if(reloadSound != null)
+            	{
+            		double posX = player.getX();
+            		double posY = player.getY() + 1.0;
+            		double posZ = player.getZ();
+            		double radius = Config.SERVER.reloadMaxDistance.get();
+            		S2CMessageGunSound messageSound = new S2CMessageGunSound(reloadSound, SoundSource.PLAYERS, (float) posX, (float) posY, (float) posZ, 1.0F, 1.0F, player.getId(), false, true);
+            		PacketHandler.getPlayChannel().sendToNearbyPlayers(() -> LevelLocation.create(player.level, posX, posY, posZ, radius), messageSound);
+            	}
+            }
+        }
+    }
+
+    private static ResourceLocation getReloadStartSound(ItemStack stack, Gun modifiedGun)
+    {
+        ResourceLocation reloadSound = modifiedGun.getSounds().getReloadStart();
+        if(reloadSound != null)
+        {
+            return modifiedGun.getSounds().getReloadStart();
+        }
+        return null;
+    }*/
 
     /**
      * Crafts the specified item at the workstation the player is currently using.

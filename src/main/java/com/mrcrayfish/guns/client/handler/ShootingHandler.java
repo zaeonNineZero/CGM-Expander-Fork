@@ -10,6 +10,7 @@ import com.mrcrayfish.guns.event.GunFireEvent;
 import com.mrcrayfish.guns.init.ModSyncedDataKeys;
 import com.mrcrayfish.guns.item.GunItem;
 import com.mrcrayfish.guns.network.PacketHandler;
+import com.mrcrayfish.guns.network.message.C2SMessageReload;
 import com.mrcrayfish.guns.network.message.C2SMessageShoot;
 import com.mrcrayfish.guns.network.message.C2SMessageShooting;
 import com.mrcrayfish.guns.util.GunEnchantmentHelper;
@@ -194,11 +195,24 @@ public class ShootingHandler
         if(!(heldItem.getItem() instanceof GunItem))
             return;
 
-        if(!Gun.hasAmmo(heldItem) && !player.isCreative())
+        if((!Gun.hasAmmo(heldItem) || !Gun.canShoot(heldItem)) && !player.isCreative())
             return;
         
-        if(ModSyncedDataKeys.RELOADING.getValue(player)) //*NEW* Disallow firing while reloading.
-            return;
+        if(ModSyncedDataKeys.RELOADING.getValue(player)) //*NEW* Disallow firing while reloading, and cancel reload.
+        {
+        	GunItem gunItem = (GunItem) heldItem.getItem();
+        	if (!gunItem.getModifiedGun(heldItem).getGeneral().getUseMagReload())
+        	{
+        		ModSyncedDataKeys.RELOADING.setValue(player, false);
+        		PacketHandler.getPlayChannel().sendToServer(new C2SMessageReload(false));
+        	}
+        	return;
+        }
+        
+        if(ModSyncedDataKeys.SWITCHTIME.getValue(player) > 0) //*NEW* Disallow firing during the weapon switch/reload time.
+        {
+        	return;
+        }
         
         if(player.isSpectator())
             return;
@@ -220,7 +234,9 @@ public class ShootingHandler
 
             int rate = GunEnchantmentHelper.getRate(heldItem, modifiedGun);
             rate = GunModifierHelper.getModifiedRate(heldItem, rate);
+            rate = GunEnchantmentHelper.getRampUpRate(player, heldItem, rate);
             tracker.addCooldown(heldItem.getItem(), rate);
+            ModSyncedDataKeys.RAMPUPSHOT.setValue(player, ModSyncedDataKeys.RAMPUPSHOT.getValue(player)+1);
             PacketHandler.getPlayChannel().sendToServer(new C2SMessageShoot(player));
 
             MinecraftForge.EVENT_BUS.post(new GunFireEvent.Post(player, heldItem));

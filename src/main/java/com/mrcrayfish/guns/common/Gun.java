@@ -15,6 +15,7 @@ import com.mrcrayfish.guns.debug.client.screen.EditorScreen;
 import com.mrcrayfish.guns.debug.client.screen.widget.DebugButton;
 import com.mrcrayfish.guns.debug.client.screen.widget.DebugSlider;
 import com.mrcrayfish.guns.debug.client.screen.widget.DebugToggle;
+import com.mrcrayfish.guns.init.ModEnchantments;
 import com.mrcrayfish.guns.item.GunItem;
 import com.mrcrayfish.guns.item.ScopeItem;
 import com.mrcrayfish.guns.item.attachment.IAttachment;
@@ -127,6 +128,10 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         @Optional
         private float reloadAllowedCooldown = 1F;
         @Optional
+        private int energyCapacity = 0;
+        @Optional
+        private int energyPerShot = 0;
+        @Optional
         private float recoilAngle;
         @Optional
         private float recoilKick;
@@ -146,6 +151,8 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         private float spreadAdsReduction = 0.5F;
         @Optional
         private double adsSpeed = 1;
+        @Optional
+        private boolean doRampUp = false;
 
         @Override
         public CompoundTag serializeNBT()
@@ -156,6 +163,7 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             tag.putString("GripType", this.gripType.getId().toString());
             tag.putInt("MaxAmmo", this.maxAmmo);
             tag.putInt("OverCapacityAmmo", this.overCapacityAmmo);
+            tag.putBoolean("InfiniteAmmo", this.infiniteAmmo);
             tag.putInt("ReloadSpeed", this.reloadAmount);
             tag.putInt("ItemsPerAmmo", this.itemsPerAmmo);
             tag.putInt("AmmoPerItem", this.ammoPerItem);
@@ -163,6 +171,8 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             tag.putBoolean("UseMagReload", this.useMagReload);
             tag.putInt("MagReloadTime", this.magReloadTime);
             tag.putFloat("ReloadAllowedCooldown", this.reloadAllowedCooldown);
+            tag.putInt("EnergyCapacity", this.energyCapacity);
+            tag.putInt("EnergyPerShot", this.energyPerShot);
             tag.putFloat("RecoilAngle", this.recoilAngle);
             tag.putFloat("RecoilKick", this.recoilKick);
             tag.putFloat("RecoilDurationOffset", this.recoilDurationOffset);
@@ -173,6 +183,7 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             tag.putFloat("RestingSpread", this.restingSpread);
             tag.putFloat("SpreadAdsReduction", this.spreadAdsReduction);
             tag.putDouble("ADSSpeed", this.adsSpeed);
+            tag.putBoolean("DoRampUp", this.doRampUp);
             return tag;
         }
 
@@ -198,6 +209,10 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             if(tag.contains("OverCapacityAmmo", Tag.TAG_ANY_NUMERIC))
             {
                 this.overCapacityAmmo = tag.getInt("OverCapacityAmmo");
+            }
+            if(tag.contains("InfiniteAmmo", Tag.TAG_ANY_NUMERIC))
+            {
+                this.infiniteAmmo = tag.getBoolean("InfiniteAmmo");
             }
             if(tag.contains("ReloadSpeed", Tag.TAG_ANY_NUMERIC))
             {
@@ -226,6 +241,14 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             if(tag.contains("ReloadAllowedCooldown", Tag.TAG_ANY_NUMERIC))
             {
                 this.reloadAllowedCooldown = tag.getFloat("ReloadAllowedCooldown");
+            }
+            if(tag.contains("EnergyCapacity", Tag.TAG_ANY_NUMERIC))
+            {
+                this.energyCapacity = tag.getInt("EnergyCapacity");
+            }
+            if(tag.contains("EnergyPerShot", Tag.TAG_ANY_NUMERIC))
+            {
+                this.energyPerShot = tag.getInt("EnergyPerShot");
             }
             if(tag.contains("RecoilAngle", Tag.TAG_ANY_NUMERIC))
             {
@@ -267,6 +290,10 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             {
                 this.adsSpeed = tag.getDouble("ADSSpeed");
             }
+            if(tag.contains("DoRampUp", Tag.TAG_ANY_NUMERIC))
+            {
+                this.doRampUp = tag.getBoolean("DoRampUp");
+            }
         }
 
         public JsonObject toJsonObject()
@@ -279,6 +306,8 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             Preconditions.checkArgument(this.ammoPerItem >= 1, "Ammo Per Item must be more than or equal to one");
             Preconditions.checkArgument(this.reloadRate >= 1, "Reload rate must be more than or equal to one");
             Preconditions.checkArgument(this.magReloadTime >= 1, "Mag reload time must be more than or equal to one");
+            Preconditions.checkArgument(this.energyCapacity >= 0, "Energy capacity must be more than or equal to zero");
+            Preconditions.checkArgument(this.energyPerShot >= 0, "Energy usage per shot must be more than or equal to zero");
             Preconditions.checkArgument(this.reloadAllowedCooldown >= 0.0F && this.reloadAllowedCooldown <= 1.0F, "Reload allowed cooldown must be between 0.0 and 1.0");
             Preconditions.checkArgument(this.recoilAngle >= 0.0F, "Recoil angle must be more than or equal to zero");
             Preconditions.checkArgument(this.recoilKick >= 0.0F, "Recoil kick must be more than or equal to zero");
@@ -313,6 +342,7 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             if(this.restingSpread != 0.0F) object.addProperty("restingSpread", this.spread);
             if(this.spreadAdsReduction != 0.5F) object.addProperty("spreadAdsReduction", this.spread);
             if(this.adsSpeed != 1) object.addProperty("adsSpeed", this.adsSpeed);
+            if(this.doRampUp) object.addProperty("doRampUp", false);
             return object;
         }
 
@@ -334,6 +364,8 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             general.reloadRate = this.reloadRate;
             general.useMagReload = this.useMagReload;
             general.magReloadTime = this.magReloadTime;
+            general.energyCapacity = this.energyCapacity;
+            general.energyPerShot = this.energyPerShot;
             general.reloadAllowedCooldown = this.reloadAllowedCooldown;
             general.recoilAngle = this.recoilAngle;
             general.recoilKick = this.recoilKick;
@@ -345,6 +377,7 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             general.restingSpread = this.restingSpread;
             general.spreadAdsReduction = this.spreadAdsReduction;
             general.adsSpeed = this.adsSpeed;
+            general.doRampUp = this.doRampUp;
             return general;
         }
 
@@ -389,7 +422,7 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         }
 
         /**
-         * @return The bonus to MaxAmmo provided by one level of the Over Capacity enchantment.
+         * @return Whether the gun has infinite ammo.
          */
         public boolean getInfiniteAmmo()
         {
@@ -443,6 +476,22 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         public int getMagReloadTime()
         {
             return this.magReloadTime;
+        }
+
+        /**
+         * @return The speed of magazine reloads in ticks. The lower the value, shorter the reload time.
+         */
+        public int getEnergyCapacity()
+        {
+            return this.energyCapacity;
+        }
+
+        /**
+         * @return The speed of magazine reloads in ticks. The lower the value, shorter the reload time.
+         */
+        public int getEnergyPerShot()
+        {
+            return this.energyPerShot;
         }
 
         /**
@@ -533,14 +582,24 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         {
             return this.adsSpeed;
         }
+
+        /**
+         * @return Whether the gun has the Ramp Up effect.
+         */
+        public boolean hasDoRampUp()
+        {
+            return this.doRampUp;
+        }
     }
 
     public static class Projectile implements INBTSerializable<CompoundTag>
     {
         private ResourceLocation item = new ResourceLocation(Reference.MOD_ID, "basic_ammo");
         @Optional
-        private ResourceLocation projectileItem = item;
+        @Nullable
+        private ResourceLocation projectileItem;
         @Optional
+        @Nullable
         private String projectileOverride;
         @Optional
         private boolean visible;
@@ -564,7 +623,10 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         {
             CompoundTag tag = new CompoundTag();
             tag.putString("Item", this.item.toString());
+            
+            if (projectileItem != null)  // Null check to prevent issues
             tag.putString("ProjectileItem", this.projectileItem.toString());
+            else tag.putString("ProjectileItem", this.item.toString());
             
             if (projectileOverride != null)  // Null check to prevent issues
             tag.putString("ProjectileOverride", this.projectileOverride.toString());
@@ -650,8 +712,7 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             Preconditions.checkArgument(this.trailLengthMultiplier >= 0.0, "Projectile trail length multiplier must be more than or equal to zero");
             JsonObject object = new JsonObject();
             object.addProperty("item", this.item.toString());
-            object.addProperty("projectileItem", this.item.toString());
-            if(projectileItem!=item) object.addProperty("projectileItem", this.projectileItem.toString());
+            if(projectileItem!=null) object.addProperty("projectileItem", this.projectileItem.toString());
             if(projectileOverride!=null) object.addProperty("projectileOverride", this.projectileOverride.toString());
             else object.addProperty("projectileOverride", "null");
             if(this.visible) object.addProperty("visible", true);
@@ -700,6 +761,8 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
          */
         public ResourceLocation getProjectileItem()
         {
+        	if (this.projectileItem==null)
+        		return this.item;
         	return this.projectileItem;
         }
 
@@ -1803,6 +1866,12 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         return tag.getBoolean("UnlimitedReloads") || tag.getBoolean("UnlimitReload");
     }
 
+    public static boolean hasRampUp(ItemStack gunStack)
+    {
+        Gun modifiedGun = ((GunItem) gunStack.getItem()).getModifiedGun(gunStack);
+        return modifiedGun.getGeneral().hasDoRampUp();
+    }
+
     public static boolean isAmmo(ItemStack stack, ResourceLocation id)
     {
         return stack != null && Objects.equals(ForgeRegistries.ITEMS.getKey(stack.getItem()), id);
@@ -1811,8 +1880,27 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
     public static boolean hasAmmo(ItemStack gunStack)
     {
         CompoundTag tag = gunStack.getOrCreateTag();
+        return hasInfiniteAmmo(gunStack) || tag.getInt("AmmoCount") > 0;
+    }
+
+    public static boolean hasInfiniteAmmo(ItemStack gunStack)
+    {
+        CompoundTag tag = gunStack.getOrCreateTag();
         Gun modifiedGun = ((GunItem) gunStack.getItem()).getModifiedGun(gunStack);
-        return tag.getBoolean("IgnoreAmmo") || modifiedGun.getGeneral().getInfiniteAmmo() || tag.getInt("AmmoCount") > 0;
+        return tag.getBoolean("IgnoreAmmo") || modifiedGun.getGeneral().getInfiniteAmmo();
+    }
+
+    public static boolean canShoot(ItemStack gunStack)
+    {
+        CompoundTag tag = gunStack.getOrCreateTag();
+        Gun modifiedGun = ((GunItem) gunStack.getItem()).getModifiedGun(gunStack);
+        return (!usesEnergy(gunStack)) || (tag.getInt("Energy")>=modifiedGun.getGeneral().getEnergyPerShot());
+    }
+
+    public static boolean usesEnergy(ItemStack gunStack)
+    {
+        Gun modifiedGun = ((GunItem) gunStack.getItem()).getModifiedGun(gunStack);
+        return modifiedGun.getGeneral().getEnergyPerShot()>0 && modifiedGun.getGeneral().getEnergyCapacity()>0;
     }
 
     public static float getFovModifier(ItemStack stack, Gun modifiedGun)
@@ -1877,9 +1965,51 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             return this;
         }
 
+        public Builder setOverCapacityAmmo(int overCapacityAmmo)
+        {
+            this.gun.general.overCapacityAmmo = overCapacityAmmo;
+            return this;
+        }
+
+        public Builder setInfiniteAmmo(boolean infiniteAmmo)
+        {
+            this.gun.general.infiniteAmmo = infiniteAmmo;
+            return this;
+        }
+
         public Builder setReloadAmount(int reloadAmount)
         {
             this.gun.general.reloadAmount = reloadAmount;
+            return this;
+        }
+
+        public Builder setReloadRate(int reloadRate)
+        {
+            this.gun.general.reloadRate = reloadRate;
+            return this;
+        }
+
+        public Builder setUseMagReload(boolean useMagReload)
+        {
+            this.gun.general.useMagReload = useMagReload;
+            return this;
+        }
+
+        public Builder setMagReloadTime(int magReloadTime)
+        {
+            this.gun.general.magReloadTime = magReloadTime;
+            return this;
+        }
+
+        public Builder setEnergyCapacity(int energyCapacity)
+        {
+            this.gun.general.energyCapacity = energyCapacity;
+            return this;
+        }
+
+        public Builder setEnergyPerShot(int energyPerShot)
+        {
+            this.gun.general.energyPerShot = energyPerShot;
             return this;
         }
 
@@ -1925,9 +2055,45 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             return this;
         }
 
+        public Builder setRestingSpread(float restingSpread)
+        {
+            this.gun.general.restingSpread = restingSpread;
+            return this;
+        }
+
+        public Builder setSpreadAdsReduction(float spreadAdsReduction)
+        {
+            this.gun.general.spreadAdsReduction = spreadAdsReduction;
+            return this;
+        }
+
+        public Builder setAdsSpeed(float adsSpeed)
+        {
+            this.gun.general.adsSpeed = adsSpeed;
+            return this;
+        }
+
+        public Builder setDoRampUp(boolean doRampUp)
+        {
+            this.gun.general.doRampUp = doRampUp;
+            return this;
+        }
+
         public Builder setAmmo(Item item)
         {
             this.gun.projectile.item = ForgeRegistries.ITEMS.getKey(item);
+            return this;
+        }
+
+        public Builder setProjectileItem(Item item)
+        {
+            this.gun.projectile.projectileItem = ForgeRegistries.ITEMS.getKey(item);
+            return this;
+        }
+
+        public Builder setProjectileOverride(String override)
+        {
+            this.gun.projectile.projectileOverride = override;
             return this;
         }
 
@@ -1958,6 +2124,12 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         public Builder setProjectileAffectedByGravity(boolean gravity)
         {
             this.gun.projectile.gravity = gravity;
+            return this;
+        }
+
+        public Builder setProjectileGravityStrength(double gravity)
+        {
+            this.gun.projectile.gravityStrength = gravity;
             return this;
         }
 

@@ -69,7 +69,7 @@ public class GunMod
             super.fillItemList(items);
             CustomGunManager.fill(items);
         }
-    }.setEnchantmentCategories(EnchantmentTypes.GUN, EnchantmentTypes.SEMI_AUTO_GUN);
+    }.setEnchantmentCategories(EnchantmentTypes.GUN, EnchantmentTypes.SEMI_AUTO_GUN, EnchantmentTypes.AUTO_GUN);
 
     public GunMod()
     {
@@ -108,8 +108,10 @@ public class GunMod
         {
             PacketHandler.init();
             FrameworkAPI.registerSyncedDataKey(ModSyncedDataKeys.AIMING);
+            FrameworkAPI.registerSyncedDataKey(ModSyncedDataKeys.RAMPUPSHOT);
             FrameworkAPI.registerSyncedDataKey(ModSyncedDataKeys.RELOADING);
             FrameworkAPI.registerSyncedDataKey(ModSyncedDataKeys.SHOOTING);
+            FrameworkAPI.registerSyncedDataKey(ModSyncedDataKeys.SWITCHTIME);
             FrameworkAPI.registerLoginData(new ResourceLocation(Reference.MOD_ID, "network_gun_manager"), NetworkGunManager.LoginData::new);
             FrameworkAPI.registerLoginData(new ResourceLocation(Reference.MOD_ID, "custom_gun_manager"), CustomGunManager.LoginData::new);
             CraftingHelper.register(new ResourceLocation(Reference.MOD_ID, "workbench_ingredient"), WorkbenchIngredient.Serializer.INSTANCE);

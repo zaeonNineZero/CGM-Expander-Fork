@@ -2,6 +2,7 @@ package com.mrcrayfish.guns.network.message;
 
 import com.mrcrayfish.framework.api.network.MessageContext;
 import com.mrcrayfish.framework.api.network.message.PlayMessage;
+import com.mrcrayfish.guns.common.network.ServerPlayHandler;
 import com.mrcrayfish.guns.event.GunReloadEvent;
 import com.mrcrayfish.guns.init.ModSyncedDataKeys;
 import net.minecraft.network.FriendlyByteBuf;
@@ -48,12 +49,16 @@ public class C2SMessageReload extends PlayMessage<C2SMessageReload>
             {
                 ModSyncedDataKeys.RELOADING.setValue(player, message.reload); // This has to be set in order to verify the packet is sent if the event is cancelled
                 if(!message.reload)
+                {
+                    ModSyncedDataKeys.SWITCHTIME.setValue(player, 6);
                     return;
+                }
 
                 ItemStack gun = player.getMainHandItem();
                 if(MinecraftForge.EVENT_BUS.post(new GunReloadEvent.Pre(player, gun)))
                 {
-                    ModSyncedDataKeys.RELOADING.setValue(player, false);
+                	//ServerPlayHandler.playReloadStartSound(player);
+                	ModSyncedDataKeys.RELOADING.setValue(player, false);
                     return;
                 }
                 MinecraftForge.EVENT_BUS.post(new GunReloadEvent.Post(player, gun));
