@@ -642,7 +642,7 @@ public class GunRenderingHandler
         {
             Window window = Minecraft.getInstance().getWindow();
 
-            int ammoPosX = (int) (window.getGuiScaledWidth()*0.88);
+            int ammoPosX = (int) (window.getGuiScaledWidth()*0.87);
             int ammoPosY = (int) (window.getGuiScaledHeight()*0.8);
 
             PoseStack poseStack = new PoseStack();

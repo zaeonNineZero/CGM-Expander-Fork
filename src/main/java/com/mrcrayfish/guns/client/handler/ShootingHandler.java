@@ -217,11 +217,11 @@ public class ShootingHandler
         if(player.isSpectator())
             return;
         
-        if(player.isSprinting()) //*NEW* Disallow firing while sprinting.
-            return;
-
-        //if(player.getUseItem().getItem() == Items.SHIELD)
+        //if(player.isSprinting()) //*NEW* Disallow firing while sprinting. D
         //    return;
+
+        if(player.getUseItem().getItem() == Items.SHIELD)
+            return;
 
         ItemCooldowns tracker = player.getCooldowns();
         if(!tracker.isOnCooldown(heldItem.getItem()))
