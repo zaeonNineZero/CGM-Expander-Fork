@@ -643,7 +643,7 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
         if(this.projectile.isDamageReduceOverLife())
         {
             float modifier = ((float) this.projectile.getLife() - (float) (this.tickCount - 1)) / (float) this.projectile.getLife();
-            initialDamage *= modifier;
+            initialDamage *= Math.min(modifier, 1);
         }
         float damage = initialDamage / this.general.getProjectileAmount();
         damage = GunModifierHelper.getModifiedDamage(this.weapon, this.modifiedGun, damage);
