@@ -31,9 +31,14 @@ public class SpreadTracker
     {
         Pair<MutableLong, MutableInt> entry = SPREAD_TRACKER_MAP.computeIfAbsent(item, gun -> Pair.of(new MutableLong(-1), new MutableInt()));
         MutableLong lastFire = entry.getLeft();
+        MutableInt spreadCount = entry.getRight();
+        if(player.isSprinting())
+        {
+        	if(spreadCount.getValue() < (Config.COMMON.projectileSpread.maxCount.get()/2))
+        		spreadCount.setValue(Config.COMMON.projectileSpread.maxCount.get()/2);
+        }
         if(lastFire.getValue() != -1)
         {
-            MutableInt spreadCount = entry.getRight();
             long deltaTime = System.currentTimeMillis() - lastFire.getValue();
             if(deltaTime < Config.COMMON.projectileSpread.spreadThreshold.get())
             {
@@ -50,7 +55,8 @@ public class SpreadTracker
             }
             else
             {
-                spreadCount.setValue(0);
+            	if(!player.isSprinting())
+            		spreadCount.setValue(0);
             }
         }
         lastFire.setValue(System.currentTimeMillis());

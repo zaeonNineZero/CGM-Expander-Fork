@@ -621,6 +621,16 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         @Optional
         private boolean visible;
         private float damage;
+        @Optional
+        private float headshotExtraDamage = 0;
+        @Optional
+        private float headshotMultiplierBonus = 0;
+        @Optional
+        private float headshotMultiplierMin = 1;
+        @Optional
+        @Nullable
+        private float headshotMultiplierOverride = 0;
+        
         private float size;
         private double speed;
         private int life;
@@ -644,13 +654,15 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             if (projectileItem != null)  // Null check to prevent issues
             tag.putString("ProjectileItem", this.projectileItem.toString());
             else tag.putString("ProjectileItem", this.item.toString());
-            
             if (projectileOverride != null)  // Null check to prevent issues
             tag.putString("ProjectileOverride", this.projectileOverride.toString());
             else tag.putString("ProjectileOverride", "null");
-            
             tag.putBoolean("Visible", this.visible);
             tag.putFloat("Damage", this.damage);
+            tag.putFloat("HeadshotExtraDamage", this.headshotExtraDamage);
+            tag.putFloat("HeadshotMultiplierBonus", this.headshotMultiplierBonus);
+            tag.putFloat("HeadshotMultiplierMin", this.headshotMultiplierMin);
+            tag.putFloat("HeadshotMultiplierOverride", this.headshotMultiplierOverride);
             tag.putFloat("Size", this.size);
             tag.putDouble("Speed", this.speed);
             tag.putInt("Life", this.life);
@@ -685,6 +697,22 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             if(tag.contains("Damage", Tag.TAG_ANY_NUMERIC))
             {
                 this.damage = tag.getFloat("Damage");
+            }
+            if(tag.contains("HeadshotExtraDamage", Tag.TAG_ANY_NUMERIC))
+            {
+                this.headshotExtraDamage = tag.getFloat("HeadshotExtraDamage");
+            }
+            if(tag.contains("HeadshotMultiplierBonus", Tag.TAG_ANY_NUMERIC))
+            {
+                this.headshotMultiplierMin = tag.getFloat("HeadshotMultiplierBonus");
+            }
+            if(tag.contains("HeadshotMultiplierMin", Tag.TAG_ANY_NUMERIC))
+            {
+                this.headshotMultiplierMin = tag.getFloat("HeadshotMultiplierMin");
+            }
+            if(tag.contains("HeadshotMultiplierOverride", Tag.TAG_ANY_NUMERIC))
+            {
+                this.headshotMultiplierOverride = tag.getFloat("HeadshotMultiplierOverride");
             }
             if(tag.contains("Size", Tag.TAG_ANY_NUMERIC))
             {
@@ -727,6 +755,10 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             Preconditions.checkArgument(this.speed >= 0.0, "Projectile speed must be more than or equal to zero");
             Preconditions.checkArgument(this.life > 0, "Projectile life must be more than zero");
             Preconditions.checkArgument(this.trailLengthMultiplier >= 0.0, "Projectile trail length multiplier must be more than or equal to zero");
+            Preconditions.checkArgument(this.headshotExtraDamage >= 0.0F, "Headshot extra damage must be more than or equal to zero");
+            Preconditions.checkArgument(this.headshotMultiplierBonus >= 0.0F, "Headshot multiplier bonus must be more than or equal to zero");
+            Preconditions.checkArgument(this.headshotMultiplierMin >= 1.0F, "Headshot multiplier minimum must be more than or equal to one");
+            Preconditions.checkArgument(this.headshotMultiplierOverride >= 0.0F, "Headshot multiplier override cannot be negative - set to zero to disable it");
             JsonObject object = new JsonObject();
             object.addProperty("item", this.item.toString());
             if(projectileItem!=null) object.addProperty("projectileItem", this.projectileItem.toString());
@@ -753,6 +785,10 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             projectile.projectileOverride = this.projectileOverride;
             projectile.visible = this.visible;
             projectile.damage = this.damage;
+            projectile.headshotExtraDamage = this.headshotExtraDamage;
+            projectile.headshotMultiplierBonus = this.headshotMultiplierBonus;
+            projectile.headshotMultiplierMin = this.headshotMultiplierMin;
+            projectile.headshotMultiplierOverride = this.headshotMultiplierOverride;
             projectile.size = this.size;
             projectile.speed = this.speed;
             projectile.life = this.life;
@@ -807,6 +843,38 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         public float getDamage()
         {
             return this.damage;
+        }
+
+        /**
+         * @return The extra damage (after multpliers) caused by landing a headshot.
+         */
+        public float getHeadshotExtraDamage()
+        {
+            return this.headshotExtraDamage;
+        }
+
+        /**
+         * @return A multiplier to damage caused by landing a headshot, added on top of the standard headshot multiplier.
+         */
+        public float getHeadshotMultiplierBonus()
+        {
+            return this.headshotMultiplierBonus;
+        }
+
+        /**
+         * @return The minimum damage multiplier to apply to headshots.
+         */
+        public float getHeadshotMultiplierMin()
+        {
+            return this.headshotMultiplierMin;
+        }
+
+        /**
+         * @return If not equal to zero, overrides the standard headshot multiplier.
+         */
+        public float getHeadshotMultiplierOverride()
+        {
+            return this.headshotMultiplierOverride;
         }
 
         /**
@@ -2171,6 +2239,30 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         public Builder setDamage(float damage)
         {
             this.gun.projectile.damage = damage;
+            return this;
+        }
+
+        public Builder setHeadshotExtraDamage(float headshotExtraDamage)
+        {
+            this.gun.projectile.headshotExtraDamage = headshotExtraDamage;
+            return this;
+        }
+
+        public Builder setHeadshotMultiplierBonus(float headshotMultiplierBonus)
+        {
+            this.gun.projectile.headshotMultiplierBonus = headshotMultiplierBonus;
+            return this;
+        }
+
+        public Builder setHeadshotMultiplierMin(float headshotMultiplierMin)
+        {
+            this.gun.projectile.headshotMultiplierMin = headshotMultiplierMin;
+            return this;
+        }
+
+        public Builder setHeadshotMultiplierOverride(float headshotMultiplierOverride)
+        {
+            this.gun.projectile.headshotMultiplierOverride = headshotMultiplierOverride;
             return this;
         }
 

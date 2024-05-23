@@ -77,6 +77,8 @@ public class ServerPlayHandler
 
         if(player.getUseItem().getItem() == Items.SHIELD)
             return;
+        
+        player.setSprinting(false); //*NEW* Stop sprinting when attempting to shoot a gun.
 
         Level world = player.level;
         ItemStack heldItem = player.getItemInHand(InteractionHand.MAIN_HAND);

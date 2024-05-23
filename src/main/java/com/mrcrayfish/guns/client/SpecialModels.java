@@ -27,7 +27,11 @@ public enum SpecialModels
     MINI_GUN_BASE("mini_gun_base"),
     MINI_GUN_BARRELS("mini_gun_barrels"),
     GRENADE_LAUNCHER_BASE("grenade_launcher_base"),
-    GRENADE_LAUNCHER_CYLINDER("grenade_launcher_cylinder");
+    GRENADE_LAUNCHER_CYLINDER("grenade_launcher_cylinder"),
+    
+    PISTOL_BASE("pistol_base"),
+    PISTOL_SLIDE("pistol_slide"),
+    PISTOL_SIGHTMOUNT("pistol_sightmount");
 
     /**
      * The location of an item model in the [MOD_ID]/models/special/[NAME] folder

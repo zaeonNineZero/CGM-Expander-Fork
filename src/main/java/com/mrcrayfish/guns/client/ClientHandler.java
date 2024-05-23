@@ -5,9 +5,7 @@ import com.mrcrayfish.guns.GunMod;
 import com.mrcrayfish.guns.Reference;
 import com.mrcrayfish.guns.client.handler.*;
 import com.mrcrayfish.guns.client.render.gun.ModelOverrides;
-import com.mrcrayfish.guns.client.render.gun.model.GrenadeLauncherModel;
-import com.mrcrayfish.guns.client.render.gun.model.MiniGunModel;
-import com.mrcrayfish.guns.client.render.gun.model.SimpleModel;
+import com.mrcrayfish.guns.client.render.gun.model.*;
 import com.mrcrayfish.guns.client.screen.AttachmentScreen;
 import com.mrcrayfish.guns.client.screen.WorkbenchScreen;
 import com.mrcrayfish.guns.client.util.PropertyHelper;
@@ -126,9 +124,11 @@ public class ClientHandler
         ModelOverrides.register(ModItems.HEAVY_RIFLE.get(), new SimpleModel(SpecialModels.HEAVY_RIFLE::getModel));
         ModelOverrides.register(ModItems.MACHINE_PISTOL.get(), new SimpleModel(SpecialModels.MACHINE_PISTOL::getModel));
         ModelOverrides.register(ModItems.MINI_GUN.get(), new MiniGunModel());
-        ModelOverrides.register(ModItems.PISTOL.get(), new SimpleModel(SpecialModels.PISTOL::getModel));
+        //ModelOverrides.register(ModItems.PISTOL.get(), new SimpleModel(SpecialModels.PISTOL::getModel));
         ModelOverrides.register(ModItems.RIFLE.get(), new SimpleModel(SpecialModels.RIFLE::getModel));
         ModelOverrides.register(ModItems.SHOTGUN.get(), new SimpleModel(SpecialModels.SHOTGUN::getModel));
+        
+        ModelOverrides.register(ModItems.PISTOL.get(), new PistolCustomModel());
     }
 
     private static void registerScreenFactories()

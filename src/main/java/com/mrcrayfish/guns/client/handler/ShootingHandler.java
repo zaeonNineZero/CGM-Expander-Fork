@@ -194,9 +194,15 @@ public class ShootingHandler
     {
         if(!(heldItem.getItem() instanceof GunItem))
             return;
+        
+        if(player.isSpectator())
+            return;
 
         if((!Gun.hasAmmo(heldItem) || !Gun.canShoot(heldItem)) && !player.isCreative())
             return;
+        
+        if(player.isSprinting()) //*NEW* Stop sprinting when attempting to shoot a gun.
+            player.setSprinting(false);
         
         if(ModSyncedDataKeys.RELOADING.getValue(player)) //*NEW* Disallow firing while reloading, and cancel reload.
         {
@@ -213,12 +219,6 @@ public class ShootingHandler
         {
         	return;
         }
-        
-        if(player.isSpectator())
-            return;
-        
-        //if(player.isSprinting()) //*NEW* Disallow firing while sprinting. D
-        //    return;
 
         if(player.getUseItem().getItem() == Items.SHIELD)
             return;
