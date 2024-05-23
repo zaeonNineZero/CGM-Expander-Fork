@@ -532,7 +532,17 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
 
         if(headshot)
         {
-            damage *= Config.COMMON.gameplay.headShotDamageMultiplier.get();
+            if (this.modifiedGun.getProjectile().getHeadshotMultiplierOverride()!=0)
+            	damage *= this.modifiedGun.getProjectile().getHeadshotMultiplierOverride();
+            else
+            {
+            	double hm = Config.COMMON.gameplay.headShotDamageMultiplier.get();
+            	float headshotMultiplier = (float) Math.max(hm,this.modifiedGun.getProjectile().getHeadshotMultiplierMin());
+            	damage *= headshotMultiplier+this.modifiedGun.getProjectile().getHeadshotMultiplierBonus();
+            }
+            
+            if (this.modifiedGun.getProjectile().getHeadshotExtraDamage()>0)
+            	damage += this.modifiedGun.getProjectile().getHeadshotExtraDamage();
         }
 
         DamageSource source = new DamageSourceProjectile("bullet", this, shooter, weapon).setProjectile();
