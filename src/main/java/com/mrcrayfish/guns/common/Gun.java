@@ -153,6 +153,8 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         private double adsSpeed = 1;
         @Optional
         private boolean doRampUp = false;
+        @Optional
+        private int rampUpShotsNeeded = 8;
 
         @Override
         public CompoundTag serializeNBT()
@@ -184,6 +186,7 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             tag.putFloat("SpreadAdsReduction", this.spreadAdsReduction);
             tag.putDouble("ADSSpeed", this.adsSpeed);
             tag.putBoolean("DoRampUp", this.doRampUp);
+            tag.putInt("RampUpShotsNeeded", this.rampUpShotsNeeded);
             return tag;
         }
 
@@ -294,6 +297,10 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             {
                 this.doRampUp = tag.getBoolean("DoRampUp");
             }
+            if(tag.contains("RampUpShotsNeeded", Tag.TAG_ANY_NUMERIC))
+            {
+                this.rampUpShotsNeeded = tag.getInt("RampUpShotsNeeded");
+            }
         }
 
         public JsonObject toJsonObject()
@@ -318,6 +325,7 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             Preconditions.checkArgument(this.restingSpread >= 0.0F, "Spread must be more than or equal to zero");
             Preconditions.checkArgument(this.spreadAdsReduction >= 0.0F && this.spreadAdsReduction <= 1.0F, "Spread ADS reduction must be between 0.0 and 1.0");
             Preconditions.checkArgument(this.adsSpeed > 0.0, "ADS Speed must be more than zero");
+            Preconditions.checkArgument(this.rampUpShotsNeeded > 0.0, "Shots to Full Ramp Up must be more than zero");
             JsonObject object = new JsonObject();
             if(this.auto) object.addProperty("auto", true);
             object.addProperty("rate", this.rate);
@@ -378,6 +386,7 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             general.spreadAdsReduction = this.spreadAdsReduction;
             general.adsSpeed = this.adsSpeed;
             general.doRampUp = this.doRampUp;
+            general.rampUpShotsNeeded = this.rampUpShotsNeeded;
             return general;
         }
 
@@ -589,6 +598,14 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         public boolean hasDoRampUp()
         {
             return this.doRampUp;
+        }
+
+        /**
+         * @return Whether the gun has the Ramp Up effect.
+         */
+        public int getRampUpShotsNeeded()
+        {
+            return this.rampUpShotsNeeded;
         }
     }
 
@@ -2076,6 +2093,12 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         public Builder setDoRampUp(boolean doRampUp)
         {
             this.gun.general.doRampUp = doRampUp;
+            return this;
+        }
+
+        public Builder setRampUpShotsNeeded(int rampUpShotsNeeded)
+        {
+            this.gun.general.rampUpShotsNeeded = rampUpShotsNeeded;
             return this;
         }
 

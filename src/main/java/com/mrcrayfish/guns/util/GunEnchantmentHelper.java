@@ -98,8 +98,8 @@ public class GunEnchantmentHelper
         if(level > 0 || modifiedGun.getGeneral().hasDoRampUp())
         {
         	int rampUpShot = ModSyncedDataKeys.RAMPUPSHOT.getValue(player);
-        	float rampLog = (float) (Math.log((float) rampUpShot+1)/Math.log((float) getRampUpMaxShots()));
-        	//float rampDiv = ((float) rampUpShot)/((float) getRampUpMaxShots());
+        	float rampLog = (float) (Math.log((float) rampUpShot+1)/Math.log((float) getRampUpMaxShots(modifiedGun)));
+        	//float rampDiv = ((float) rampUpShot)/((float) getRampUpMaxShots(modifiedGun));
         	//float rampFactor = (rampLog+rampDiv)/2;
         	float rampFactor = rampLog;
         	float rampedRate = (float) Math.ceil((float) Mth.lerp(rampFactor,minRate,maxRate));
@@ -108,9 +108,9 @@ public class GunEnchantmentHelper
         return newRate;
     }
     
-    public static int getRampUpMaxShots()
+    public static int getRampUpMaxShots(Gun gun)
     {
-    	 return 9;
+    	 return gun.getGeneral().getRampUpShotsNeeded();
     }
     
     public static int getRampUpMinRate(int rate)

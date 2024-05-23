@@ -634,7 +634,7 @@ public class GunRenderingHandler
     @SuppressWarnings("resource")
 	public void renderGunInfoHUD(TickEvent.RenderTickEvent event, ItemStack heldItem)
     {
-    	Gun gun = ((GunItem) heldItem.getItem()).getGun();
+    	Gun gun = ((GunItem) heldItem.getItem()).getModifiedGun(heldItem);
         CompoundTag tagCompound = heldItem.getTag();
         if (Minecraft.getInstance().screen != null)
         	return;

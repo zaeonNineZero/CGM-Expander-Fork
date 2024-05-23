@@ -66,8 +66,8 @@ public class RampUpTracker
     private boolean shouldDoRampdown(Player player)
     {
         int deltaTicks = player.tickCount - this.rampdownTick;
-        int minTickDelay = GunEnchantmentHelper.getRampUpMaxRate(stack,gun);
-        return deltaTicks > 0 && deltaTicks % minTickDelay == 0 && !ModSyncedDataKeys.SHOOTING.getValue(player);
+        int minTickDelay = GunEnchantmentHelper.getRampUpMaxRate(stack,gun)+1;
+        return deltaTicks > 0 && deltaTicks % Math.max(minTickDelay,1) == 0 && !ModSyncedDataKeys.SHOOTING.getValue(player);
     }
 
     @SubscribeEvent
@@ -95,8 +95,8 @@ public class RampUpTracker
             	if (tracker.isSameWeapon(player))
             	{
             		int rampUpShot = ModSyncedDataKeys.RAMPUPSHOT.getValue(player);
-                	if (rampUpShot > GunEnchantmentHelper.getRampUpMaxShots())
-                		rampUpShot = GunEnchantmentHelper.getRampUpMaxShots();
+                	if (rampUpShot > GunEnchantmentHelper.getRampUpMaxShots(tracker.gun))
+                		rampUpShot = GunEnchantmentHelper.getRampUpMaxShots(tracker.gun);
                 	if (tracker.shouldDoRampdown(player) && rampUpShot>0)
                     {
                 		rampUpShot-=1;
