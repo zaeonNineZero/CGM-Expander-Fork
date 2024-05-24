@@ -1186,11 +1186,11 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             
             public ForwardHandPos copy()
             {
-            	ForwardHandPos hand = new ForwardHandPos();
-            	hand.xOffset = this.xOffset;
-                hand.yOffset = this.yOffset;
-                hand.zOffset = this.zOffset;
-                return hand;
+            	ForwardHandPos forwardHand = new ForwardHandPos();
+            	forwardHand.xOffset = this.xOffset;
+            	forwardHand.yOffset = this.yOffset;
+                forwardHand.zOffset = this.zOffset;
+                return forwardHand;
             }
         }
         
@@ -1199,11 +1199,11 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             
             public RearHandPos copy()
             {
-            	RearHandPos hand = new RearHandPos();
-            	hand.xOffset = this.xOffset;
-                hand.yOffset = this.yOffset;
-                hand.zOffset = this.zOffset;
-                return hand;
+            	RearHandPos rearHand = new RearHandPos();
+            	rearHand.xOffset = this.xOffset;
+            	rearHand.yOffset = this.yOffset;
+                rearHand.zOffset = this.zOffset;
+                return rearHand;
             }
         }
 
@@ -1245,11 +1245,11 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             }
             if(tag.contains("ForwardHand", Tag.TAG_COMPOUND))
             {
-                CompoundTag handTag = tag.getCompound("Flash");
+                CompoundTag handTag = tag.getCompound("ForwardHand");
                 if(!handTag.isEmpty())
                 {
                     ForwardHandPos hand = new ForwardHandPos();
-                    forwardHand.deserializeNBT(tag.getCompound("Flash"));
+                    hand.deserializeNBT(tag.getCompound("ForwardHand"));
                     this.forwardHand = hand;
                 }
                 else
@@ -1259,11 +1259,11 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             }
             if(tag.contains("RearHand", Tag.TAG_COMPOUND))
             {
-                CompoundTag handTag = tag.getCompound("Flash");
+                CompoundTag handTag = tag.getCompound("RearHand");
                 if(!handTag.isEmpty())
                 {
                     RearHandPos hand = new RearHandPos();
-                    rearHand.deserializeNBT(tag.getCompound("Flash"));
+                    hand.deserializeNBT(tag.getCompound("RearHand"));
                     this.rearHand = hand;
                 }
                 else

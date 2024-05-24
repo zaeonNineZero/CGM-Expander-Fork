@@ -131,22 +131,28 @@ public class TwoHandedShortPose extends WeaponPose
         float translateX = model.getTransforms().firstPersonRightHand.translation.x();
         int side = hand.getOpposite() == HumanoidArm.RIGHT ? 1 : -1;
         poseStack.translate(translateX * side, 0, 0);
-        
-        GunItem gunStack = (GunItem) stack.getItem();
-        Gun gun = gunStack.getModifiedGun(stack);
 
         boolean slim = Minecraft.getInstance().player.getModelName().equals("slim");
         float armWidth = slim ? 3.0F : 4.0F;
+        
+        if (!(stack.getItem() instanceof GunItem))
+        	return;
+        GunItem gunStack = (GunItem) stack.getItem();
+        Gun gun = gunStack.getModifiedGun(stack);
 
         // Front arm holding the barrel
         poseStack.pushPose();
         {
             ForwardHandPos posHand = gun.getDisplay().getForwardHand();
+            double xOffset = (posHand != null ? posHand.getXOffset() : 0);
+            double yOffset = (posHand != null ? posHand.getYOffset() : 0);
+            double zOffset = (posHand != null ? posHand.getZOffset() : 0);
         	float reloadProgress = ReloadHandler.get().getReloadProgress(partialTicks);
             poseStack.translate(reloadProgress * 0.5, -reloadProgress, -reloadProgress * 0.5);
 
             poseStack.scale(0.5F, 0.5F, 0.5F);
-            poseStack.translate((1.55 + posHand.getXOffset()) * 0.0625 * side, (0.4 + posHand.getXOffset()) * 0.0625, (-3.5 + posHand.getXOffset()) * 0.0625);
+            poseStack.translate((1.55 + xOffset) * 0.0625 * side, (0.6 + yOffset) * 0.0625, (-3.5 + zOffset) * 0.0625);
+            //poseStack.translate((1.55) * 0.0625 * side, (0.4) * 0.0625, (-3.5) * 0.0625);
             poseStack.translate((armWidth / 2.0) * 0.0625 * side, 0, 0);
             poseStack.translate(-0.3125 * side, -0.1, -0.4375);
 
@@ -163,9 +169,13 @@ public class TwoHandedShortPose extends WeaponPose
         poseStack.pushPose();
         {
             RearHandPos posHand = gun.getDisplay().getRearHand();
+            double xOffset = (posHand != null ? posHand.getXOffset() : 0);
+            double yOffset = (posHand != null ? posHand.getYOffset() : 0);
+            double zOffset = (posHand != null ? posHand.getZOffset() : 0);
             poseStack.translate(0, 0.1, -0.675);
             poseStack.scale(0.5F, 0.5F, 0.5F);
-            poseStack.translate((-4.0 + posHand.getXOffset()) * 0.0625 * side, (posHand.getXOffset()) * 0.0625, (posHand.getXOffset()) * 0.0625);
+            poseStack.translate((-4.0 + xOffset) * 0.0625 * side, (0 + yOffset) * 0.0625, (0 + zOffset) * 0.0625);
+            //poseStack.translate((-4.0) * 0.0625 * side, (0) * 0.0625, (0) * 0.0625);
             poseStack.translate(-(armWidth / 2.0) * 0.0625 * side, 0, 0);
             poseStack.mulPose(Vector3f.XP.rotationDegrees(80F));
 

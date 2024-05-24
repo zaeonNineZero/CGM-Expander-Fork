@@ -2,8 +2,13 @@ package com.mrcrayfish.guns.client.render.pose;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3f;
+import com.mrcrayfish.guns.Config;
 import com.mrcrayfish.guns.client.render.IHeldAnimation;
 import com.mrcrayfish.guns.client.util.RenderUtil;
+import com.mrcrayfish.guns.common.Gun;
+import com.mrcrayfish.guns.common.Gun.Display.RearHandPos;
+import com.mrcrayfish.guns.item.GunItem;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.model.geom.ModelPart;
@@ -31,11 +36,24 @@ public class OneHandedPose implements IHeldAnimation
         boolean right = Minecraft.getInstance().options.mainHand().get() == HumanoidArm.RIGHT ? hand == InteractionHand.MAIN_HAND : hand == InteractionHand.OFF_HAND;
         ModelPart arm = right ? rightArm : leftArm;
         IHeldAnimation.copyModelAngles(head, arm);
-        arm.xRot += (float) Math.toRadians(-70F);
+        arm.xRot += (float) Math.toRadians(-70F + (aimProgress*20));
 
         if(player.getUseItem().getItem() == Items.SHIELD)
         {
             arm.xRot = (float) Math.toRadians(-30F);
+        }
+    }
+
+    @Override
+    @OnlyIn(Dist.CLIENT)
+    public void applyHeldItemTransforms(Player player, InteractionHand hand, float aimProgress, PoseStack poseStack, MultiBufferSource buffer)
+    {
+        if(hand == InteractionHand.MAIN_HAND)
+        {
+        	boolean right = Minecraft.getInstance().options.mainHand().get() == HumanoidArm.RIGHT ? hand == InteractionHand.MAIN_HAND : hand == InteractionHand.OFF_HAND;
+        	poseStack.translate(0, 0, 0.05);
+           	float invertRealProgress = 1.0F - aimProgress;
+           	poseStack.mulPose(Vector3f.ZP.rotationDegrees((aimProgress*-20) * (right ? 1F : -1F)));
         }
     }
 
@@ -52,9 +70,19 @@ public class OneHandedPose implements IHeldAnimation
 
         boolean slim = Minecraft.getInstance().player.getModelName().equals("slim");
         float armWidth = slim ? 3.0F : 4.0F;
+        
+        if (!(stack.getItem() instanceof GunItem))
+        	return;
+        GunItem gunStack = (GunItem) stack.getItem();
+        Gun gun = gunStack.getModifiedGun(stack);
+        RearHandPos posHand = gun.getDisplay().getRearHand();
+        double xOffset = (posHand != null ? posHand.getXOffset() : 0);
+        double yOffset = (posHand != null ? posHand.getYOffset() : 0);
+        double zOffset = (posHand != null ? posHand.getZOffset() : 0);
 
         poseStack.scale(0.5F, 0.5F, 0.5F);
-        poseStack.translate(-4.0 * 0.0625 * side, 0, 0);
+        poseStack.translate((-4.0 + xOffset) * 0.0625 * side, (0 + yOffset) * 0.0625, (0 + zOffset) * 0.0625);
+        //poseStack.translate(-4.0 * 0.0625 * side, 0, 0);
         poseStack.translate(-(armWidth / 2.0) * 0.0625 * side, 0, 0);
 
         poseStack.translate(0, 0.15, -1.3125);
