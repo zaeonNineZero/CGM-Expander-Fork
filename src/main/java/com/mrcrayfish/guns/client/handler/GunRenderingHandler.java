@@ -10,8 +10,10 @@ import com.mrcrayfish.guns.Config;
 import com.mrcrayfish.guns.Reference;
 import com.mrcrayfish.guns.client.GunModel;
 import com.mrcrayfish.guns.client.GunRenderType;
+import com.mrcrayfish.guns.client.render.IHeldAnimation;
 import com.mrcrayfish.guns.client.render.gun.IOverrideModel;
 import com.mrcrayfish.guns.client.render.gun.ModelOverrides;
+import com.mrcrayfish.guns.client.render.pose.OneHandedPose;
 import com.mrcrayfish.guns.client.util.PropertyHelper;
 import com.mrcrayfish.guns.client.util.RenderUtil;
 import com.mrcrayfish.guns.common.GripType;
@@ -192,7 +194,7 @@ public class GunRenderingHandler
             return;
 
         this.sprintTransition = 0;
-        this.sprintCooldown = 20; //TODO make a config option
+        this.sprintCooldown = 10; //TODO make a config option
 
         ItemStack heldItem = event.getStack();
         GunItem gunItem = (GunItem) heldItem.getItem();
@@ -491,12 +493,23 @@ public class GunRenderingHandler
     {
         if(Config.CLIENT.display.sprintAnimation.get() && modifiedGun.getGeneral().getGripType().getHeldAnimation().canApplySprintingAnimation())
         {
-            float leftHanded = hand == HumanoidArm.LEFT ? -1 : 1;
-            float transition = (this.prevSprintTransition + (this.sprintTransition - this.prevSprintTransition) * partialTicks) / 5F;
-            transition = (float) Math.sin((transition * Math.PI) / 2);
-            poseStack.translate(-0.25 * leftHanded * transition, -0.1 * transition, 0);
-            poseStack.mulPose(Vector3f.YP.rotationDegrees(45F * leftHanded * transition));
-            poseStack.mulPose(Vector3f.XP.rotationDegrees(-25F * transition));
+        	GripType pose = modifiedGun.getGeneral().getGripType();
+        	if(pose == GripType.ONE_HANDED || pose == GripType.ONE_HANDED)
+        	{
+            	float transition = (this.prevSprintTransition + (this.sprintTransition - this.prevSprintTransition) * partialTicks) / 5F;
+            	transition = (float) Math.sin((transition * Math.PI) / 2);
+            	poseStack.translate(0, 0.35 * transition, -0.1 * transition);
+            	poseStack.mulPose(Vector3f.XP.rotationDegrees(45F * transition));
+        	}
+        	else
+        	{
+        		float leftHanded = hand == HumanoidArm.LEFT ? -1 : 1;
+            	float transition = (this.prevSprintTransition + (this.sprintTransition - this.prevSprintTransition) * partialTicks) / 5F;
+            	transition = (float) Math.sin((transition * Math.PI) / 2);
+            	poseStack.translate(-0.25 * leftHanded * transition, -0.1 * transition, 0);
+            	poseStack.mulPose(Vector3f.YP.rotationDegrees(45F * leftHanded * transition));
+            	poseStack.mulPose(Vector3f.XP.rotationDegrees(-25F * transition));
+        	}
         }
     }
 

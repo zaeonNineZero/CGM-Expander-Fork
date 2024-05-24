@@ -70,13 +70,13 @@ public class PistolCustomModel implements IOverrideModel
             boltMovement = cooldown_d;
         }
 
-		// Infantry Rifle charging handle. This animated part kicks backward on firing, then moves back to its resting position.
+		// Pistol slide. This animated part kicks backward on firing, then moves back to its resting position.
 		// Push pose so we can make do transformations without affecting the models above.
         poseStack.pushPose();
 		// Now we apply our transformations.
 		// All we need to do is move the model based on the cooldown variable.
         if(isPlayer)
-        poseStack.translate(0, 0, (boltMovement * 1.1) * 0.0625);
+        poseStack.translate(0, 0, (boltMovement * 1.3) * 0.0625);
 		// Our transformations are done - now we can render the model.
         RenderUtil.renderModel(SpecialModels.PISTOL_SLIDE.getModel(), transformType, null, stack, parent, poseStack, buffer, light, overlay);
 		// Pop pose to compile everything in the render matrix.

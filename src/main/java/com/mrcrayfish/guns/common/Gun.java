@@ -704,7 +704,7 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             }
             if(tag.contains("HeadshotMultiplierBonus", Tag.TAG_ANY_NUMERIC))
             {
-                this.headshotMultiplierMin = tag.getFloat("HeadshotMultiplierBonus");
+                this.headshotMultiplierBonus = tag.getFloat("HeadshotMultiplierBonus");
             }
             if(tag.contains("HeadshotMultiplierMin", Tag.TAG_ANY_NUMERIC))
             {
@@ -1107,11 +1107,25 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         @Optional
         @Nullable
         protected Flash flash;
+        protected ForwardHandPos forwardHand;
+        protected RearHandPos rearHand;
 
         @Nullable
         public Flash getFlash()
         {
             return this.flash;
+        }
+
+        @Nullable
+        public ForwardHandPos getForwardHand()
+        {
+            return this.forwardHand;
+        }
+
+        @Nullable
+        public RearHandPos getRearHand()
+        {
+            return this.rearHand;
         }
 
         public static class Flash extends Positioned
@@ -1166,6 +1180,32 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
                 return this.size;
             }
         }
+        
+        public static class ForwardHandPos extends Positioned
+        {
+            
+            public ForwardHandPos copy()
+            {
+            	ForwardHandPos hand = new ForwardHandPos();
+            	hand.xOffset = this.xOffset;
+                hand.yOffset = this.yOffset;
+                hand.zOffset = this.zOffset;
+                return hand;
+            }
+        }
+        
+        public static class RearHandPos extends Positioned
+        {
+            
+            public RearHandPos copy()
+            {
+            	RearHandPos hand = new RearHandPos();
+            	hand.xOffset = this.xOffset;
+                hand.yOffset = this.yOffset;
+                hand.zOffset = this.zOffset;
+                return hand;
+            }
+        }
 
         @Override
         public CompoundTag serializeNBT()
@@ -1174,6 +1214,14 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             if(this.flash != null)
             {
                 tag.put("Flash", this.flash.serializeNBT());
+            }
+            if(this.forwardHand != null)
+            {
+                tag.put("ForwardHand", this.forwardHand.serializeNBT());
+            }
+            if(this.rearHand != null)
+            {
+                tag.put("RearHand", this.rearHand.serializeNBT());
             }
             return tag;
         }
@@ -1195,6 +1243,34 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
                     this.flash = null;
                 }
             }
+            if(tag.contains("ForwardHand", Tag.TAG_COMPOUND))
+            {
+                CompoundTag handTag = tag.getCompound("Flash");
+                if(!handTag.isEmpty())
+                {
+                    ForwardHandPos hand = new ForwardHandPos();
+                    forwardHand.deserializeNBT(tag.getCompound("Flash"));
+                    this.forwardHand = hand;
+                }
+                else
+                {
+                    this.forwardHand = null;
+                }
+            }
+            if(tag.contains("RearHand", Tag.TAG_COMPOUND))
+            {
+                CompoundTag handTag = tag.getCompound("Flash");
+                if(!handTag.isEmpty())
+                {
+                    RearHandPos hand = new RearHandPos();
+                    rearHand.deserializeNBT(tag.getCompound("Flash"));
+                    this.rearHand = hand;
+                }
+                else
+                {
+                    this.rearHand = null;
+                }
+            }
         }
 
         public JsonObject toJsonObject()
@@ -1203,6 +1279,14 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             if(this.flash != null)
             {
                 GunJsonUtil.addObjectIfNotEmpty(object, "flash", this.flash.toJsonObject());
+            }
+            if(this.forwardHand != null)
+            {
+                GunJsonUtil.addObjectIfNotEmpty(object, "forwardHand", this.forwardHand.toJsonObject());
+            }
+            if(this.rearHand != null)
+            {
+                GunJsonUtil.addObjectIfNotEmpty(object, "rearHand", this.rearHand.toJsonObject());
             }
             return object;
         }
@@ -1213,6 +1297,14 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             if(this.flash != null)
             {
                 display.flash = this.flash.copy();
+            }
+            if(this.forwardHand != null)
+            {
+                display.forwardHand = this.forwardHand.copy();
+            }
+            if(this.rearHand != null)
+            {
+                display.rearHand = this.rearHand.copy();
             }
             return display;
         }

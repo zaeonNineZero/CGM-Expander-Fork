@@ -4,10 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3f;
 import com.mrcrayfish.guns.Reference;
 import com.mrcrayfish.guns.client.render.IHeldAnimation;
-import com.mrcrayfish.guns.client.render.pose.BazookaPose;
-import com.mrcrayfish.guns.client.render.pose.MiniGunPose;
-import com.mrcrayfish.guns.client.render.pose.OneHandedPose;
-import com.mrcrayfish.guns.client.render.pose.TwoHandedPose;
+import com.mrcrayfish.guns.client.render.pose.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
@@ -30,6 +27,11 @@ public class GripType
      * A grip type designed for weapons that are held with two hands, like an assault rifle
      */
     public static final GripType TWO_HANDED = new GripType(new ResourceLocation(Reference.MOD_ID, "two_handed"), new TwoHandedPose());
+
+    /**
+     * A grip type designed for short two-handed weapons like submachine guns
+     */
+    public static final GripType TWO_HANDED_SHORT = new GripType(new ResourceLocation(Reference.MOD_ID, "two_handed_short"), new TwoHandedShortPose());
 
     /**
      * A custom grip type designed for the mini gun simply due it's nature of being a completely
@@ -90,6 +92,7 @@ public class GripType
         /* Registers the standard grip types when the class is loaded */
         registerType(ONE_HANDED);
         registerType(TWO_HANDED);
+        registerType(TWO_HANDED_SHORT);
         registerType(MINI_GUN);
         registerType(BAZOOKA);
     }
