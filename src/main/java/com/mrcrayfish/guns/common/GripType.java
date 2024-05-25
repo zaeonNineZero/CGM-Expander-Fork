@@ -24,6 +24,11 @@ public class GripType
     public static final GripType ONE_HANDED = new GripType(new ResourceLocation(Reference.MOD_ID, "one_handed"), new OneHandedPose());
 
     /**
+     * A two-handed grip type for one handed weapons. Can be used in place of the ONE_HANDED grip type without any model changes
+     */
+    public static final GripType PISTOL_CUSTOM = new GripType(new ResourceLocation(Reference.MOD_ID, "pistol_custom"), new PistolCustomPose());
+
+    /**
      * A grip type designed for weapons that are held with two hands, like an assault rifle
      */
     public static final GripType TWO_HANDED = new GripType(new ResourceLocation(Reference.MOD_ID, "two_handed"), new TwoHandedPose());
@@ -91,6 +96,7 @@ public class GripType
     {
         /* Registers the standard grip types when the class is loaded */
         registerType(ONE_HANDED);
+        registerType(PISTOL_CUSTOM);
         registerType(TWO_HANDED);
         registerType(TWO_HANDED_SHORT);
         registerType(MINI_GUN);

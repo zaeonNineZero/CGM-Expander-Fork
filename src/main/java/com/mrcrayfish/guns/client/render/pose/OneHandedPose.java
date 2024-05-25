@@ -36,8 +36,8 @@ public class OneHandedPose implements IHeldAnimation
         boolean right = Minecraft.getInstance().options.mainHand().get() == HumanoidArm.RIGHT ? hand == InteractionHand.MAIN_HAND : hand == InteractionHand.OFF_HAND;
         ModelPart arm = right ? rightArm : leftArm;
         IHeldAnimation.copyModelAngles(head, arm);
-        arm.xRot += (float) Math.toRadians(-70F - (aimProgress*22));
-        arm.yRot += (float) Math.toRadians((-aimProgress*15));
+        arm.xRot += (float) Math.toRadians(-70F - (aimProgress*25));
+        //arm.yRot += (float) Math.toRadians((-aimProgress*15));
 
         if(player.getUseItem().getItem() == Items.SHIELD)
         {
@@ -53,8 +53,9 @@ public class OneHandedPose implements IHeldAnimation
         {
         	boolean right = Minecraft.getInstance().options.mainHand().get() == HumanoidArm.RIGHT ? hand == InteractionHand.MAIN_HAND : hand == InteractionHand.OFF_HAND;
         	poseStack.translate(0, 0, 0.05);
-           	poseStack.mulPose(Vector3f.XP.rotationDegrees((-aimProgress*24) * (right ? 1F : -1F)));
-           	poseStack.mulPose(Vector3f.YP.rotationDegrees((-aimProgress*15) * (right ? 1F : -1F)));
+           	//poseStack.mulPose(Vector3f.YP.rotationDegrees((-aimProgress*15) * (right ? 1F : -1F)));
+           	poseStack.mulPose(Vector3f.XP.rotationDegrees((-aimProgress*27) * (right ? 1F : -1F)));
+           	//poseStack.mulPose(Vector3f.ZP.rotationDegrees((aimProgress*1.5F) * (right ? 1F : -1F)));
         }
     }
 

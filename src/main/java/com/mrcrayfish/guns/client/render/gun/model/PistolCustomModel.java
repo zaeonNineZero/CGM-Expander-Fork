@@ -48,13 +48,14 @@ public class PistolCustomModel implements IOverrideModel
 		// Next, we do the animated parts.
 		
 		// Get the item's cooldown from the user entity, then process it into a usable animation.
-        boolean isPlayer = (entity != null && entity.equals(Minecraft.getInstance().player) ? true : false);
+        boolean isPlayer = (entity != null && entity.equals(Minecraft.getInstance().player));
+        boolean correctContext = (transformType == ItemTransforms.TransformType.FIRST_PERSON_RIGHT_HAND || transformType == ItemTransforms.TransformType.THIRD_PERSON_RIGHT_HAND || transformType == ItemTransforms.TransformType.FIRST_PERSON_LEFT_HAND || transformType == ItemTransforms.TransformType.THIRD_PERSON_LEFT_HAND);
         GunItem gunStack = (GunItem) stack.getItem();
         Gun gun = gunStack.getModifiedGun(stack);
         float boltMovement = 0F;
-        if(isPlayer)
+        if(isPlayer && correctContext)
         {
-            float cooldownDivider = 1.0F*Math.max(gun.getGeneral().getRate()/3,1);
+            float cooldownDivider = 1.0F*Math.max((float) gun.getGeneral().getRate()/3F,1);
             float cooldownOffset1 = cooldownDivider - 1.0F;
             float intensity = 1.0F +1;
             
@@ -76,7 +77,7 @@ public class PistolCustomModel implements IOverrideModel
 		// Now we apply our transformations.
 		// All we need to do is move the model based on the cooldown variable.
         if(isPlayer)
-        poseStack.translate(0, 0, (boltMovement * 1.3) * 0.0625);
+        poseStack.translate(0, 0, (boltMovement * 1.35) * 0.0625);
 		// Our transformations are done - now we can render the model.
         RenderUtil.renderModel(SpecialModels.PISTOL_SLIDE.getModel(), transformType, null, stack, parent, poseStack, buffer, light, overlay);
 		// Pop pose to compile everything in the render matrix.

@@ -26,14 +26,14 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 /**
  * Author: MrCrayfish
  */
-public class TwoHandedShortPose extends WeaponPose
+public class PistolCustomPose extends WeaponPose
 {
     @Override
     protected AimPose getUpPose()
     {
         AimPose upPose = new AimPose();
-        upPose.getIdle().setRenderYawOffset(30F).setItemRotation(new Vector3f(60F, 0F, 10F)).setRightArm(new LimbPose().setRotationAngleX(-120F).setRotationAngleY(-40F).setRotationPointX(-5).setRotationPointY(3).setRotationPointZ(0)).setLeftArm(new LimbPose().setRotationAngleX(-150F).setRotationAngleY(15F).setRotationAngleZ(-30F).setRotationPointY(2).setRotationPointZ(-1));
-        upPose.getAiming().setRenderYawOffset(35F).setItemRotation(new Vector3f(40F, 0F, 30F)).setItemTranslate(new Vector3f(-1, 0, 0)).setRightArm(new LimbPose().setRotationAngleX(-140F).setRotationAngleY(-45F).setRotationPointX(-5).setRotationPointY(3).setRotationPointZ(0)).setLeftArm(new LimbPose().setRotationAngleX(-160F).setRotationAngleY(15F).setRotationAngleZ(-35F).setRotationPointY(1).setRotationPointZ(0));
+        upPose.getIdle().setRenderYawOffset(20F).setItemRotation(new Vector3f(17.5F, 0F, 10F)).setItemTranslate(new Vector3f(0, 0, -1)).setRightArm(new LimbPose().setRotationAngleX(-140F).setRotationAngleY(-40F).setRotationPointX(-5).setRotationPointY(3).setRotationPointZ(0)).setLeftArm(new LimbPose().setRotationAngleX(-160F).setRotationAngleY(15F).setRotationAngleZ(-30F).setRotationPointY(2).setRotationPointZ(-1));
+        upPose.getAiming().setRenderYawOffset(20F).setItemRotation(new Vector3f(-2.5F, 0F, 20F)).setItemTranslate(new Vector3f(-1, 0, -1)).setRightArm(new LimbPose().setRotationAngleX(-160F).setRotationAngleY(-45F).setRotationPointX(-5).setRotationPointY(3).setRotationPointZ(0)).setLeftArm(new LimbPose().setRotationAngleX(-170F).setRotationAngleY(15F).setRotationAngleZ(-35F).setRotationPointY(1).setRotationPointZ(0));
         return upPose;
     }
 
@@ -41,8 +41,8 @@ public class TwoHandedShortPose extends WeaponPose
     protected AimPose getForwardPose()
     {
         AimPose forwardPose = new AimPose();
-        forwardPose.getIdle().setRenderYawOffset(35F).setItemRotation(new Vector3f(30F, -11F, 0F)).setRightArm(new LimbPose().setRotationAngleX(-60F).setRotationAngleY(-45F).setRotationAngleZ(0F).setRotationPointX(-5).setRotationPointY(2).setRotationPointZ(1)).setLeftArm(new LimbPose().setRotationAngleX(-63F).setRotationAngleY(10F).setRotationAngleZ(5F).setRotationPointY(2).setRotationPointZ(-1));
-        forwardPose.getAiming().setRenderYawOffset(40F).setItemRotation(new Vector3f(5F, -16F, 0F)).setRightArm(new LimbPose().setRotationAngleX(-85F).setRotationAngleY(-55F).setRotationAngleZ(0F).setRotationPointX(-5).setRotationPointY(2)).setLeftArm(new LimbPose().setRotationAngleX(-87F).setRotationAngleY(10F).setRotationAngleZ(5F).setRotationPointY(2).setRotationPointZ(0));
+        forwardPose.getIdle().setRenderYawOffset(20F).setItemRotation(new Vector3f(-7.5F, -12.5F, -5F)).setItemTranslate(new Vector3f(0.4F, 0, -1)).setRightArm(new LimbPose().setRotationAngleX(-75F).setRotationAngleY(-35F).setRotationAngleZ(0F).setRotationPointX(-5).setRotationPointY(2).setRotationPointZ(1)).setLeftArm(new LimbPose().setRotationAngleX(-67F).setRotationAngleY(40F).setRotationAngleZ(5F).setRotationPointY(2).setRotationPointZ(-1));
+        forwardPose.getAiming().setRenderYawOffset(20F).setItemRotation(new Vector3f(-25F, -12.5F, -5.5F)).setItemTranslate(new Vector3f(0.4F, 0, -1)).setRightArm(new LimbPose().setRotationAngleX(-92F).setRotationAngleY(-35F).setRotationAngleZ(0F).setRotationPointX(-5).setRotationPointY(2)).setLeftArm(new LimbPose().setRotationAngleX(-93F).setRotationAngleY(40F).setRotationAngleZ(5F).setRotationPointY(2).setRotationPointZ(0));
         return forwardPose;
     }
 
@@ -50,8 +50,8 @@ public class TwoHandedShortPose extends WeaponPose
     protected AimPose getDownPose()
     {
         AimPose downPose = new AimPose();
-        downPose.getIdle().setRenderYawOffset(40F).setItemRotation(new Vector3f(-15F, -5F, 0F)).setItemTranslate(new Vector3f(0, -0.5F, 0.5F)).setRightArm(new LimbPose().setRotationAngleX(-30F).setRotationAngleY(-65F).setRotationAngleZ(0F).setRotationPointX(-5).setRotationPointY(2)).setLeftArm(new LimbPose().setRotationAngleX(-5F).setRotationAngleY(-20F).setRotationAngleZ(25F).setRotationPointY(5).setRotationPointZ(0));
-        downPose.getAiming().setRenderYawOffset(45F).setItemRotation(new Vector3f(-20F, -5F, -10F)).setItemTranslate(new Vector3f(0, -0.5F, 1F)).setRightArm(new LimbPose().setRotationAngleX(-30F).setRotationAngleY(-65F).setRotationAngleZ(0F).setRotationPointX(-5).setRotationPointY(1)).setLeftArm(new LimbPose().setRotationAngleX(-10F).setRotationAngleY(-25F).setRotationAngleZ(35F).setRotationPointY(5).setRotationPointZ(0));
+        downPose.getIdle().setRenderYawOffset(20F).setItemRotation(new Vector3f(-37.5F, -5F, 0F)).setItemTranslate(new Vector3f(0, -0.5F, -1.5F)).setRightArm(new LimbPose().setRotationAngleX(-30F).setRotationAngleY(-65F).setRotationAngleZ(0F).setRotationPointX(-5).setRotationPointY(2)).setLeftArm(new LimbPose().setRotationAngleX(-5F).setRotationAngleY(-20F).setRotationAngleZ(25F).setRotationPointY(5).setRotationPointZ(0));
+        downPose.getAiming().setRenderYawOffset(20F).setItemRotation(new Vector3f(-42.5F, -5F, -10F)).setItemTranslate(new Vector3f(0, -0.5F, -1F)).setRightArm(new LimbPose().setRotationAngleX(-30F).setRotationAngleY(-65F).setRotationAngleZ(0F).setRotationPointX(-5).setRotationPointY(1)).setLeftArm(new LimbPose().setRotationAngleX(-10F).setRotationAngleY(-25F).setRotationAngleZ(35F).setRotationPointY(5).setRotationPointZ(0));
         return downPose;
     }
 
@@ -107,15 +107,12 @@ public class TwoHandedShortPose extends WeaponPose
             poseStack.translate(reloadProgress * 0.5, -reloadProgress, -reloadProgress * 0.5);
 
             poseStack.scale(0.5F, 0.5F, 0.5F);
-            poseStack.translate((1.55 + xOffset) * 0.0625 * side, (0.6 + yOffset) * 0.0625, (-3.5 + zOffset) * 0.0625);
+            poseStack.translate((2.9 + xOffset) * 0.0625 * side, (2.2 + yOffset) * 0.0625, (-11.2 + zOffset) * 0.0625);
             //poseStack.translate((1.55) * 0.0625 * side, (0.4) * 0.0625, (-3.5) * 0.0625);
             poseStack.translate((armWidth / 2.0) * 0.0625 * side, 0, 0);
             poseStack.translate(-0.3125 * side, -0.1, -0.4375);
-
-            poseStack.mulPose(Vector3f.XP.rotationDegrees(80F));
-            poseStack.mulPose(Vector3f.YP.rotationDegrees(10F * -side));
-            poseStack.mulPose(Vector3f.ZP.rotationDegrees(35F * -side));
-            poseStack.mulPose(Vector3f.XP.rotationDegrees(-35F));
+            poseStack.mulPose(Vector3f.XP.rotationDegrees(75F));
+            poseStack.mulPose(Vector3f.ZP.rotationDegrees(25F * -side));
 
             RenderUtil.renderFirstPersonArm((LocalPlayer) player, hand.getOpposite(), poseStack, buffer, light);
         }
@@ -130,10 +127,11 @@ public class TwoHandedShortPose extends WeaponPose
             double zOffset = (posHand != null ? posHand.getZOffset() : 0);
             poseStack.translate(0, 0.1, -0.675);
             poseStack.scale(0.5F, 0.5F, 0.5F);
-            poseStack.translate((-4.0 + xOffset) * 0.0625 * side, (0 + yOffset) * 0.0625, (0 + zOffset) * 0.0625);
+            poseStack.translate((-1.7 + xOffset) * 0.0625 * side, (0 + yOffset) * 0.0625, (3.2 + zOffset) * 0.0625);
             //poseStack.translate((-4.0) * 0.0625 * side, (0) * 0.0625, (0) * 0.0625);
             poseStack.translate(-(armWidth / 2.0) * 0.0625 * side, 0, 0);
             poseStack.mulPose(Vector3f.XP.rotationDegrees(80F));
+            poseStack.mulPose(Vector3f.ZP.rotationDegrees(12F * side));
 
             RenderUtil.renderFirstPersonArm((LocalPlayer) player, hand, poseStack, buffer, light);
         }
@@ -144,5 +142,17 @@ public class TwoHandedShortPose extends WeaponPose
     public boolean applyOffhandTransforms(Player player, PlayerModel model, ItemStack stack, PoseStack poseStack, float partialTicks)
     {
         return GripType.applyBackTransforms(player, poseStack);
+    }
+
+    @Override
+    public boolean canRenderOffhandItem()
+    {
+        return true;
+    }
+
+    @Override
+    public double getFallSwayZOffset()
+    {
+        return 0.5;
     }
 }

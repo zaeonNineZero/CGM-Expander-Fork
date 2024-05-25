@@ -494,7 +494,7 @@ public class GunRenderingHandler
         if(Config.CLIENT.display.sprintAnimation.get() && modifiedGun.getGeneral().getGripType().getHeldAnimation().canApplySprintingAnimation())
         {
         	GripType pose = modifiedGun.getGeneral().getGripType();
-        	if(pose == GripType.ONE_HANDED || pose == GripType.ONE_HANDED)
+        	if(pose == GripType.ONE_HANDED || pose == GripType.PISTOL_CUSTOM)
         	{
             	float transition = (this.prevSprintTransition + (this.sprintTransition - this.prevSprintTransition) * partialTicks) / 5F;
             	transition = (float) Math.sin((transition * Math.PI) / 2);
