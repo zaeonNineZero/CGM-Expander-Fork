@@ -5,6 +5,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mrcrayfish.guns.Config;
 import com.mrcrayfish.guns.Reference;
 import com.mrcrayfish.guns.client.render.crosshair.Crosshair;
+import com.mrcrayfish.guns.client.render.crosshair.DynamicCrosshair;
 import com.mrcrayfish.guns.client.render.crosshair.TechCrosshair;
 import com.mrcrayfish.guns.client.render.crosshair.TexturedCrosshair;
 import com.mrcrayfish.guns.event.GunFireEvent;
@@ -63,6 +64,7 @@ public class CrosshairHandler
         this.register(new TexturedCrosshair(new ResourceLocation(Reference.MOD_ID, "t")));
         this.register(new TexturedCrosshair(new ResourceLocation(Reference.MOD_ID, "smiley")));
         this.register(new TechCrosshair());
+        this.register(new DynamicCrosshair());
     }
 
     /**
