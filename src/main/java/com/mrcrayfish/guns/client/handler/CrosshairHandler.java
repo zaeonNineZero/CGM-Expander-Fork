@@ -139,7 +139,7 @@ public class CrosshairHandler
         event.setCanceled(true);
 
         //if(!mc.options.getCameraType().isFirstPerson())
-        if(mc.options.getCameraType() != CameraType.FIRST_PERSON && !mc.options.getCameraType().toString().equals("SHOULDER_SURFING"))
+        if(mc.options.getCameraType() != CameraType.FIRST_PERSON && mc.options.getCameraType() != CameraType.THIRD_PERSON_BACK)
             return;
 
         if(mc.player.getUseItem().getItem() == Items.SHIELD)

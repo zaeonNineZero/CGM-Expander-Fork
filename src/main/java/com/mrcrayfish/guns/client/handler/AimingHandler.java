@@ -144,7 +144,7 @@ public class AimingHandler
             return;
 
         Minecraft mc = Minecraft.getInstance();
-        if(mc.player == null || mc.player.getMainHandItem().isEmpty() || (mc.options.getCameraType() != CameraType.FIRST_PERSON && !mc.options.getCameraType().toString().equals("SHOULDER_SURFING")))
+        if(mc.player == null || mc.player.getMainHandItem().isEmpty() || (mc.options.getCameraType() != CameraType.FIRST_PERSON && mc.options.getCameraType() != CameraType.THIRD_PERSON_BACK))
             return;
 
         ItemStack heldItem = mc.player.getMainHandItem();
