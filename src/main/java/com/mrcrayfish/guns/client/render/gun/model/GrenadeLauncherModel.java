@@ -28,7 +28,9 @@ public class GrenadeLauncherModel implements IOverrideModel
         Minecraft.getInstance().getItemRenderer().render(stack, ItemTransforms.TransformType.NONE, false, poseStack, buffer, light, overlay, GunModel.wrap(bakedModel));
 
         float cooldown = 0F;
-        if(entity != null && entity.equals(Minecraft.getInstance().player))
+        boolean isPlayer = (entity != null && entity.equals(Minecraft.getInstance().player));
+        boolean correctContext = (transformType == ItemTransforms.TransformType.FIRST_PERSON_RIGHT_HAND || transformType == ItemTransforms.TransformType.THIRD_PERSON_RIGHT_HAND || transformType == ItemTransforms.TransformType.FIRST_PERSON_LEFT_HAND || transformType == ItemTransforms.TransformType.THIRD_PERSON_LEFT_HAND);
+        if(isPlayer && correctContext)
         {
             ItemCooldowns tracker = Minecraft.getInstance().player.getCooldowns();
             cooldown = tracker.getCooldownPercent(stack.getItem(), Minecraft.getInstance().getFrameTime());
@@ -36,9 +38,12 @@ public class GrenadeLauncherModel implements IOverrideModel
         }
 
         poseStack.pushPose();
-        poseStack.translate(0, -5.8 * 0.0625, 0);
-        poseStack.mulPose(Vector3f.ZN.rotationDegrees(45F * cooldown));
-        poseStack.translate(0, 5.8 * 0.0625, 0);
+        if (correctContext)
+        {
+        	poseStack.translate(0, -5.8 * 0.0625, 0);
+        	poseStack.mulPose(Vector3f.ZN.rotationDegrees(45F * cooldown));
+        	poseStack.translate(0, 5.8 * 0.0625, 0);
+    	}
         RenderUtil.renderModel(SpecialModels.GRENADE_LAUNCHER_CYLINDER.getModel(), transformType, null, stack, parent, poseStack, buffer, light, overlay);
         poseStack.popPose();
     }

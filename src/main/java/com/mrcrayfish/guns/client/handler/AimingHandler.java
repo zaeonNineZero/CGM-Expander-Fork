@@ -164,8 +164,8 @@ public class AimingHandler
         double time = PropertyHelper.getSightAnimations(heldItem, modifiedGun).getFovCurve().apply(this.normalisedAdsProgress);
         boolean isFirstPerson = (mc.options.getCameraType() == CameraType.FIRST_PERSON);
         float modifier = Gun.getFovModifier(heldItem, modifiedGun);
+        modifier = Math.max((modifier * (isFirstPerson ? 1 : 0.3F)) + (isFirstPerson ? 0 : 0.4F),modifier);
         modifier = (1.0F - modifier) * (float) time;
-        modifier = Math.min((modifier * (isFirstPerson ? 1 : 0.3F)) + (isFirstPerson ? 0 : 0.4F),modifier);
         event.setFOV(event.getFOV() - event.getFOV() * modifier);
     }
 
