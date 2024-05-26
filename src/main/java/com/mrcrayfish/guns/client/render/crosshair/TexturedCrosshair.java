@@ -13,6 +13,7 @@ import com.mrcrayfish.guns.client.handler.AimingHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 
 /**
  * Author: MrCrayfish
@@ -21,6 +22,9 @@ public class TexturedCrosshair extends Crosshair
 {
     private ResourceLocation texture;
     private boolean blend;
+    
+    private float scale;
+    private float prevScale;
 
     public TexturedCrosshair(ResourceLocation id)
     {
@@ -35,13 +39,30 @@ public class TexturedCrosshair extends Crosshair
     }
 
     @Override
+    public void tick()
+    {
+        this.prevScale = this.scale;
+        this.scale *= 0.5F;
+    }
+
+    @Override
+    public void onGunFired()
+    {
+        this.prevScale = 0;
+        this.scale = 0.3F;
+    }
+
+    @Override
     public void render(Minecraft mc, PoseStack stack, int windowWidth, int windowHeight, float partialTicks)
     {
         stack.pushPose();
 
-        float alpha = 1.0F - (float) AimingHandler.get().getNormalisedAdsProgress();
-        float size = 8.0F;
-        stack.translate((windowWidth - size) / 2F, (windowHeight - size) / 2F, 0);
+        float alpha = 1.0F;// - (float) AimingHandler.get().getNormalisedAdsProgress();
+        float size = 9.0F;
+        float scale = 1F + Mth.lerp(partialTicks, this.prevScale, this.scale);
+        stack.translate((windowWidth - 1) / 2F, (windowHeight) / 2F, 0);
+        stack.scale(scale, scale, scale);
+        stack.translate(-size / 2F, -size / 2F, 0);
 
         RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
