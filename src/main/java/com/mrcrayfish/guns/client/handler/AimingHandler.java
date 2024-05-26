@@ -144,7 +144,7 @@ public class AimingHandler
             return;
 
         Minecraft mc = Minecraft.getInstance();
-        if(mc.player == null || mc.player.getMainHandItem().isEmpty() || mc.options.getCameraType() != CameraType.FIRST_PERSON)
+        if(mc.player == null || mc.player.getMainHandItem().isEmpty() || (mc.options.getCameraType() != CameraType.FIRST_PERSON && !mc.options.getCameraType().toString().equals("SHOULDER_SURFING")))
             return;
 
         ItemStack heldItem = mc.player.getMainHandItem();
@@ -162,8 +162,10 @@ public class AimingHandler
             return;
 
         double time = PropertyHelper.getSightAnimations(heldItem, modifiedGun).getFovCurve().apply(this.normalisedAdsProgress);
+        boolean isFirstPerson = (mc.options.getCameraType() == CameraType.FIRST_PERSON);
         float modifier = Gun.getFovModifier(heldItem, modifiedGun);
         modifier = (1.0F - modifier) * (float) time;
+        modifier = Math.min((modifier * (isFirstPerson ? 1 : 0.3F)) + (isFirstPerson ? 0 : 0.4F),modifier);
         event.setFOV(event.getFOV() - event.getFOV() * modifier);
     }
 

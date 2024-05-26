@@ -26,7 +26,7 @@ public class MouseHandlerMixin
     {
         float additionalAdsSensitivity = 1.0F;
         Minecraft mc = Minecraft.getInstance();
-        if(mc.player != null && !mc.player.getMainHandItem().isEmpty() && mc.options.getCameraType() == CameraType.FIRST_PERSON)
+        if(mc.player != null && !mc.player.getMainHandItem().isEmpty() && (mc.options.getCameraType() == CameraType.FIRST_PERSON || mc.options.getCameraType().toString().equals("SHOULDER_SURFING")))
         {
             ItemStack heldItem = mc.player.getMainHandItem();
             if(heldItem.getItem() instanceof GunItem gunItem)
@@ -36,7 +36,9 @@ public class MouseHandlerMixin
                     Gun modifiedGun = gunItem.getModifiedGun(heldItem);
                     if(modifiedGun.getModules().getZoom() != null)
                     {
+                        boolean isFirstPerson = (mc.options.getCameraType() == CameraType.FIRST_PERSON);
                         float modifier = Gun.getFovModifier(heldItem, modifiedGun);
+                        modifier = Math.min((modifier * (isFirstPerson ? 1 : 0.3F)) + (isFirstPerson ? 0 : 0.4F),modifier);
                         additionalAdsSensitivity = Mth.clamp(1.0F - (1.0F / modifier) / 10F, 0.0F, 1.0F);
                     }
                 }

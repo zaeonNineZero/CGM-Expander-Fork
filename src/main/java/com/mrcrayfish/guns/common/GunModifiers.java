@@ -163,7 +163,7 @@ public class GunModifiers
         @Override
         public double modifyAimDownSightSpeed(double speed)
         {
-            return speed * 1.2F;
+            return speed * 1.1F;
         }
 
         @Override

@@ -9,6 +9,8 @@ import com.mrcrayfish.guns.client.render.crosshair.TechCrosshair;
 import com.mrcrayfish.guns.client.render.crosshair.TexturedCrosshair;
 import com.mrcrayfish.guns.event.GunFireEvent;
 import com.mrcrayfish.guns.item.GunItem;
+
+import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
@@ -111,11 +113,15 @@ public class CrosshairHandler
     @SubscribeEvent
     public void onRenderOverlay(RenderGuiOverlayEvent.Pre event)
     {
+    	Minecraft mc = Minecraft.getInstance();
+        if(mc.player == null)
+            return;
+        
         if(event.getOverlay() != VanillaGuiOverlay.CROSSHAIR.type())
             return;
 
         Crosshair crosshair = this.getCurrentCrosshair();
-        if(AimingHandler.get().getNormalisedAdsProgress() > 0.5)
+        if(AimingHandler.get().getNormalisedAdsProgress() > 0.5 && (mc.options.getCameraType().isFirstPerson()))
         {
             event.setCanceled(true);
             return;
@@ -126,17 +132,14 @@ public class CrosshairHandler
             return;
         }
 
-        Minecraft mc = Minecraft.getInstance();
-        if(mc.player == null)
-            return;
-
         ItemStack heldItem = mc.player.getMainHandItem();
         if(!(heldItem.getItem() instanceof GunItem))
             return;
 
         event.setCanceled(true);
 
-        if(!mc.options.getCameraType().isFirstPerson())
+        //if(!mc.options.getCameraType().isFirstPerson())
+        if(mc.options.getCameraType() != CameraType.FIRST_PERSON && !mc.options.getCameraType().toString().equals("SHOULDER_SURFING"))
             return;
 
         if(mc.player.getUseItem().getItem() == Items.SHIELD)
