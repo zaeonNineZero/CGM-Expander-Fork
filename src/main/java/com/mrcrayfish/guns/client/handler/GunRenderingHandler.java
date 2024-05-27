@@ -180,11 +180,11 @@ public class GunRenderingHandler
         if(heldItem.getItem() instanceof GunItem)
         {
             Gun modifiedGun = ((GunItem) heldItem.getItem()).getModifiedGun(heldItem);
-            down = !modifiedGun.getGeneral().getGripType().getHeldAnimation().canRenderOffhandItem();
+            down = (!modifiedGun.getGeneral().getGripType().getHeldAnimation().canRenderOffhandItem() || ModSyncedDataKeys.RELOADING.getValue(mc.player));
         }
 
-        float direction = down ? -0.3F : 0.3F;
-        this.offhandTranslate = Mth.clamp(this.offhandTranslate + direction, 0.0F, 1.0F);
+        float direction = down ? -0.6F : 0.6F;
+        this.offhandTranslate = Mth.clamp(this.offhandTranslate + direction, -1.0F, 1.0F);
     }
 
     @SubscribeEvent
@@ -544,7 +544,7 @@ public class GunRenderingHandler
 
     private void applyShieldTransforms(PoseStack poseStack, LocalPlayer player, Gun modifiedGun, float partialTick)
     {
-        if(player.isUsingItem() && player.getOffhandItem().getItem() == Items.SHIELD && modifiedGun.getGeneral().getGripType() == GripType.ONE_HANDED)
+        if(player.isUsingItem() && player.getOffhandItem().getItem() == Items.SHIELD && (modifiedGun.getGeneral().getGripType() == GripType.ONE_HANDED || modifiedGun.getGeneral().getGripType() == GripType.PISTOL_CUSTOM))
         {
             double time = Mth.clamp((player.getTicksUsingItem() + partialTick), 0.0, 4.0) / 4.0;
             poseStack.translate(0, 0.35 * time, 0);

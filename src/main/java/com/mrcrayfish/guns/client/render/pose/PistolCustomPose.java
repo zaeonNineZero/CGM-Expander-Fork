@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3f;
 import com.mrcrayfish.guns.Config;
 import com.mrcrayfish.guns.client.handler.ReloadHandler;
+import com.mrcrayfish.guns.client.render.IHeldAnimation;
 import com.mrcrayfish.guns.client.util.RenderUtil;
 import com.mrcrayfish.guns.common.GripType;
 import com.mrcrayfish.guns.common.Gun;
@@ -17,9 +18,11 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -59,23 +62,53 @@ public class PistolCustomPose extends WeaponPose
     @OnlyIn(Dist.CLIENT)
     public void applyPlayerModelRotation(Player player, ModelPart rightArm, ModelPart leftArm, ModelPart head, InteractionHand hand, float aimProgress)
     {
-        super.applyPlayerModelRotation(player, rightArm, leftArm, head, hand, aimProgress);
-        float angle = this.getPlayerPitch(player);
-        head.xRot = (float) Math.toRadians(angle > 0.0 ? angle * 70F : angle * 90F);
+    	if (!player.getOffhandItem().isEmpty())
+        {
+    		boolean right = Minecraft.getInstance().options.mainHand().get() == HumanoidArm.RIGHT ? hand == InteractionHand.MAIN_HAND : hand == InteractionHand.OFF_HAND;
+            ModelPart arm = right ? rightArm : leftArm;
+            IHeldAnimation.copyModelAngles(head, arm);
+            arm.xRot += (float) Math.toRadians(-70F - (aimProgress*25));
+            //arm.yRot += (float) Math.toRadians((-aimProgress*15));
+
+            if(player.getUseItem().getItem() == Items.SHIELD)
+            {
+                arm.xRot = (float) Math.toRadians(-30F);
+            }
+        }
+        else
+        {
+        	super.applyPlayerModelRotation(player, rightArm, leftArm, head, hand, aimProgress);
+        	float angle = this.getPlayerPitch(player);
+        	head.xRot = (float) Math.toRadians(angle > 0.0 ? angle * 70F : angle * 90F);
+        }
     }
 
     @Override
     @OnlyIn(Dist.CLIENT)
     public void applyPlayerPreRender(Player player, InteractionHand hand, float aimProgress, PoseStack poseStack, MultiBufferSource buffer)
     {
-       super.applyPlayerPreRender(player, hand, aimProgress, poseStack, buffer);
+    	if (!player.getOffhandItem().isEmpty())
+	        return;
+        super.applyPlayerPreRender(player, hand, aimProgress, poseStack, buffer);
     }
 
     @Override
     @OnlyIn(Dist.CLIENT)
     public void applyHeldItemTransforms(Player player, InteractionHand hand, float aimProgress, PoseStack poseStack, MultiBufferSource buffer)
     {
-        super.applyHeldItemTransforms(player, hand, aimProgress, poseStack, buffer);
+    	if (!player.getOffhandItem().isEmpty())
+        {
+    		if(hand == InteractionHand.MAIN_HAND)
+            {
+            	boolean right = Minecraft.getInstance().options.mainHand().get() == HumanoidArm.RIGHT ? hand == InteractionHand.MAIN_HAND : hand == InteractionHand.OFF_HAND;
+            	poseStack.translate(0, 0, 0.05);
+               	//poseStack.mulPose(Vector3f.YP.rotationDegrees((-aimProgress*15) * (right ? 1F : -1F)));
+               	poseStack.mulPose(Vector3f.XP.rotationDegrees((-aimProgress*27) * (right ? 1F : -1F)));
+               	//poseStack.mulPose(Vector3f.ZP.rotationDegrees((aimProgress*1.5F) * (right ? 1F : -1F)));
+            }
+        }
+    	else
+    		super.applyHeldItemTransforms(player, hand, aimProgress, poseStack, buffer);
     }
 
     @Override
@@ -98,6 +131,7 @@ public class PistolCustomPose extends WeaponPose
 
         // Front arm holding the barrel
         poseStack.pushPose();
+        if (player.getOffhandItem().isEmpty())
         {
             ForwardHandPos posHand = gun.getDisplay().getForwardHand();
             double xOffset = (posHand != null ? posHand.getXOffset() : 0);
@@ -125,13 +159,25 @@ public class PistolCustomPose extends WeaponPose
             double xOffset = (posHand != null ? posHand.getXOffset() : 0);
             double yOffset = (posHand != null ? posHand.getYOffset() : 0);
             double zOffset = (posHand != null ? posHand.getZOffset() : 0);
-            poseStack.translate(0, 0.1, -0.675);
-            poseStack.scale(0.5F, 0.5F, 0.5F);
-            poseStack.translate((-1.7 + xOffset) * 0.0625 * side, (0 + yOffset) * 0.0625, (3.2 + zOffset) * 0.0625);
-            //poseStack.translate((-4.0) * 0.0625 * side, (0) * 0.0625, (0) * 0.0625);
-            poseStack.translate(-(armWidth / 2.0) * 0.0625 * side, 0, 0);
-            poseStack.mulPose(Vector3f.XP.rotationDegrees(80F));
-            poseStack.mulPose(Vector3f.ZP.rotationDegrees(12F * side));
+            if (player.getOffhandItem().isEmpty())
+            {
+            	poseStack.translate(0, 0.1, -0.675);
+            	poseStack.scale(0.5F, 0.5F, 0.5F);
+            	poseStack.translate((-1.7 + xOffset) * 0.0625 * side, (0 + yOffset) * 0.0625, (3.2 + zOffset) * 0.0625);
+            	//poseStack.translate((-4.0) * 0.0625 * side, (0) * 0.0625, (0) * 0.0625);
+            	poseStack.translate(-(armWidth / 2.0) * 0.0625 * side, 0, 0);
+            	poseStack.mulPose(Vector3f.XP.rotationDegrees(80F));
+            	poseStack.mulPose(Vector3f.ZP.rotationDegrees(12F * side));
+            }
+            else
+            {
+            	poseStack.translate(0, 0.1, -0.675);
+            	poseStack.scale(0.5F, 0.5F, 0.5F);
+            	poseStack.translate((-4.0 + xOffset) * 0.0625 * side, (0 + yOffset) * 0.0625, (3.2 + zOffset) * 0.0625);
+            	//poseStack.translate((-4.0) * 0.0625 * side, (0) * 0.0625, (0) * 0.0625);
+            	poseStack.translate(-(armWidth / 2.0) * 0.0625 * side, 0, 0);
+            	poseStack.mulPose(Vector3f.XP.rotationDegrees(80F));
+            }
 
             RenderUtil.renderFirstPersonArm((LocalPlayer) player, hand, poseStack, buffer, light);
         }
@@ -141,7 +187,28 @@ public class PistolCustomPose extends WeaponPose
     @Override
     public boolean applyOffhandTransforms(Player player, PlayerModel model, ItemStack stack, PoseStack poseStack, float partialTicks)
     {
-        return GripType.applyBackTransforms(player, poseStack);
+    	poseStack.mulPose(Vector3f.YP.rotationDegrees(180F));
+        poseStack.mulPose(Vector3f.ZP.rotationDegrees(180F));
+
+        if(player.isCrouching())
+        {
+            poseStack.translate(-4.5 * 0.0625, -15 * 0.0625, -4 * 0.0625);
+        }
+        else if(!player.getItemBySlot(EquipmentSlot.LEGS).isEmpty())
+        {
+            poseStack.translate(-4.0 * 0.0625, -13 * 0.0625, 1 * 0.0625);
+        }
+        else
+        {
+            poseStack.translate(-3.5 * 0.0625, -13 * 0.0625, 1 * 0.0625);
+        }
+
+        poseStack.mulPose(Vector3f.YP.rotationDegrees(90F));
+        poseStack.mulPose(Vector3f.ZP.rotationDegrees(75F));
+        poseStack.mulPose(Vector3f.ZP.rotationDegrees((float) (Math.toDegrees(model.rightLeg.xRot) / 10F)));
+        poseStack.scale(0.5F, 0.5F, 0.5F);
+
+        return true;
     }
 
     @Override
