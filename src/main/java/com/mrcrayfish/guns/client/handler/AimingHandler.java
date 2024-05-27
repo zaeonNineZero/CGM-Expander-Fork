@@ -7,6 +7,7 @@ import com.mrcrayfish.guns.client.util.PropertyHelper;
 import com.mrcrayfish.guns.common.GripType;
 import com.mrcrayfish.guns.common.Gun;
 import com.mrcrayfish.guns.compat.PlayerReviveHelper;
+import com.mrcrayfish.guns.compat.ShoulderSurfingHelper;
 import com.mrcrayfish.guns.debug.Debug;
 import com.mrcrayfish.guns.init.ModBlocks;
 import com.mrcrayfish.guns.init.ModSyncedDataKeys;
@@ -120,6 +121,7 @@ public class AimingHandler
 
         if(this.isAiming())
         {
+        	if (!Minecraft.getInstance().options.keySprint.isDown())
         	player.setSprinting(false);
             if(!this.aiming)
             {
@@ -145,7 +147,7 @@ public class AimingHandler
             return;
 
         Minecraft mc = Minecraft.getInstance();
-        if(mc.player == null || mc.player.getMainHandItem().isEmpty() || (mc.options.getCameraType() != CameraType.FIRST_PERSON && mc.options.getCameraType() != CameraType.THIRD_PERSON_BACK))
+        if(mc.player == null || mc.player.getMainHandItem().isEmpty() || (mc.options.getCameraType() != CameraType.FIRST_PERSON && !ShoulderSurfingHelper.isShoulderSurfing()))
             return;
 
         ItemStack heldItem = mc.player.getMainHandItem();
@@ -202,7 +204,7 @@ public class AimingHandler
         //if(mc.player.isSprinting())
             //return false;
         
-        if(mc.options.keySprint.isDown())
+        if(mc.options.keySprint.isDown() && mc.player.isSprinting())
             return false;
 
         if(Debug.isForceAim())

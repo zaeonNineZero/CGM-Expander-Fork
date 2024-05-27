@@ -83,7 +83,7 @@ public class DynamicCrosshair extends Crosshair
             	float spreadModifier = ((SpreadTracker.get(mc.player).getSpread(gun)+(1F/Math.max(Config.COMMON.projectileSpread.maxCount.get(),1F)))*Math.min(Mth.lerp(partialTicks, this.prevFireBloom, this.fireBloom),1F));
             	float baseSpread = GunCompositeStatHelper.getCompositeSpread(heldItem, modifiedGun);
             	float minSpread = GunCompositeStatHelper.getCompositeMinSpread(heldItem, modifiedGun);
-            	minSpread = (minSpread > 0F ? minSpread : (modifiedGun.getGeneral().isAlwaysSpread() ? baseSpread : 0));
+            	minSpread = (modifiedGun.getGeneral().getRestingSpread() > 0F ? minSpread : (modifiedGun.getGeneral().isAlwaysSpread() ? baseSpread : 0));
             	spread = Math.max(Mth.lerp(spreadModifier,minSpread,baseSpread)*(aiming * modifiedGun.getGeneral().getSpreadAdsReduction()),0F);
             }
         }

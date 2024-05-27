@@ -8,6 +8,7 @@ import com.mrcrayfish.guns.client.render.crosshair.Crosshair;
 import com.mrcrayfish.guns.client.render.crosshair.DynamicCrosshair;
 import com.mrcrayfish.guns.client.render.crosshair.TechCrosshair;
 import com.mrcrayfish.guns.client.render.crosshair.TexturedCrosshair;
+import com.mrcrayfish.guns.compat.ShoulderSurfingHelper;
 import com.mrcrayfish.guns.event.GunFireEvent;
 import com.mrcrayfish.guns.item.GunItem;
 
@@ -147,7 +148,7 @@ public class CrosshairHandler
         event.setCanceled(true);
 
         //if(!mc.options.getCameraType().isFirstPerson())
-        if(mc.options.getCameraType() != CameraType.FIRST_PERSON && mc.options.getCameraType() != CameraType.THIRD_PERSON_BACK)
+        if(mc.options.getCameraType() != CameraType.FIRST_PERSON && !ShoulderSurfingHelper.isShoulderSurfing())
             return;
 
         if(mc.player.getUseItem().getItem() == Items.SHIELD)

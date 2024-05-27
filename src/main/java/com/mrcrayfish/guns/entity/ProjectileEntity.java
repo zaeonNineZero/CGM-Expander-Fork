@@ -20,6 +20,7 @@ import com.mrcrayfish.guns.network.message.S2CMessageProjectileHitBlock;
 import com.mrcrayfish.guns.network.message.S2CMessageProjectileHitEntity;
 import com.mrcrayfish.guns.network.message.S2CMessageRemoveProjectile;
 import com.mrcrayfish.guns.util.BufferUtil;
+import com.mrcrayfish.guns.util.GunCompositeStatHelper;
 import com.mrcrayfish.guns.util.GunEnchantmentHelper;
 import com.mrcrayfish.guns.util.GunModifierHelper;
 import com.mrcrayfish.guns.util.ReflectionUtil;
@@ -162,8 +163,8 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
 
     private Vec3 getDirection(LivingEntity shooter, ItemStack weapon, GunItem item, Gun modifiedGun)
     {
-        float gunSpread = GunModifierHelper.getModifiedSpread(weapon, modifiedGun.getGeneral().getSpread());
-        float minSpread = GunModifierHelper.getModifiedSpread(weapon, modifiedGun.getGeneral().getRestingSpread());
+        float gunSpread = GunCompositeStatHelper.getCompositeSpread(weapon, modifiedGun);
+        float minSpread = GunCompositeStatHelper.getCompositeMinSpread(weapon, modifiedGun);
 
         if(gunSpread == 0F)
         {
@@ -172,7 +173,7 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
 
         if(shooter instanceof Player)
         {
-            if(!modifiedGun.getGeneral().isAlwaysSpread() || minSpread != 0)
+            if(!modifiedGun.getGeneral().isAlwaysSpread() || minSpread > 0)
             {
                 gunSpread = Mth.lerp(SpreadTracker.get((Player) shooter).getSpread(item),minSpread,gunSpread);
             }

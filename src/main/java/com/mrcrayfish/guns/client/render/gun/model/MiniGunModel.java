@@ -7,6 +7,9 @@ import com.mrcrayfish.guns.client.render.gun.IOverrideModel;
 import com.mrcrayfish.guns.client.util.RenderUtil;
 import com.mrcrayfish.guns.common.Gun;
 import com.mrcrayfish.guns.init.ModSyncedDataKeys;
+import com.mrcrayfish.guns.item.GunItem;
+import com.mrcrayfish.guns.util.GunCompositeStatHelper;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
@@ -25,6 +28,8 @@ import java.util.WeakHashMap;
 public class MiniGunModel implements IOverrideModel
 {
     private WeakHashMap<LivingEntity, Rotations> rotationMap = new WeakHashMap<>();
+    
+    float rotationSpeed = 0F;
 
     @Override
     public void tick(Player player)
@@ -35,6 +40,8 @@ public class MiniGunModel implements IOverrideModel
 
         boolean shooting = ModSyncedDataKeys.SHOOTING.getValue(player);
         ItemStack heldItem = player.getMainHandItem();
+        int fireRate = GunCompositeStatHelper.getCompositeRate(heldItem, player);
+        float maxSpinRate = Math.max(60F,90F/fireRate);
         if(!Gun.hasAmmo(heldItem) && !player.isCreative())
         {
             shooting = false;
@@ -42,12 +49,16 @@ public class MiniGunModel implements IOverrideModel
 
         if(shooting)
         {
-            rotations.rotation += 30;
+            if (rotationSpeed<maxSpinRate)
+        	rotationSpeed+=Math.min(maxSpinRate-rotationSpeed,maxSpinRate/10F);
         }
         else
         {
-            rotations.rotation += 1;
+        	rotationSpeed*=0.8F;
         }
+        
+        if (rotationSpeed>0F)
+        rotations.rotation += rotationSpeed;
     }
 
     @Override
