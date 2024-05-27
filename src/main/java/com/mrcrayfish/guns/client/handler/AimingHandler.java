@@ -120,6 +120,7 @@ public class AimingHandler
 
         if(this.isAiming())
         {
+        	player.setSprinting(false);
             if(!this.aiming)
             {
                 ModSyncedDataKeys.AIMING.setValue(player, true);
@@ -198,7 +199,10 @@ public class AimingHandler
         if(mc.player.isSpectator())
             return false;
         
-        if(mc.player.isSprinting())
+        //if(mc.player.isSprinting())
+            //return false;
+        
+        if(mc.options.keySprint.isDown())
             return false;
 
         if(Debug.isForceAim())

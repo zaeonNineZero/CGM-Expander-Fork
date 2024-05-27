@@ -128,6 +128,12 @@ public class CrosshairHandler
             event.setCanceled(true);
             return;
         }
+        
+        if(mc.player.isSprinting())
+        {
+            event.setCanceled(true);
+            return;
+        }
 
         if(crosshair == null || crosshair.isDefault())
         {

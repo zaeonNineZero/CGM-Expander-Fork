@@ -183,8 +183,8 @@ public class GunRenderingHandler
             down = (!modifiedGun.getGeneral().getGripType().getHeldAnimation().canRenderOffhandItem() || ModSyncedDataKeys.RELOADING.getValue(mc.player));
         }
 
-        float direction = down ? -0.6F : 0.6F;
-        this.offhandTranslate = Mth.clamp(this.offhandTranslate + direction, -1.0F, 1.0F);
+        float direction = down ? -1.0F : 1.0F;
+        this.offhandTranslate = Mth.clamp(this.offhandTranslate + direction, -2.0F, 1.0F);
     }
 
     @SubscribeEvent
@@ -546,7 +546,8 @@ public class GunRenderingHandler
     {
         if(player.isUsingItem() && player.getOffhandItem().getItem() == Items.SHIELD && (modifiedGun.getGeneral().getGripType() == GripType.ONE_HANDED || modifiedGun.getGeneral().getGripType() == GripType.PISTOL_CUSTOM))
         {
-            double time = Mth.clamp((player.getTicksUsingItem() + partialTick), 0.0, 4.0) / 4.0;
+        	this.sprintCooldown = 1;
+        	double time = Mth.clamp((player.getTicksUsingItem() + partialTick), 0.0, 4.0) / 4.0;
             poseStack.translate(0, 0.35 * time, 0);
             poseStack.mulPose(Vector3f.XP.rotationDegrees(45F * (float) time));
         }
