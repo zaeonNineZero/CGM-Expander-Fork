@@ -42,7 +42,7 @@ public class SpreadTracker
                     spreadCount.increment();
 
                     /* Increases the spread count quicker if the player is not aiming down sight */
-                    if(spreadCount.getValue() < Config.COMMON.projectileSpread.maxCount.get() && !ModSyncedDataKeys.AIMING.getValue(player))
+                    if(spreadCount.getValue() < Config.COMMON.projectileSpread.maxCount.get() && !ModSyncedDataKeys.AIMING.getValue(player) && Config.COMMON.projectileSpread.doSpreadHipFirePenalty.get())
                     {
                         spreadCount.increment();
                     }

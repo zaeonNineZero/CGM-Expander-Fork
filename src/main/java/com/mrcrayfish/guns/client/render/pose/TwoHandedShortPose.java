@@ -32,8 +32,8 @@ public class TwoHandedShortPose extends WeaponPose
     protected AimPose getUpPose()
     {
         AimPose upPose = new AimPose();
-        upPose.getIdle().setRenderYawOffset(30F).setItemRotation(new Vector3f(60F, 0F, 10F)).setRightArm(new LimbPose().setRotationAngleX(-120F).setRotationAngleY(-40F).setRotationPointX(-5).setRotationPointY(3).setRotationPointZ(0)).setLeftArm(new LimbPose().setRotationAngleX(-135F).setRotationAngleY(30F).setRotationAngleZ(-25F).setRotationPointX(10).setRotationPointY(0).setRotationPointZ(-1));
-        upPose.getAiming().setRenderYawOffset(35F).setItemRotation(new Vector3f(40F, 0F, 30F)).setItemTranslate(new Vector3f(-1, 0, 0)).setRightArm(new LimbPose().setRotationAngleX(-140F).setRotationAngleY(-45F).setRotationPointX(-5).setRotationPointY(3).setRotationPointZ(0)).setLeftArm(new LimbPose().setRotationAngleX(-145F).setRotationAngleY(40F).setRotationAngleZ(-30F).setRotationPointX(10).setRotationPointY(-1).setRotationPointZ(0));
+        upPose.getIdle().setRenderYawOffset(30F).setItemRotation(new Vector3f(60F, 0F, 10F)).setRightArm(new LimbPose().setRotationAngleX(-120F).setRotationAngleY(-40F).setRotationPointX(-5).setRotationPointY(3).setRotationPointZ(0)).setLeftArm(new LimbPose().setRotationAngleX(-135F).setRotationAngleY(30F).setRotationAngleZ(-25F).setRotationPointX(-10).setRotationPointY(0).setRotationPointZ(-1));
+        upPose.getAiming().setRenderYawOffset(35F).setItemRotation(new Vector3f(40F, 0F, 30F)).setItemTranslate(new Vector3f(-1, 0, 0)).setRightArm(new LimbPose().setRotationAngleX(-140F).setRotationAngleY(-45F).setRotationPointX(-5).setRotationPointY(3).setRotationPointZ(0)).setLeftArm(new LimbPose().setRotationAngleX(-145F).setRotationAngleY(40F).setRotationAngleZ(-30F).setRotationPointX(-10).setRotationPointY(-1).setRotationPointZ(0));
         return upPose;
     }
 
