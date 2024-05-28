@@ -9,6 +9,7 @@ import com.mrcrayfish.guns.client.util.RenderUtil;
 import com.mrcrayfish.guns.common.GripType;
 import com.mrcrayfish.guns.common.Gun;
 import com.mrcrayfish.guns.common.Gun.Display.*;
+import com.mrcrayfish.guns.init.ModSyncedDataKeys;
 import com.mrcrayfish.guns.item.GunItem;
 
 import net.minecraft.client.Minecraft;
@@ -35,8 +36,8 @@ public class PistolCustomPose extends WeaponPose
     protected AimPose getUpPose()
     {
         AimPose upPose = new AimPose();
-        upPose.getIdle().setRenderYawOffset(15F).setItemRotation(new Vector3f(7.5F, 0F, 10F)).setItemTranslate(new Vector3f(0, 0, -0.7F)).setRightArm(new LimbPose().setRotationAngleX(-150F).setRotationAngleY(-20F).setRotationPointX(-5).setRotationPointY(3).setRotationPointZ(0)).setLeftArm(new LimbPose().setRotationAngleX(-150F).setRotationAngleY(65F).setRotationAngleZ(-40F).setRotationPointY(2.5F).setRotationPointZ(-1));
-        upPose.getAiming().setRenderYawOffset(15F).setItemRotation(new Vector3f(-12.5F, -5F, 20F)).setItemTranslate(new Vector3f(-1, 0, -0.8F)).setRightArm(new LimbPose().setRotationAngleX(-170F).setRotationAngleY(-25F).setRotationPointX(-5).setRotationPointY(3).setRotationPointZ(0)).setLeftArm(new LimbPose().setRotationAngleX(-160F).setRotationAngleY(65F).setRotationAngleZ(-45F).setRotationPointY(2.0F).setRotationPointZ(0));
+        upPose.getIdle().setRenderYawOffset(15F).setItemRotation(new Vector3f(7.5F, -5F, 15F)).setItemTranslate(new Vector3f(0, 0, -0.7F)).setRightArm(new LimbPose().setRotationAngleX(-150F).setRotationAngleY(-30F).setRotationPointX(-5).setRotationPointY(3).setRotationPointZ(0)).setLeftArm(new LimbPose().setRotationAngleX(-130F).setRotationAngleY(70F).setRotationAngleZ(-20F).setRotationPointX(1).setRotationPointY(0.0F).setRotationPointZ(-1));
+        upPose.getAiming().setRenderYawOffset(15F).setItemRotation(new Vector3f(-12.5F, -10F, 25F)).setItemTranslate(new Vector3f(-1, 0, -0.8F)).setRightArm(new LimbPose().setRotationAngleX(-170F).setRotationAngleY(-35F).setRotationPointX(-5).setRotationPointY(3).setRotationPointZ(0)).setLeftArm(new LimbPose().setRotationAngleX(-135F).setRotationAngleY(80F).setRotationAngleZ(-25F).setRotationPointX(10).setRotationPointY(0.0F).setRotationPointZ(-1));
         return upPose;
     }
 
@@ -44,8 +45,8 @@ public class PistolCustomPose extends WeaponPose
     protected AimPose getForwardPose()
     {
         AimPose forwardPose = new AimPose();
-        forwardPose.getIdle().setRenderYawOffset(15F).setItemRotation(new Vector3f(-7.5F, -13.5F, -5F)).setItemTranslate(new Vector3f(0.4F, 0, -1)).setRightArm(new LimbPose().setRotationAngleX(-75F).setRotationAngleY(-30F).setRotationAngleZ(0F).setRotationPointX(-5).setRotationPointY(2).setRotationPointZ(1)).setLeftArm(new LimbPose().setRotationAngleX(-49F).setRotationAngleY(45F).setRotationAngleZ(35F).setRotationPointY(2.3F).setRotationPointZ(-1));
-        forwardPose.getAiming().setRenderYawOffset(15F).setItemRotation(new Vector3f(-25F, -18F, -5.5F)).setItemTranslate(new Vector3f(0.4F, 0, -1)).setRightArm(new LimbPose().setRotationAngleX(-92F).setRotationAngleY(-35F).setRotationAngleZ(0F).setRotationPointX(-5).setRotationPointY(2)).setLeftArm(new LimbPose().setRotationAngleX(-81F).setRotationAngleY(42F).setRotationAngleZ(10F).setRotationPointY(2.2F).setRotationPointZ(0));
+        forwardPose.getIdle().setRenderYawOffset(15F).setItemRotation(new Vector3f(-7.5F, -13.5F, -5F)).setItemTranslate(new Vector3f(0.4F, 0, -1)).setRightArm(new LimbPose().setRotationAngleX(-75F).setRotationAngleY(-30F).setRotationAngleZ(0F).setRotationPointX(-5).setRotationPointY(2).setRotationPointZ(1)).setLeftArm(new LimbPose().setRotationAngleX(-61F).setRotationAngleY(45F).setRotationAngleZ(10F).setRotationPointY(2.0F).setRotationPointZ(-1));
+        forwardPose.getAiming().setRenderYawOffset(15F).setItemRotation(new Vector3f(-25F, -18F, -5.5F)).setItemTranslate(new Vector3f(0.4F, 0, -1)).setRightArm(new LimbPose().setRotationAngleX(-92F).setRotationAngleY(-35F).setRotationAngleZ(0F).setRotationPointX(-5).setRotationPointY(2)).setLeftArm(new LimbPose().setRotationAngleX(-81F).setRotationAngleY(42F).setRotationAngleZ(5F).setRotationPointY(1.9F).setRotationPointZ(0));
         return forwardPose;
     }
 
@@ -53,8 +54,8 @@ public class PistolCustomPose extends WeaponPose
     protected AimPose getDownPose()
     {
         AimPose downPose = new AimPose();
-        downPose.getIdle().setRenderYawOffset(15F).setItemRotation(new Vector3f(-37.5F, -2F, 0F)).setItemTranslate(new Vector3f(0, -0.5F, -1.5F)).setRightArm(new LimbPose().setRotationAngleX(-22F).setRotationAngleY(-30F).setRotationAngleZ(0F).setRotationPointX(-5).setRotationPointY(2)).setLeftArm(new LimbPose().setRotationAngleX(-14F).setRotationAngleY(-40F).setRotationAngleZ(70F).setRotationPointY(5).setRotationPointZ(0));
-        downPose.getAiming().setRenderYawOffset(15F).setItemRotation(new Vector3f(-42.5F, -2F, -10F)).setItemTranslate(new Vector3f(0, -0.5F, -1F)).setRightArm(new LimbPose().setRotationAngleX(-22F).setRotationAngleY(-30F).setRotationAngleZ(0F).setRotationPointX(-5).setRotationPointY(1)).setLeftArm(new LimbPose().setRotationAngleX(-14F).setRotationAngleY(-45F).setRotationAngleZ(80F).setRotationPointY(5).setRotationPointZ(0));
+        downPose.getIdle().setRenderYawOffset(15F).setItemRotation(new Vector3f(-37.5F, -2F, 0F)).setItemTranslate(new Vector3f(0, -0.5F, -1.5F)).setRightArm(new LimbPose().setRotationAngleX(-22F).setRotationAngleY(-30F).setRotationAngleZ(0F).setRotationPointX(-5).setRotationPointY(2)).setLeftArm(new LimbPose().setRotationAngleX(-20F).setRotationAngleY(45F).setRotationAngleZ(40F).setRotationPointY(2.5F).setRotationPointZ(0));
+        downPose.getAiming().setRenderYawOffset(15F).setItemRotation(new Vector3f(-42.5F, -2F, -10F)).setItemTranslate(new Vector3f(0, -0.5F, -1F)).setRightArm(new LimbPose().setRotationAngleX(-22F).setRotationAngleY(-30F).setRotationAngleZ(0F).setRotationPointX(-5).setRotationPointY(1)).setLeftArm(new LimbPose().setRotationAngleX(-20F).setRotationAngleY(50F).setRotationAngleZ(45F).setRotationPointY(2.5F).setRotationPointZ(0));
         return downPose;
     }
 
@@ -73,6 +74,10 @@ public class PistolCustomPose extends WeaponPose
             if(player.getUseItem().getItem() == Items.SHIELD)
             {
                 arm.xRot = (float) Math.toRadians(-30F);
+            }
+            if(player.isSprinting() || ModSyncedDataKeys.RELOADING.getValue(player))
+            {
+                arm.xRot = (float) Math.toRadians(-105F);
             }
         }
         else
@@ -222,4 +227,9 @@ public class PistolCustomPose extends WeaponPose
     {
         return 0.5;
     }
+
+	@Override
+	public boolean doRaiseWhenSprint() {
+		return true;
+	}
 }

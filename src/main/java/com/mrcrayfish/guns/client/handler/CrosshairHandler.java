@@ -130,11 +130,13 @@ public class CrosshairHandler
             return;
         }
         
-        if(mc.player.isSprinting())
+        /*if(mc.player.isSprinting())
         {
-            event.setCanceled(true);
+        	ItemStack heldItem = mc.player.getMainHandItem();
+        	if((heldItem.getItem() instanceof GunItem))
+        		event.setCanceled(true);
             return;
-        }
+        }*/
 
         if(crosshair == null || crosshair.isDefault())
         {

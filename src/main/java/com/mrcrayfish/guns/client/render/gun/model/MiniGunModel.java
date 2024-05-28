@@ -50,7 +50,7 @@ public class MiniGunModel implements IOverrideModel
         if(shooting)
         {
             if (rotationSpeed<maxSpinRate)
-        	rotationSpeed+=Math.min(maxSpinRate-rotationSpeed,Math.max(maxSpinRate/10F,15F-rotationSpeed));
+        	rotationSpeed+=Math.min(maxSpinRate-rotationSpeed,Math.max(maxSpinRate/5F,20F-rotationSpeed));
         }
         else
         {

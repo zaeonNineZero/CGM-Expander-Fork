@@ -125,6 +125,12 @@ public class GunRenderingHandler
         return this.renderingWeapon;
     }
 
+    @Nullable
+    public float getSprintTransition(float partialTicks)
+    {
+    	return (this.prevSprintTransition + (this.sprintTransition - this.prevSprintTransition) * partialTicks) / 5F;
+    }
+
     @SubscribeEvent
     public void onTick(TickEvent.ClientTickEvent event)
     {
@@ -568,8 +574,8 @@ public class GunRenderingHandler
         if(player == null)
             return;
 
-        if(Minecraft.getInstance().options.getCameraType() != CameraType.FIRST_PERSON)
-            return;
+        //if(Minecraft.getInstance().options.getCameraType() != CameraType.FIRST_PERSON)
+        //    return;
 
         ItemStack heldItem = player.getItemInHand(InteractionHand.MAIN_HAND);
         if(heldItem.isEmpty())
@@ -650,7 +656,8 @@ public class GunRenderingHandler
     {
     	if(!Config.CLIENT.display.displayAmmoCount.get())
     		return;
-    	
+
+        Player player = Minecraft.getInstance().player;
     	Gun gun = ((GunItem) heldItem.getItem()).getModifiedGun(heldItem);
         CompoundTag tagCompound = heldItem.getTag();
         if (Minecraft.getInstance().screen != null)
@@ -668,6 +675,8 @@ public class GunRenderingHandler
             if (Gun.hasInfiniteAmmo(heldItem))
             	ammoCountValue = (Component.literal("∞ / ∞").withStyle(ChatFormatting.BOLD));
             GuiComponent.drawString(poseStack, Minecraft.getInstance().font, ammoCountValue, ammoPosX, ammoPosY, (currentAmmo>0 ? 0xFFFFFF : 0xFF5555));
+            if (ModSyncedDataKeys.RELOADING.getValue(player))
+            	GuiComponent.drawString(poseStack, Minecraft.getInstance().font, "Reloading...", ammoPosX, ammoPosY-10, 0xFFFF55);
 
 	        /*int inventoryAmmo = ReloadTracker.getInventoryAmmo(Gun.findAmmo(Minecraft.getInstance().player, gun.getProjectile().getItem()));
             MutableComponent reserveAmmoValue = (Component.literal("( " + GunEnchantmentHelper.getAmmoCapacity(heldItem, gun) + " )").withStyle(ChatFormatting.BOLD));

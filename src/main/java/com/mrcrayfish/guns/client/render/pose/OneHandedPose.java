@@ -7,6 +7,7 @@ import com.mrcrayfish.guns.client.render.IHeldAnimation;
 import com.mrcrayfish.guns.client.util.RenderUtil;
 import com.mrcrayfish.guns.common.Gun;
 import com.mrcrayfish.guns.common.Gun.Display.RearHandPos;
+import com.mrcrayfish.guns.init.ModSyncedDataKeys;
 import com.mrcrayfish.guns.item.GunItem;
 
 import net.minecraft.client.Minecraft;
@@ -42,6 +43,10 @@ public class OneHandedPose implements IHeldAnimation
         if(player.getUseItem().getItem() == Items.SHIELD)
         {
             arm.xRot = (float) Math.toRadians(-30F);
+        }
+        if(player.isSprinting() || ModSyncedDataKeys.RELOADING.getValue(player))
+        {
+        	arm.xRot = (float) Math.toRadians(-105F);
         }
     }
 

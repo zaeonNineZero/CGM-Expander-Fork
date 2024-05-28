@@ -2,7 +2,11 @@ package com.mrcrayfish.guns.client.render.pose;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3f;
+import com.mrcrayfish.guns.client.handler.GunRenderingHandler;
+import com.mrcrayfish.guns.client.handler.ReloadHandler;
 import com.mrcrayfish.guns.client.render.IHeldAnimation;
+import com.mrcrayfish.guns.init.ModSyncedDataKeys;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -26,12 +30,14 @@ public abstract class WeaponPose implements IHeldAnimation
     private AimPose upPose;
     private AimPose forwardPose;
     private AimPose downPose;
+    private boolean raiseWhenSprint;
 
     public WeaponPose()
     {
         this.upPose = this.getUpPose();
         this.forwardPose = this.getForwardPose();
         this.downPose = this.getDownPose();
+        this.raiseWhenSprint = this.doRaiseWhenSprint();
     }
 
     /**
@@ -50,6 +56,13 @@ public abstract class WeaponPose implements IHeldAnimation
     protected abstract AimPose getDownPose();
 
     /**
+     * Gets the pose of the player when looking directly down
+     */
+    public boolean doRaiseWhenSprint() {
+		return false;
+	}
+
+    /**
      * If this weapon pose has an aim pose
      */
     protected boolean hasAimPose()
@@ -65,8 +78,11 @@ public abstract class WeaponPose implements IHeldAnimation
         boolean right = mc.options.mainHand().get() == HumanoidArm.RIGHT ? hand == InteractionHand.MAIN_HAND : hand == InteractionHand.OFF_HAND;
         ModelPart mainArm = right ? rightArm : leftArm;
         ModelPart secondaryArm = right ? leftArm : rightArm;
-
-        float angle = this.getPlayerPitch(player);
+        
+        float reloadProgress = (float) ReloadHandler.get().getReloadProgress(Minecraft.getInstance().getFrameTime());
+        float sprintTransition = (float) GunRenderingHandler.get().getSprintTransition(Minecraft.getInstance().getFrameTime());
+        float angle = Mth.lerp(sprintTransition, this.getPlayerPitch(player), (doRaiseWhenSprint() ? -0.3F : 0.5F));
+        angle = Mth.lerp(reloadProgress, angle, 0.1F);
         float angleAbs = Math.abs(angle);
         float zoom = this.hasAimPose() ? aimProgress : 0F;
         AimPose targetPose = angle > 0.0 ? this.downPose : this.upPose;
@@ -117,13 +133,19 @@ public abstract class WeaponPose implements IHeldAnimation
     public void applyPlayerPreRender(Player player, InteractionHand hand, float aimProgress, PoseStack poseStack, MultiBufferSource buffer)
     {
         boolean right = Minecraft.getInstance().options.mainHand().get() == HumanoidArm.RIGHT ? hand == InteractionHand.MAIN_HAND : hand == InteractionHand.OFF_HAND;
-        float angle = this.getPlayerPitch(player);
+        float reloadProgress = (float) ReloadHandler.get().getReloadProgress(Minecraft.getInstance().getFrameTime());
+        float sprintTransition = (float) GunRenderingHandler.get().getSprintTransition(Minecraft.getInstance().getFrameTime());
+        float angle = Mth.lerp(sprintTransition, this.getPlayerPitch(player), (doRaiseWhenSprint() ? -0.3F : 0.5F));
+        angle = Mth.lerp(reloadProgress, angle, 0.2F);
         float angleAbs = Math.abs(angle);
         float zoom = this.hasAimPose() ? aimProgress : 0F;
         AimPose targetPose = angle > 0.0 ? this.downPose : this.upPose;
         float rightOffset = this.getValue(targetPose.getIdle().getRenderYawOffset(), targetPose.getAiming().getRenderYawOffset(), this.forwardPose.getIdle().getRenderYawOffset(), this.forwardPose.getAiming().getRenderYawOffset(), 0F, angleAbs, zoom, right ? 1 : -1);
-        player.yBodyRotO = player.yRotO + rightOffset;
-        player.yBodyRot = player.getYRot() + rightOffset;
+        if (sprintTransition <= 0)
+        {
+        	player.yBodyRotO = player.yRotO + rightOffset;
+        	player.yBodyRot = player.getYRot() + rightOffset;
+        }
     }
 
     @Override
@@ -136,7 +158,10 @@ public abstract class WeaponPose implements IHeldAnimation
             float leftHanded = right ? 1 : -1;
             poseStack.translate(0, 0, 0.05);
 
-            float angle = this.getPlayerPitch(player);
+            float reloadProgress = (float) ReloadHandler.get().getReloadProgress(Minecraft.getInstance().getFrameTime());
+            float sprintTransition = (float) GunRenderingHandler.get().getSprintTransition(Minecraft.getInstance().getFrameTime());
+            float angle = Mth.lerp(sprintTransition, this.getPlayerPitch(player), 0.0F);
+            angle = Mth.lerp(reloadProgress, angle, -1.0F);
             float angleAbs = Math.abs(angle);
             float zoom = this.hasAimPose() ? aimProgress : 0F;
             AimPose targetPose = angle > 0.0 ? this.downPose : this.upPose;
