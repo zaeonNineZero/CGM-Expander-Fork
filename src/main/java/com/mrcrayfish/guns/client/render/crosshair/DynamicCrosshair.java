@@ -53,7 +53,7 @@ public class DynamicCrosshair extends Crosshair
         if (this.fireBloom > 0)
         {
         	float i = (float) Config.COMMON.projectileSpread.spreadThreshold.get()/50;
-        	this.fireBloom -= Math.min(4F/(Math.max(i,1)), this.fireBloom);
+        	this.fireBloom -= Math.min(5F/(Math.max(i,1)), this.fireBloom);
         }
     }
 
@@ -62,14 +62,14 @@ public class DynamicCrosshair extends Crosshair
     {
         this.prevScale = 0.0F;
         this.scale = 0.6F;
-        this.fireBloom = 4.0F;
+        this.fireBloom = 5.0F;
     }
 
     @Override
     public void render(Minecraft mc, PoseStack stack, int windowWidth, int windowHeight, float partialTicks)
     {
         float alpha = 1.0F;// - (float) AimingHandler.get().getNormalisedAdsProgress();
-        float size1 = 8F;
+        float size1 = 7F;
         float size2 = 1F;
         float spread = 0F;
         if (mc.player != null)
@@ -79,20 +79,21 @@ public class DynamicCrosshair extends Crosshair
             {
             	GunItem gun = (GunItem) heldItem.getItem();
             	Gun modifiedGun = gun.getModifiedGun(heldItem);
-            	float aiming = 1.0F - (float) AimingHandler.get().getNormalisedAdsProgress();
+            	float aiming = (float) AimingHandler.get().getNormalisedAdsProgress();
             	float spreadModifier = ((SpreadTracker.get(mc.player).getSpread(gun)+(1F/Math.max(Config.COMMON.projectileSpread.maxCount.get(),1F)))*Math.min(Mth.lerp(partialTicks, this.prevFireBloom, this.fireBloom),1F));
             	float baseSpread = GunCompositeStatHelper.getCompositeSpread(heldItem, modifiedGun);
             	float minSpread = GunCompositeStatHelper.getCompositeMinSpread(heldItem, modifiedGun);
             	minSpread = (modifiedGun.getGeneral().getRestingSpread() > 0F ? minSpread : (modifiedGun.getGeneral().isAlwaysSpread() ? baseSpread : 0));
-            	spread = Math.max(Mth.lerp(spreadModifier,minSpread,baseSpread)*(aiming * modifiedGun.getGeneral().getSpreadAdsReduction()),0F);
+            	float aimingSpreadMultiplier = (float) (Mth.lerp(aiming, 1.0F, 1.0F - modifiedGun.getGeneral().getSpreadAdsReduction()));
+            	spread = Math.max(Mth.lerp(spreadModifier,minSpread,baseSpread)*(aimingSpreadMultiplier),0F);
             }
         }
         
         float baseScale = 1F + Mth.lerp(partialTicks, this.prevScale, this.scale);
         float scale = baseScale + (spread*2);
-        float scaleSize = (scale/5F)+1F;
-        float crosshairBaseTightness = size1/2;
-        float spreadTranslateFactor = 4F;
+        float scaleSize = (scale/6F)+1F;
+        float crosshairBaseTightness = size1/4;
+        float spreadTranslateFactor = 2.5F;
 
         RenderSystem.enableBlend();
         RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.ONE_MINUS_DST_COLOR, GlStateManager.DestFactor.ONE_MINUS_SRC_COLOR, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
