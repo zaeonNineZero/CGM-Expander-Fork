@@ -26,12 +26,15 @@ public class SpreadTracker
     private static final Map<Player, SpreadTracker> TRACKER_MAP = new WeakHashMap<>();
 
     private final Map<GunItem, Pair<MutableLong, MutableInt>> SPREAD_TRACKER_MAP = new HashMap<>();
+    
+    private int sprintBaseSpread = (int) Math.ceil((float) Config.COMMON.projectileSpread.maxCount.get()/2F);
 
     public void update(Player player, GunItem item)
     {
         Pair<MutableLong, MutableInt> entry = SPREAD_TRACKER_MAP.computeIfAbsent(item, gun -> Pair.of(new MutableLong(-1), new MutableInt()));
         MutableLong lastFire = entry.getLeft();
         MutableInt spreadCount = entry.getRight();
+        sprintBaseSpread = (int) Math.ceil((float) Config.COMMON.projectileSpread.maxCount.get()/2F);
         if(lastFire.getValue() != -1)
         {
             long deltaTime = System.currentTimeMillis() - lastFire.getValue();
@@ -42,19 +45,38 @@ public class SpreadTracker
                     spreadCount.increment();
 
                     /* Increases the spread count quicker if the player is not aiming down sight */
-                    if(spreadCount.getValue() < Config.COMMON.projectileSpread.maxCount.get() && !ModSyncedDataKeys.AIMING.getValue(player) && Config.COMMON.projectileSpread.doSpreadHipFirePenalty.get())
+                    if(spreadCount.getValue() < Config.COMMON.projectileSpread.maxCount.get() && !ModSyncedDataKeys.AIMING.getValue(player) && (Config.COMMON.projectileSpread.doSpreadHipFirePenalty.get() || player.isSprinting()))
                     {
                         spreadCount.increment();
                     }
+                    /*  */
+                    if (player.isSprinting() && spreadCount.getValue() < sprintBaseSpread)
+                    spreadCount.setValue(sprintBaseSpread);
                 }
             }
             else
             {
             	if(!player.isSprinting())
             		spreadCount.setValue(0);
+            	else
+            	{
+                    if (player.isSprinting() && spreadCount.getValue() < sprintBaseSpread)
+                    spreadCount.setValue(sprintBaseSpread);
+            	}
             }
         }
         lastFire.setValue(System.currentTimeMillis());
+    }
+
+    public float getNextSpread(GunItem item, float aim)
+    {
+    	Pair<MutableLong, MutableInt> entry = SPREAD_TRACKER_MAP.get(item);
+        if(entry != null)
+        {
+            float nextSpread = (Config.COMMON.projectileSpread.doSpreadHipFirePenalty.get() ? 1F+aim : 1F);
+        	return ((float) entry.getRight().getValue()+nextSpread) / (float) Config.COMMON.projectileSpread.maxCount.get();
+        }
+        return 0F;
     }
 
     public float getSpread(GunItem item)

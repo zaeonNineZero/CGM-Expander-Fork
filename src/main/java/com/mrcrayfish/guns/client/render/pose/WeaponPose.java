@@ -79,7 +79,7 @@ public abstract class WeaponPose implements IHeldAnimation
         
         float reloadProgress = (float) ReloadHandler.get().getReloadProgress(Minecraft.getInstance().getFrameTime());
         float sprintTransition = (float) GunRenderingHandler.get().getSprintTransition(Minecraft.getInstance().getFrameTime());
-        float angle = Mth.lerp(sprintTransition, this.getPlayerPitch(player), (doRaiseWhenSprint() ? -0.3F : 0.3F));
+        float angle = Mth.lerp(sprintTransition, this.getPlayerPitch(player), (doRaiseWhenSprint() ? -0.4F : 0.3F));
         angle = Mth.lerp(reloadProgress, angle, 0.1F);
         float angleAbs = Math.abs(angle);
         float zoom = this.hasAimPose() ? aimProgress : 0F;
@@ -133,7 +133,7 @@ public abstract class WeaponPose implements IHeldAnimation
         boolean right = Minecraft.getInstance().options.mainHand().get() == HumanoidArm.RIGHT ? hand == InteractionHand.MAIN_HAND : hand == InteractionHand.OFF_HAND;
         float reloadProgress = (float) ReloadHandler.get().getReloadProgress(Minecraft.getInstance().getFrameTime());
         float sprintTransition = (float) GunRenderingHandler.get().getSprintTransition(Minecraft.getInstance().getFrameTime());
-        float angle = Mth.lerp(sprintTransition, this.getPlayerPitch(player), (doRaiseWhenSprint() ? -0.3F : 0.3F));
+        float angle = Mth.lerp(sprintTransition, this.getPlayerPitch(player), (doRaiseWhenSprint() ? -0.8F : 0.3F));
         angle = Mth.lerp(reloadProgress, angle, 0.2F);
         float angleAbs = Math.abs(angle);
         float zoom = this.hasAimPose() ? aimProgress : 0F;

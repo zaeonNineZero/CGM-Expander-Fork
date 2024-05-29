@@ -82,8 +82,8 @@ public class DynamicCrosshair extends Crosshair
             	Gun modifiedGun = gun.getModifiedGun(heldItem);
             	float aiming = (float) AimingHandler.get().getNormalisedAdsProgress();
                 float sprintTransition = (float) GunRenderingHandler.get().getSprintTransition(Minecraft.getInstance().getFrameTime());
-            	float spreadModifier = ((SpreadTracker.get(mc.player).getSpread(gun)+(1F/Math.max(Config.COMMON.projectileSpread.maxCount.get(),1F)))*Math.min(Mth.lerp(partialTicks, this.prevFireBloom, this.fireBloom),1F));
-            	spreadModifier = Math.min(spreadModifier+(Math.min(sprintTransition,0.5F)),1F);
+            	float spreadModifier = ((SpreadTracker.get(mc.player).getNextSpread(gun,aiming)+(1F/Math.max(Config.COMMON.projectileSpread.maxCount.get(),1F)))*Math.min(Mth.lerp(partialTicks, this.prevFireBloom, this.fireBloom),1F));
+            	spreadModifier = (float) (Mth.lerp(sprintTransition*0.5, spreadModifier, 1.0F));
             	float baseSpread = GunCompositeStatHelper.getCompositeSpread(heldItem, modifiedGun);
             	float minSpread = GunCompositeStatHelper.getCompositeMinSpread(heldItem, modifiedGun);
             	minSpread = (modifiedGun.getGeneral().getRestingSpread() > 0F ? minSpread : (modifiedGun.getGeneral().isAlwaysSpread() ? baseSpread : 0));
