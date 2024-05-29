@@ -27,43 +27,40 @@ public class SpreadTracker
 
     private final Map<GunItem, Pair<MutableLong, MutableInt>> SPREAD_TRACKER_MAP = new HashMap<>();
     
-    private int sprintBaseSpread = (int) Math.ceil((float) Config.COMMON.projectileSpread.maxCount.get()/2F);
+    private int sprintBaseSpread;
 
     public void update(Player player, GunItem item)
     {
         Pair<MutableLong, MutableInt> entry = SPREAD_TRACKER_MAP.computeIfAbsent(item, gun -> Pair.of(new MutableLong(-1), new MutableInt()));
         MutableLong lastFire = entry.getLeft();
         MutableInt spreadCount = entry.getRight();
-        sprintBaseSpread = (int) Math.ceil((float) Config.COMMON.projectileSpread.maxCount.get()/2F);
+        sprintBaseSpread = (int) Math.floor((float) Config.COMMON.projectileSpread.maxCount.get()/2F);
         if(lastFire.getValue() != -1)
         {
             long deltaTime = System.currentTimeMillis() - lastFire.getValue();
-            if(deltaTime < Config.COMMON.projectileSpread.spreadThreshold.get() || player.isSprinting())
+            if(deltaTime < Config.COMMON.projectileSpread.spreadThreshold.get())
             {
                 if(spreadCount.getValue() < Config.COMMON.projectileSpread.maxCount.get())
                 {
                     spreadCount.increment();
 
-                    /* Increases the spread count quicker if the player is not aiming down sight */
-                    if(spreadCount.getValue() < Config.COMMON.projectileSpread.maxCount.get() && !ModSyncedDataKeys.AIMING.getValue(player) && (Config.COMMON.projectileSpread.doSpreadHipFirePenalty.get() || player.isSprinting()))
+                    /* Increases the spread count quicker if the player is not aiming down sight - can be disabled in the config */
+                    if(spreadCount.getValue() < Config.COMMON.projectileSpread.maxCount.get() && !ModSyncedDataKeys.AIMING.getValue(player) && (Config.COMMON.projectileSpread.doSpreadHipFirePenalty.get()))
                     {
                         spreadCount.increment();
                     }
-                    /*  */
-                    if (player.isSprinting() && spreadCount.getValue() < sprintBaseSpread)
-                    spreadCount.setValue(sprintBaseSpread);
                 }
             }
             else
             {
-            	if(!player.isSprinting())
-            		spreadCount.setValue(0);
-            	else
-            	{
-                    if (player.isSprinting() && spreadCount.getValue() < sprintBaseSpread)
-                    spreadCount.setValue(sprintBaseSpread);
-            	}
+            	spreadCount.setValue(0);
             }
+    		/* Spread is always at least ~50% when sprinting */
+        	if(player.isSprinting())
+        	{
+                if (spreadCount.getValue() < sprintBaseSpread)
+                spreadCount.setValue(sprintBaseSpread);
+        	}
         }
         lastFire.setValue(System.currentTimeMillis());
     }
