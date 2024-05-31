@@ -158,13 +158,13 @@ public class ProjectileExplosion extends Explosion
 
             double blockDensity = (double) getSeenPercent(explosionPos, entity);
             double rawDamage = (1.0D - strength) * blockDensity;
-            double damage = Math.min( ((rawDamage * rawDamage + rawDamage) / 2.0D)*(projectileDamage*2) + 1.0D, projectileDamage);
+            double damage = Math.min( ((rawDamage * rawDamage + rawDamage) / 2.0D)*(projectileDamage*2.3) + 1.0D, projectileDamage);
             entity.hurt(this.getDamageSource(), (float) damage);
 
-            double blastDamage = damage;
+            double blastDamage = rawDamage;
             if(entity instanceof LivingEntity)
             {
-                blastDamage = ProtectionEnchantment.getExplosionKnockbackAfterDampener((LivingEntity) entity, damage);
+                blastDamage = ProtectionEnchantment.getExplosionKnockbackAfterDampener((LivingEntity) entity, rawDamage);
             }
             entity.setDeltaMovement(entity.getDeltaMovement().add(deltaX * blastDamage, deltaY * blastDamage, deltaZ * blastDamage));
 
@@ -172,7 +172,7 @@ public class ProjectileExplosion extends Explosion
             {
                 if(!player.isSpectator() && (!player.isCreative() || !player.getAbilities().flying))
                 {
-                    this.getHitPlayers().put(player, new Vec3(deltaX * damage, deltaY * damage, deltaZ * damage));
+                    this.getHitPlayers().put(player, new Vec3(deltaX * rawDamage, deltaY * rawDamage, deltaZ * rawDamage));
                 }
             }
         }
