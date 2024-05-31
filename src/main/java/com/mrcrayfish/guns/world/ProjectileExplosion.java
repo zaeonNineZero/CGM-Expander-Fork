@@ -34,6 +34,7 @@ public class ProjectileExplosion extends Explosion
     private final double y;
     private final double z;
     private final float size;
+    private final float projectileDamage;
     private final Entity exploder;
     private final ExplosionDamageCalculator context;
 
@@ -45,6 +46,20 @@ public class ProjectileExplosion extends Explosion
         this.y = y;
         this.z = z;
         this.size = size;
+		this.projectileDamage = size*5;
+        this.exploder = exploder;
+        this.context = context == null ? DEFAULT_CONTEXT : context;
+    }
+
+    public ProjectileExplosion(Level world, Entity exploder, @Nullable DamageSource source, @Nullable ExplosionDamageCalculator context, double x, double y, double z, float size, boolean causesFire, BlockInteraction mode, float projectileDamage)
+    {
+        super(world, exploder, source, context, x, y, z, size, causesFire, mode);
+        this.world = world;
+        this.x = x;
+        this.y = y;
+        this.z = z;
+        this.size = size;
+        this.projectileDamage = projectileDamage;
         this.exploder = exploder;
         this.context = context == null ? DEFAULT_CONTEXT : context;
     }
@@ -142,8 +157,9 @@ public class ProjectileExplosion extends Explosion
             }
 
             double blockDensity = (double) getSeenPercent(explosionPos, entity);
-            double damage = (1.0D - strength) * blockDensity;
-            entity.hurt(this.getDamageSource(), (float) ((int) ((damage * damage + damage) / 2.0D * 7.0D * (double) radius + 1.0D)));
+            double rawDamage = (1.0D - strength) * blockDensity;
+            double damage = Math.min( ((rawDamage * rawDamage + rawDamage) / 2.0D)*(projectileDamage*2) + 1.0D, projectileDamage);
+            entity.hurt(this.getDamageSource(), (float) damage);
 
             double blastDamage = damage;
             if(entity instanceof LivingEntity)

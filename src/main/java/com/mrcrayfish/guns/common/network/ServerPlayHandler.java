@@ -200,7 +200,7 @@ public class ServerPlayHandler
 
                 player.awardStat(Stats.ITEM_USED.get(item));
                 
-                player.setSprinting(false); //*NEW* Stop sprinting when shooting.
+                //player.setSprinting(false); //*NEW* Stop sprinting when shooting.
             }
         }
         else

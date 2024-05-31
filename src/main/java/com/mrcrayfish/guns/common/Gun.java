@@ -622,6 +622,8 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         private boolean visible;
         private float damage;
         @Optional
+        private float maxRangeDamageMultiplier = 0;
+        @Optional
         private float headshotExtraDamage = 0;
         @Optional
         private float headshotMultiplierBonus = 0;
@@ -659,6 +661,7 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             else tag.putString("ProjectileOverride", "null");
             tag.putBoolean("Visible", this.visible);
             tag.putFloat("Damage", this.damage);
+            tag.putFloat("MaxRangeDamageMultiplier", this.maxRangeDamageMultiplier);
             tag.putFloat("HeadshotExtraDamage", this.headshotExtraDamage);
             tag.putFloat("HeadshotMultiplierBonus", this.headshotMultiplierBonus);
             tag.putFloat("HeadshotMultiplierMin", this.headshotMultiplierMin);
@@ -697,6 +700,10 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             if(tag.contains("Damage", Tag.TAG_ANY_NUMERIC))
             {
                 this.damage = tag.getFloat("Damage");
+            }
+            if(tag.contains("MaxRangeDamageMultiplier", Tag.TAG_ANY_NUMERIC))
+            {
+                this.maxRangeDamageMultiplier = tag.getFloat("MaxRangeDamageMultiplier");
             }
             if(tag.contains("HeadshotExtraDamage", Tag.TAG_ANY_NUMERIC))
             {
@@ -751,6 +758,7 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         public JsonObject toJsonObject()
         {
             Preconditions.checkArgument(this.damage >= 0.0F, "Damage must be more than or equal to zero");
+            Preconditions.checkArgument(this.maxRangeDamageMultiplier >= 0.0F, "Damage Multiplier at Max Range must be more than or equal to zero");
             Preconditions.checkArgument(this.size >= 0.0F, "Projectile size must be more than or equal to zero");
             Preconditions.checkArgument(this.speed >= 0.0, "Projectile speed must be more than or equal to zero");
             Preconditions.checkArgument(this.life > 0, "Projectile life must be more than zero");
@@ -785,6 +793,7 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             projectile.projectileOverride = this.projectileOverride;
             projectile.visible = this.visible;
             projectile.damage = this.damage;
+            projectile.maxRangeDamageMultiplier = this.maxRangeDamageMultiplier;
             projectile.headshotExtraDamage = this.headshotExtraDamage;
             projectile.headshotMultiplierBonus = this.headshotMultiplierBonus;
             projectile.headshotMultiplierMin = this.headshotMultiplierMin;
@@ -843,6 +852,16 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         public float getDamage()
         {
             return this.damage;
+        }
+
+        /**
+         * @return The projectile's damage at the end of its life.
+         * This allows for decreasing (or increasing) the projectile's damage output the further it travels.
+         * Requires DamageReduceOverLife for values below 1, and DamageIncreaseOverLife for values above 1.
+         */
+        public float getMaxRangeDamageMultiplier()
+        {
+            return this.maxRangeDamageMultiplier;
         }
 
         /**

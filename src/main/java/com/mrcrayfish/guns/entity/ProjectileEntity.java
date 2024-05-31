@@ -651,11 +651,20 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
     public float getDamage()
     {
         float initialDamage = (this.projectile.getDamage() + this.additionalDamage);
-        if(this.projectile.isDamageReduceOverLife())
+        float maxRangeDamageMultiplier = this.projectile.getMaxRangeDamageMultiplier();
+        if(this.projectile.isDamageReduceOverLife() && maxRangeDamageMultiplier > 1)
         {
             float modifier = ((float) this.projectile.getLife() - (float) (this.tickCount - 1)) / (float) this.projectile.getLife();
-            initialDamage *= Math.min(modifier, 1);
+            float finalModifier = Mth.lerp(modifier, maxRangeDamageMultiplier, 1);
+            initialDamage *= Math.min(finalModifier, 1);
         }
+        /*else
+        if(this.projectile.isDamageIncreaseOverLife() && maxRangeDamageMultiplier > 1)
+        {
+            float modifier = ((float) this.projectile.getLife() - (float) (this.tickCount - 1)) / (float) this.projectile.getLife();
+            float finalModifier = Mth.lerp(modifier, 1, maxRangeDamageMultiplier);
+            initialDamage *= Math.max(finalModifier, 1);
+        }*/
         float damage = initialDamage / this.general.getProjectileAmount();
         damage = GunModifierHelper.getModifiedDamage(this.weapon, this.modifiedGun, damage);
         damage = GunEnchantmentHelper.getAcceleratorDamage(this.weapon, damage);
@@ -808,7 +817,7 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
      * Creates a projectile explosion for the specified entity.
      *
      * @param entity The entity to explode
-     * @param radius The amount of radius the entity should deal
+     * @param radius The size of the explosion caused by this entity
      * @param forceNone If true, forces the explosion mode to be NONE instead of config value
      */
     public static void createExplosion(Entity entity, float radius, boolean forceNone)
@@ -817,9 +826,12 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
         if(world.isClientSide())
             return;
 
-        DamageSource source = entity instanceof ProjectileEntity projectile ? DamageSource.explosion(projectile.getShooter()) : null;
+        boolean isProjectile = entity instanceof ProjectileEntity projectile ? true : false;
+        DamageSource source = isProjectile ? DamageSource.explosion(((ProjectileEntity) entity).getShooter()) : null;
+        boolean hasGunProjectile = isProjectile ? (((ProjectileEntity) entity).getProjectile()!=null) : false;
+        float projectileDamage = (hasGunProjectile ? ((ProjectileEntity) entity).getDamage() : 20F );
         Explosion.BlockInteraction mode = Config.COMMON.gameplay.griefing.enableBlockRemovalOnExplosions.get() && !forceNone ? Explosion.BlockInteraction.BREAK : Explosion.BlockInteraction.NONE;
-        Explosion explosion = new ProjectileExplosion(world, entity, source, null, entity.getX(), entity.getY(), entity.getZ(), radius, false, mode);
+        Explosion explosion = new ProjectileExplosion(world, entity, source, null, entity.getX(), entity.getY(), entity.getZ(), radius, false, mode, projectileDamage);
 
         if(net.minecraftforge.event.ForgeEventFactory.onExplosionStart(world, explosion))
             return;
