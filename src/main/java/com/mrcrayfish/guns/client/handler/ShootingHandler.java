@@ -45,9 +45,8 @@ public class ShootingHandler
     }
 
     private boolean shooting;
-    private boolean tempBurstCooldown = false;
 
-    private int slot = 0;
+    private int slot = -1;
 
     private ShootingHandler() {}
 
@@ -272,9 +271,6 @@ public class ShootingHandler
             	// When there are shots remaining in burst:
             	if (ModSyncedDataKeys.BURSTCOUNT.getValue(player)>0)
             	ModSyncedDataKeys.BURSTCOUNT.setValue(player, ModSyncedDataKeys.BURSTCOUNT.getValue(player)-1);
-
-            	if (ModSyncedDataKeys.BURSTCOUNT.getValue(player)<=0)
-            	tempBurstCooldown=true;
             }
             PacketHandler.getPlayChannel().sendToServer(new C2SMessageShoot(player));
 
@@ -284,6 +280,8 @@ public class ShootingHandler
     
     private boolean isSameWeapon(Player player)
     {
-        return player.getInventory().selected == slot;
+        if (slot==-1)
+        	return true;
+    	return player.getInventory().selected == slot;
     }
 }

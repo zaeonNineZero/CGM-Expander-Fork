@@ -47,7 +47,7 @@ public class BurstTracker
 
     private BurstTracker(Player player)
     {
-        this.burstTick = player.tickCount;
+        this.burstTick = player.tickCount-20;
         this.slot = player.getInventory().selected;
         this.stack = player.getInventory().getSelected();
         this.gun = ((GunItem) stack.getItem()).getModifiedGun(stack);
@@ -88,48 +88,50 @@ public class BurstTracker
                 if(!(player.getInventory().getSelected().getItem() instanceof GunItem))
                 {
                 	ModSyncedDataKeys.BURSTCOUNT.setValue(player, 0);
+                    ModSyncedDataKeys.ONBURSTCOOLDOWN.setValue(player, false);
                     return;
                 }
                 BURST_TRACKER_MAP.put(player, new BurstTracker(player));
             }
             BurstTracker tracker = BURST_TRACKER_MAP.get(player);
-            	boolean resetBurst = false;
+           	boolean resetBurst = false;
             
-            	if(player.getInventory().getSelected().getItem() instanceof GunItem)
-            	{
-            		GunItem gunItem = (GunItem) tracker.stack.getItem();
-            		Gun modifiedGun = gunItem.getModifiedGun(tracker.stack);
-            		if (ModSyncedDataKeys.SHOOTING.getValue(player) && modifiedGun.getGeneral().hasBurstFire())
-                	{
-                    	tracker.burstTick = player.tickCount;
-                	}
+          	if(player.getInventory().getSelected().getItem() instanceof GunItem)
+            {
+            	GunItem gunItem = (GunItem) tracker.stack.getItem();
+            	Gun modifiedGun = gunItem.getModifiedGun(tracker.stack);
+            	if (ModSyncedDataKeys.SHOOTING.getValue(player) && modifiedGun.getGeneral().hasBurstFire())
+                {
+                   	tracker.burstTick = player.tickCount;
+                }
             		
-                	if (tracker.isSameWeapon(player))
-            		{
-                		if (!ModSyncedDataKeys.SHOOTING.getValue(player))
-                		{
-                			boolean onCooldown = tracker.getDeltaTicks(player) < tracker.getBurstDelayTicks(player);
-                			if (!onCooldown)
-                            ModSyncedDataKeys.ONBURSTCOOLDOWN.setValue(player, false);
-                    	}
-                		else
-                		ModSyncedDataKeys.ONBURSTCOOLDOWN.setValue(player, true);
-            		}
-            		else
-            		resetBurst = true;
+                if (tracker.isSameWeapon(player))
+            	{
+                	if (!ModSyncedDataKeys.SHOOTING.getValue(player))
+                	{
+                		boolean onCooldown = tracker.getDeltaTicks(player) < tracker.getBurstDelayTicks(player);
+                		if (!onCooldown)
+                		ModSyncedDataKeys.ONBURSTCOOLDOWN.setValue(player, false);
+                    }
+                	else
+                	if (modifiedGun.getGeneral().hasBurstFire())
+                	ModSyncedDataKeys.ONBURSTCOOLDOWN.setValue(player, true);
             	}
             	else
             	resetBurst = true;
+            }
+        	else
+         	resetBurst = true;
             	
-            	if (resetBurst)
+          	if (resetBurst)
+        	{
+                ModSyncedDataKeys.BURSTCOUNT.setValue(player, 0);
+                if(BURST_TRACKER_MAP.containsKey(player))
                 {
-                    ModSyncedDataKeys.BURSTCOUNT.setValue(player, 0);
-                	if(BURST_TRACKER_MAP.containsKey(player))
-                    {
-                		BURST_TRACKER_MAP.remove(player);
-                    }
-                	return;
-                }
+                	BURST_TRACKER_MAP.remove(player);
+              	}
+              	return;
+        	}
         }
     }
 
