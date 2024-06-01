@@ -110,6 +110,8 @@ public class GunMod
         {
             PacketHandler.init();
             FrameworkAPI.registerSyncedDataKey(ModSyncedDataKeys.AIMING);
+            FrameworkAPI.registerSyncedDataKey(ModSyncedDataKeys.BURSTCOUNT);
+            FrameworkAPI.registerSyncedDataKey(ModSyncedDataKeys.ONBURSTCOOLDOWN);
             FrameworkAPI.registerSyncedDataKey(ModSyncedDataKeys.RAMPUPSHOT);
             FrameworkAPI.registerSyncedDataKey(ModSyncedDataKeys.RELOADING);
             FrameworkAPI.registerSyncedDataKey(ModSyncedDataKeys.SHOOTING);

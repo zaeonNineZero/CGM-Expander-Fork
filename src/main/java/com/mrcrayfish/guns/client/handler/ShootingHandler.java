@@ -13,6 +13,7 @@ import com.mrcrayfish.guns.network.PacketHandler;
 import com.mrcrayfish.guns.network.message.C2SMessageReload;
 import com.mrcrayfish.guns.network.message.C2SMessageShoot;
 import com.mrcrayfish.guns.network.message.C2SMessageShooting;
+import com.mrcrayfish.guns.util.GunCompositeStatHelper;
 import com.mrcrayfish.guns.util.GunEnchantmentHelper;
 import com.mrcrayfish.guns.util.GunModifierHelper;
 import net.minecraft.client.Minecraft;
@@ -44,6 +45,9 @@ public class ShootingHandler
     }
 
     private boolean shooting;
+    private boolean tempBurstCooldown = false;
+
+    private int slot = 0;
 
     private ShootingHandler() {}
 
@@ -127,7 +131,8 @@ public class ShootingHandler
             ItemStack heldItem = player.getMainHandItem();
             if(heldItem.getItem() instanceof GunItem && (Gun.hasAmmo(heldItem) || player.isCreative()) && !PlayerReviveHelper.isBleeding(player))
             {
-                boolean shooting = KeyBinds.getShootMapping().isDown();
+                Gun gun = ((GunItem) heldItem.getItem()).getModifiedGun(heldItem);
+                boolean shooting = (KeyBinds.getShootMapping().isDown() && !ModSyncedDataKeys.ONBURSTCOOLDOWN.getValue(player)) || (ModSyncedDataKeys.BURSTCOUNT.getValue(player)>0 && gun.getGeneral().hasBurstFire());
                 if(GunMod.controllableLoaded)
                 {
                     shooting |= ControllerHandler.isShooting();
@@ -174,19 +179,27 @@ public class ShootingHandler
             if(PlayerReviveHelper.isBleeding(player))
                 return;
 
+            if (!isSameWeapon(player))
+            ModSyncedDataKeys.SWITCHTIME.setValue(player, 1);
+            
             ItemStack heldItem = player.getMainHandItem();
             if(heldItem.getItem() instanceof GunItem)
             {
-                if(KeyBinds.getShootMapping().isDown())
+            	Gun gun = ((GunItem) heldItem.getItem()).getModifiedGun(heldItem);
+            	
+            	if(KeyBinds.getShootMapping().isDown() || (ModSyncedDataKeys.BURSTCOUNT.getValue(player)>0 && gun.getGeneral().hasBurstFire()))
                 {
-                    Gun gun = ((GunItem) heldItem.getItem()).getModifiedGun(heldItem);
                     this.fire(player, heldItem);
-                    if(!gun.getGeneral().isAuto())
+                    boolean doAutoFire = (gun.getGeneral().isAuto());
+                    if(!doAutoFire)
                     {
                     	KeyBinds.getShootMapping().setDown(false);
                     }
                 }
             }
+            
+            // Update stack and slot variables
+            slot = player.getInventory().selected;
         }
     }
 
@@ -219,6 +232,13 @@ public class ShootingHandler
         {
         	return;
         }
+        
+        if(ModSyncedDataKeys.ONBURSTCOOLDOWN.getValue(player)) //*NEW* Disallow firing during the burst cooldown period.
+        {
+        	GunItem gunItem = (GunItem) heldItem.getItem();
+        	if (gunItem.getModifiedGun(heldItem).getGeneral().hasBurstFire() && ModSyncedDataKeys.BURSTCOUNT.getValue(player)<=0)
+        	return;
+        }
 
         if(player.getUseItem().getItem() == Items.SHIELD)
             return;
@@ -232,14 +252,35 @@ public class ShootingHandler
             if(MinecraftForge.EVENT_BUS.post(new GunFireEvent.Pre(player, heldItem)))
                 return;
 
-            int rate = GunEnchantmentHelper.getRate(heldItem, modifiedGun);
+            /*int rate = GunEnchantmentHelper.getRate(heldItem, modifiedGun);
             rate = GunModifierHelper.getModifiedRate(heldItem, rate);
-            rate = GunEnchantmentHelper.getRampUpRate(player, heldItem, rate);
+            rate = GunEnchantmentHelper.getRampUpRate(player, heldItem, rate);*/
+            int rate = GunCompositeStatHelper.getCompositeRate(heldItem,modifiedGun,player);
             tracker.addCooldown(heldItem.getItem(), rate);
             ModSyncedDataKeys.RAMPUPSHOT.setValue(player, ModSyncedDataKeys.RAMPUPSHOT.getValue(player)+1);
+            
+            int gunBurstCount = modifiedGun.getGeneral().getBurstCount();
+            if (gunBurstCount > 0)
+            {
+                // Burst has not begun yet:
+            	if (ModSyncedDataKeys.BURSTCOUNT.getValue(player)<=0)
+            	ModSyncedDataKeys.BURSTCOUNT.setValue(player, gunBurstCount-1);
+            	else
+            	// When there are shots remaining in burst:
+            	if (ModSyncedDataKeys.BURSTCOUNT.getValue(player)>0)
+            	ModSyncedDataKeys.BURSTCOUNT.setValue(player, ModSyncedDataKeys.BURSTCOUNT.getValue(player)-1);
+
+            	if (ModSyncedDataKeys.BURSTCOUNT.getValue(player)<=0)
+            	tempBurstCooldown=true;
+            }
             PacketHandler.getPlayChannel().sendToServer(new C2SMessageShoot(player));
 
             MinecraftForge.EVENT_BUS.post(new GunFireEvent.Post(player, heldItem));
         }
+    }
+    
+    private boolean isSameWeapon(Player player)
+    {
+        return player.getInventory().selected == slot;
     }
 }

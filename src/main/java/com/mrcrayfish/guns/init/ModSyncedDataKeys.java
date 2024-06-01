@@ -19,9 +19,21 @@ public class ModSyncedDataKeys
             .resetOnDeath()
             .build();
 
-    public static final SyncedDataKey<Player, Boolean> SHOOTING = SyncedDataKey.builder(SyncedClassKey.PLAYER, Serializers.BOOLEAN)
-            .id(new ResourceLocation(Reference.MOD_ID, "shooting"))
+    public static final SyncedDataKey<Player, Integer> BURSTCOUNT = SyncedDataKey.builder(SyncedClassKey.PLAYER, Serializers.INTEGER)
+            .id(new ResourceLocation(Reference.MOD_ID, "burstcount"))
+            .defaultValueSupplier(() -> 0)
+            .resetOnDeath()
+            .build();
+
+    public static final SyncedDataKey<Player, Boolean> ONBURSTCOOLDOWN = SyncedDataKey.builder(SyncedClassKey.PLAYER, Serializers.BOOLEAN)
+            .id(new ResourceLocation(Reference.MOD_ID, "onburstcooldown"))
             .defaultValueSupplier(() -> false)
+            .resetOnDeath()
+            .build();
+
+    public static final SyncedDataKey<Player, Integer> RAMPUPSHOT = SyncedDataKey.builder(SyncedClassKey.PLAYER, Serializers.INTEGER)
+            .id(new ResourceLocation(Reference.MOD_ID, "rampupshot"))
+            .defaultValueSupplier(() -> 0)
             .resetOnDeath()
             .build();
 
@@ -31,14 +43,14 @@ public class ModSyncedDataKeys
             .resetOnDeath()
             .build();
 
-    public static final SyncedDataKey<Player, Integer> SWITCHTIME = SyncedDataKey.builder(SyncedClassKey.PLAYER, Serializers.INTEGER)
-            .id(new ResourceLocation(Reference.MOD_ID, "switchtime"))
-            .defaultValueSupplier(() -> 0)
+    public static final SyncedDataKey<Player, Boolean> SHOOTING = SyncedDataKey.builder(SyncedClassKey.PLAYER, Serializers.BOOLEAN)
+            .id(new ResourceLocation(Reference.MOD_ID, "shooting"))
+            .defaultValueSupplier(() -> false)
             .resetOnDeath()
             .build();
 
-    public static final SyncedDataKey<Player, Integer> RAMPUPSHOT = SyncedDataKey.builder(SyncedClassKey.PLAYER, Serializers.INTEGER)
-            .id(new ResourceLocation(Reference.MOD_ID, "rampupshot"))
+    public static final SyncedDataKey<Player, Integer> SWITCHTIME = SyncedDataKey.builder(SyncedClassKey.PLAYER, Serializers.INTEGER)
+            .id(new ResourceLocation(Reference.MOD_ID, "switchtime"))
             .defaultValueSupplier(() -> 0)
             .resetOnDeath()
             .build();

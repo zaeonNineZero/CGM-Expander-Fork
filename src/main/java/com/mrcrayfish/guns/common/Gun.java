@@ -106,6 +106,10 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         @Optional
         private boolean auto = false;
         private int rate;
+        @Optional
+        private int burstCount = 0;
+        @Optional
+        private int burstCooldown = 1;
         @Ignored
         private GripType gripType = GripType.ONE_HANDED;
         private int maxAmmo;
@@ -162,6 +166,8 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             CompoundTag tag = new CompoundTag();
             tag.putBoolean("Auto", this.auto);
             tag.putInt("Rate", this.rate);
+            tag.putInt("BurstCount", this.burstCount);
+            tag.putInt("BurstCooldown", this.burstCooldown);
             tag.putString("GripType", this.gripType.getId().toString());
             tag.putInt("MaxAmmo", this.maxAmmo);
             tag.putInt("OverCapacityAmmo", this.overCapacityAmmo);
@@ -200,6 +206,14 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             if(tag.contains("Rate", Tag.TAG_ANY_NUMERIC))
             {
                 this.rate = tag.getInt("Rate");
+            }
+            if(tag.contains("BurstCount", Tag.TAG_ANY_NUMERIC))
+            {
+                this.burstCount = tag.getInt("BurstCount");
+            }
+            if(tag.contains("BurstCooldown", Tag.TAG_ANY_NUMERIC))
+            {
+                this.burstCooldown = tag.getInt("BurstCooldown");
             }
             if(tag.contains("GripType", Tag.TAG_STRING))
             {
@@ -307,6 +321,8 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         {
             Preconditions.checkArgument(this.rate > 0, "Rate must be more than zero");
             Preconditions.checkArgument(this.maxAmmo > 0, "Max ammo must be more than zero");
+            Preconditions.checkArgument(this.burstCount >= 0, "Burst count cannot be negative; set to zero to disable bursts");
+            Preconditions.checkArgument(this.burstCooldown >= 0, "Burst cooldown cannot be negative; set to zero to disable the cooldown");
             Preconditions.checkArgument(this.overCapacityAmmo > 0, "Over Capacity bonus ammo must be more than zero");
             Preconditions.checkArgument(this.reloadAmount >= 1, "Reload amount must be more than or equal to one");
             Preconditions.checkArgument(this.itemsPerAmmo >= 1, "Items Per Ammo must be more than or equal to one");
@@ -362,6 +378,8 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             General general = new General();
             general.auto = this.auto;
             general.rate = this.rate;
+            general.burstCount = this.burstCount;
+            general.burstCooldown = this.burstCooldown;
             general.gripType = this.gripType;
             general.maxAmmo = this.maxAmmo;
             general.overCapacityAmmo = this.overCapacityAmmo;
@@ -404,6 +422,29 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         public int getRate()
         {
             return this.rate;
+        }
+
+        /**
+         * @return If the gun fires in bursts or not
+         */
+		public boolean hasBurstFire() {
+			return this.burstCount > 0;
+		}
+
+        /**
+         * @return How many shots per burst this gun has
+         */
+        public int getBurstCount()
+        {
+            return this.burstCount;
+        }
+
+        /**
+         * @return The extra cooldown period after a burst finishes, in ticks
+         */
+        public int getBurstCooldown()
+        {
+            return this.burstCooldown;
         }
 
         /**
@@ -2146,6 +2187,18 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         public Builder setFireRate(int rate)
         {
             this.gun.general.rate = rate;
+            return this;
+        }
+
+        public Builder setBurstCount(int burstCount)
+        {
+            this.gun.general.burstCount = burstCount;
+            return this;
+        }
+
+        public Builder setBurstCooldown(int burstCooldown)
+        {
+            this.gun.general.burstCooldown = burstCooldown;
             return this;
         }
 

@@ -198,12 +198,6 @@ public class ReloadTracker
             Player player = event.player;
             // Reload logic
             attemptReload(player);
-            
-            /*//Reload and weapon switch cooldown logic
-            int switch_cooldown = ModSyncedDataKeys.SWITCHTIME.getValue(player);
-            if (switch_cooldown > 0)
-            switch_cooldown--;
-            ModSyncedDataKeys.SWITCHTIME.setValue(player, switch_cooldown);*/
         }
     }
 

@@ -11,24 +11,38 @@ import java.lang.reflect.Method;
  */
 public class ShoulderSurfingHelper
 {
-    private static boolean disable = false;
+    private static boolean disable1 = false;
+    private static boolean disable2 = false;
     private static Method getShoulderInstance;
     private static Method isShoulderSurfing;
 
     public static boolean isShoulderSurfing()
     {
-        if(!GunMod.shoulderSurfingLoaded || disable)
+        if(!GunMod.shoulderSurfingLoaded)
             return false;
-
+        
+        if (!disable1)
         try
         {
             init();
             Object object = getShoulderInstance.invoke(null);
             return (boolean) isShoulderSurfing.invoke(object);
         }
-        catch(InvocationTargetException | IllegalAccessException e)
+        catch(InvocationTargetException | IllegalAccessException | NullPointerException e)
         {
-            disable = true;
+            disable1 = true;
+        }
+        else
+        if (!disable2)
+        try
+        {
+            init();
+            Object object = getShoulderInstance.invoke(null);
+            return (boolean) isShoulderSurfing.invoke(object);
+        }
+        catch(InvocationTargetException | IllegalAccessException | NullPointerException e)
+        {
+            disable2 = true;
         }
         return false;
     }
@@ -39,13 +53,24 @@ public class ShoulderSurfingHelper
         {
             try
             {
+                Class<?> shoulderSurfingImpl = Class.forName("com.github.exopandora.shouldersurfing.client.ShoulderSurfingImpl");
+                getShoulderInstance = shoulderSurfingImpl.getDeclaredMethod("getInstance");
+                isShoulderSurfing = shoulderSurfingImpl.getDeclaredMethod("isShoulderSurfing");
+            }
+            catch(ClassNotFoundException | NoSuchMethodException | NullPointerException ignored)
+            {
+                disable1 = true;
+            }
+            if (disable1)
+            try
+            {
                 Class<?> shoulderInstance = Class.forName("com.github.exopandora.shouldersurfing.client.ShoulderInstance");
                 getShoulderInstance = shoulderInstance.getDeclaredMethod("getInstance");
                 isShoulderSurfing = shoulderInstance.getDeclaredMethod("doShoulderSurfing");
             }
-            catch(ClassNotFoundException | NoSuchMethodException ignored)
+            catch(ClassNotFoundException | NoSuchMethodException | NullPointerException ignored)
             {
-                disable = true;
+                disable2 = true;
             }
         }
     }

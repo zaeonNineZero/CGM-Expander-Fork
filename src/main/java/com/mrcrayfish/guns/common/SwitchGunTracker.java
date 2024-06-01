@@ -95,7 +95,7 @@ public class SwitchGunTracker
             
             if (doGunSwitch)
             {
-            	ModSyncedDataKeys.SWITCHTIME.setValue(player, 5);
+            	ModSyncedDataKeys.SWITCHTIME.setValue(player, 4);
             	if(SWITCHGUN_TRACKER_MAP.containsKey(player))
                 {
             		SWITCHGUN_TRACKER_MAP.remove(player);
