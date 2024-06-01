@@ -180,7 +180,10 @@ public class ShootingHandler
                 return;
 
             if (!isSameWeapon(player))
-            ModSyncedDataKeys.SWITCHTIME.setValue(player, 1);
+            {
+            	ModSyncedDataKeys.SWITCHTIME.setValue(player, 1);
+            	ModSyncedDataKeys.BURSTCOUNT.setValue(player, 0);
+            }
             
             ItemStack heldItem = player.getMainHandItem();
             if(heldItem.getItem() instanceof GunItem)
