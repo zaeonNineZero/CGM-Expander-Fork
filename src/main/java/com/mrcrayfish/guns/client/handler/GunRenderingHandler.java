@@ -131,6 +131,12 @@ public class GunRenderingHandler
     	return (this.prevSprintTransition + (this.sprintTransition - this.prevSprintTransition) * partialTicks) / 5F;
     }
 
+    @Nullable
+    public int getSprintCooldown()
+    {
+    	return sprintCooldown;
+    }
+
     @SubscribeEvent
     public void onTick(TickEvent.ClientTickEvent event)
     {
