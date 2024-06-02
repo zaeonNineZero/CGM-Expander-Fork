@@ -95,7 +95,7 @@ public class DynamicCrosshair extends Crosshair
         float baseScale = 1F + Mth.lerp(partialTicks, this.prevScale, this.scale);
         float scale = baseScale + (spread*2);
         float scaleSize = (scale/6F)+1F;
-        float crosshairBaseTightness = size1/4;
+        float crosshairBaseTightness = size1/3.5F;
         float spreadTranslateFactor = 2.5F;
 
         RenderSystem.enableBlend();

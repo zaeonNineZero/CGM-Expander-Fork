@@ -677,8 +677,11 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         @Optional
         private float headshotMultiplierMin = 1;
         @Optional
-        @Nullable
         private float headshotMultiplierOverride = 0;
+        @Optional
+        private float armorBypass = 0;
+        @Optional
+        private float protectionBypass = 0.8F;
         
         private float size;
         private double speed;
@@ -713,6 +716,8 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             tag.putFloat("HeadshotMultiplierBonus", this.headshotMultiplierBonus);
             tag.putFloat("HeadshotMultiplierMin", this.headshotMultiplierMin);
             tag.putFloat("HeadshotMultiplierOverride", this.headshotMultiplierOverride);
+            tag.putFloat("ArmorBypass", this.armorBypass);
+            tag.putFloat("ProtectionBypass", this.protectionBypass);
             tag.putFloat("Size", this.size);
             tag.putDouble("Speed", this.speed);
             tag.putInt("Life", this.life);
@@ -768,6 +773,14 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             {
                 this.headshotMultiplierOverride = tag.getFloat("HeadshotMultiplierOverride");
             }
+            if(tag.contains("ArmorBypass", Tag.TAG_ANY_NUMERIC))
+            {
+                this.armorBypass = tag.getFloat("ArmorBypass");
+            }
+            if(tag.contains("ProtectionBypass", Tag.TAG_ANY_NUMERIC))
+            {
+                this.protectionBypass = tag.getFloat("ProtectionBypass");
+            }
             if(tag.contains("Size", Tag.TAG_ANY_NUMERIC))
             {
                 this.size = tag.getFloat("Size");
@@ -814,6 +827,8 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             Preconditions.checkArgument(this.headshotMultiplierBonus >= 0.0F, "Headshot multiplier bonus must be more than or equal to zero");
             Preconditions.checkArgument(this.headshotMultiplierMin >= 1.0F, "Headshot multiplier minimum must be more than or equal to one");
             Preconditions.checkArgument(this.headshotMultiplierOverride >= 0.0F, "Headshot multiplier override cannot be negative - set to zero to disable it");
+            Preconditions.checkArgument(this.armorBypass >= 0.0F && this.armorBypass <= 1.0F, "Armor bypass multiplier must be between 0.0 and 1.0");
+            Preconditions.checkArgument(this.protectionBypass >= 0.0F && this.protectionBypass <= 1.0F, "Protection bypass multiplier must be between 0.0 and 1.0");
             JsonObject object = new JsonObject();
             object.addProperty("item", this.item.toString());
             if(projectileItem!=null) object.addProperty("projectileItem", this.projectileItem.toString());
@@ -845,6 +860,8 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             projectile.headshotMultiplierBonus = this.headshotMultiplierBonus;
             projectile.headshotMultiplierMin = this.headshotMultiplierMin;
             projectile.headshotMultiplierOverride = this.headshotMultiplierOverride;
+            projectile.armorBypass = this.armorBypass;
+            projectile.protectionBypass = this.protectionBypass;
             projectile.size = this.size;
             projectile.speed = this.speed;
             projectile.life = this.life;
@@ -941,6 +958,22 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         public float getHeadshotMultiplierOverride()
         {
             return this.headshotMultiplierOverride;
+        }
+
+        /**
+         * @return How much of the projectile's damage is not reduced by armor.
+         */
+        public float getArmorBypass()
+        {
+            return this.armorBypass;
+        }
+
+        /**
+         * @return How much of the projectile's damage is not reduced by protection enchantments.
+         */
+        public float getProtectionBypass()
+        {
+            return this.protectionBypass;
         }
 
         /**

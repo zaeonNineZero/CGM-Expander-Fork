@@ -23,6 +23,7 @@ import com.mrcrayfish.guns.util.BufferUtil;
 import com.mrcrayfish.guns.util.GunCompositeStatHelper;
 import com.mrcrayfish.guns.util.GunEnchantmentHelper;
 import com.mrcrayfish.guns.util.GunModifierHelper;
+import com.mrcrayfish.guns.util.ProjectileStatHelper;
 import com.mrcrayfish.guns.util.ReflectionUtil;
 import com.mrcrayfish.guns.util.math.ExtendedEntityRayTraceResult;
 import com.mrcrayfish.guns.world.ProjectileExplosion;
@@ -512,10 +513,11 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
                 entity.setSecondsOnFire(2);
             }
 
+            boolean isDead = (entity instanceof LivingEntity ? ((LivingEntity) entity).isDeadOrDying() : false);
             this.onHitEntity(entity, result.getLocation(), startVec, endVec, entityHitResult.isHeadshot());
 
             int collateralLevel = EnchantmentHelper.getItemEnchantmentLevel(ModEnchantments.COLLATERAL.get(), weapon);
-            if(collateralLevel == 0)
+            if(collateralLevel == 0 && !isDead)
             {
                 this.remove(RemovalReason.KILLED);
             }
@@ -547,6 +549,12 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
         }
 
         DamageSource source = new DamageSourceProjectile("bullet", this, shooter, weapon).setProjectile();
+        if (entity instanceof LivingEntity)
+        {
+            damage = ProjectileStatHelper.getArmorBypassDamage(this, (LivingEntity) entity, damage);
+        	damage = ProjectileStatHelper.getProtectionBypassDamage(this, (LivingEntity) entity, damage, source);
+        }
+
         entity.hurt(source, damage);
 
         if(this.shooter instanceof Player)

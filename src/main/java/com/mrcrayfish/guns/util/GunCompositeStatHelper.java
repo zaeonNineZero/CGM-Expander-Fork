@@ -11,6 +11,8 @@ import net.minecraft.world.item.ItemStack;
  */
 public class GunCompositeStatHelper
 {
+	// This helper delivers composite stats derived from GunModifierHelper and GunEnchantmentHelper.
+	
 	public static int getCompositeRate(ItemStack weapon, Gun modifiedGun, Player player)
     {
         int a = GunEnchantmentHelper.getRate(weapon, modifiedGun);
