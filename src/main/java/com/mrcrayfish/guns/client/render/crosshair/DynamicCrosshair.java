@@ -97,6 +97,9 @@ public class DynamicCrosshair extends Crosshair
         float scaleSize = (scale/6F)+1F;
         float crosshairBaseTightness = size1/3.5F;
         float spreadTranslateFactor = 2.5F;
+        
+        double windowCenteredX = Math.round((windowWidth) / 2F)-0.5;
+        double windowCenteredY = Math.round((windowHeight) / 2F)-0.5;
 
         RenderSystem.enableBlend();
         RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.ONE_MINUS_DST_COLOR, GlStateManager.DestFactor.ONE_MINUS_SRC_COLOR, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
@@ -110,9 +113,9 @@ public class DynamicCrosshair extends Crosshair
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
             RenderSystem.setShaderTexture(0, DYNAMIC_CROSSHAIR_H);
             
-            stack.translate(windowWidth / 2F, windowHeight / 2F, 0);
+            stack.translate(windowCenteredX, windowCenteredY, 0);
             stack.scale(scaleSize, 1, 1);
-            stack.translate((-size1 / 2F) - (scaleSize*(spreadTranslateFactor)) + crosshairBaseTightness -0.1F, -size2 / 2F, 0);
+            stack.translate((-size1 / 2F) - (scaleSize*(spreadTranslateFactor)) + crosshairBaseTightness -0.0F, -size2 / 2F, 0);
 
             float sizeX = size1;
             float sizeY = size2;
@@ -132,8 +135,8 @@ public class DynamicCrosshair extends Crosshair
             RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
             RenderSystem.setShaderTexture(0, DYNAMIC_CROSSHAIR_H);
-            
-            stack.translate(windowWidth / 2F, windowHeight / 2F, 0);
+
+            stack.translate(windowCenteredX, windowCenteredY, 0);
             stack.scale(scaleSize, 1, 1);
             stack.translate((-size1 / 2F) + (scaleSize*(spreadTranslateFactor)) - crosshairBaseTightness, -size2 / 2F, 0);
 
@@ -155,8 +158,8 @@ public class DynamicCrosshair extends Crosshair
             RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
             RenderSystem.setShaderTexture(0, DYNAMIC_CROSSHAIR_V);
-            
-            stack.translate(windowWidth / 2F, windowHeight / 2F, 0);
+
+            stack.translate(windowCenteredX, windowCenteredY, 0);
             stack.scale(1, scaleSize, 1);
             stack.translate(-size2 / 2F, (-size1 / 2F) - (scaleSize*(spreadTranslateFactor)) + crosshairBaseTightness, 0);
             
@@ -178,10 +181,10 @@ public class DynamicCrosshair extends Crosshair
             RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
             RenderSystem.setShaderTexture(0, DYNAMIC_CROSSHAIR_V);
-            
-            stack.translate(windowWidth / 2F, windowHeight / 2F, 0);
+
+            stack.translate(windowCenteredX, windowCenteredY, 0);
             stack.scale(1, scaleSize, 1);
-            stack.translate(-size2 / 2F -0.01F, (-size1 / 2F) + (scaleSize*(spreadTranslateFactor)) - crosshairBaseTightness, 0);
+            stack.translate(-size2 / 2F -0.0F, (-size1 / 2F) + (scaleSize*(spreadTranslateFactor)) - crosshairBaseTightness, 0);
 
             float sizeX = size2;
             float sizeY = size1;

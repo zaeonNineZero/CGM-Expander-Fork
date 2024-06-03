@@ -681,7 +681,7 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         @Optional
         private float armorBypass = 0;
         @Optional
-        private float protectionBypass = 0.8F;
+        private float protectionBypass = 0.5F;
         
         private float size;
         private double speed;
