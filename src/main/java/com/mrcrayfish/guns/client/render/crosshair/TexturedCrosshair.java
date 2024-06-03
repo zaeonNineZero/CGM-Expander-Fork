@@ -60,7 +60,7 @@ public class TexturedCrosshair extends Crosshair
         float alpha = 1.0F;// - (float) AimingHandler.get().getNormalisedAdsProgress();
         float size = 9.0F;
         float scale = 1F + Mth.lerp(partialTicks, this.prevScale, this.scale);
-        stack.translate((windowWidth - 1) / 2F, (windowHeight) / 2F, 0);
+        stack.translate(Math.round((windowWidth) / 2F)-0.5, Math.round((windowHeight) / 2F)-0.5, 0);
         stack.scale(scale, scale, scale);
         stack.translate(-size / 2F, -size / 2F, 0);
 

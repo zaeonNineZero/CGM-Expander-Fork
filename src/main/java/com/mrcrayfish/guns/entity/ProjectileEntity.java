@@ -47,6 +47,7 @@ import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -549,14 +550,28 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
         }
 
         DamageSource source = new DamageSourceProjectile("bullet", this, shooter, weapon).setProjectile();
+        float baseDamage = damage;
+    	float bypassDamage = 0;
         if (entity instanceof LivingEntity)
         {
-            damage = ProjectileStatHelper.getArmorBypassDamage(this, (LivingEntity) entity, damage);
-        	damage = ProjectileStatHelper.getProtectionBypassDamage(this, (LivingEntity) entity, damage, source);
+        	damage = ProjectileStatHelper.getArmorReducedDamage(this, (LivingEntity) entity, damage);
+        	bypassDamage = ProjectileStatHelper.getProtectionBypassDamage(this, (LivingEntity) entity, damage, source);
         }
-
-        entity.hurt(source, damage);
-
+        
+        DamageSource bypassSource = source.bypassArmor();
+        entity.hurt(bypassSource, damage+bypassDamage);
+        
+        // Since we're bypassing armor, we have to add logic to damage the armor's durability
+        if (entity instanceof Player)
+        {
+        	Player player = (Player) entity;
+        	if (headshot)
+            player.getInventory().hurtArmor(source, 4, Inventory.HELMET_SLOT_ONLY);
+        	else
+        	player.getInventory().hurtArmor(source, 1, Inventory.ALL_ARMOR_SLOTS);
+        }
+        
+        
         if(this.shooter instanceof Player)
         {
             int hitType = critical ? S2CMessageProjectileHitEntity.HitType.CRITICAL : headshot ? S2CMessageProjectileHitEntity.HitType.HEADSHOT : S2CMessageProjectileHitEntity.HitType.NORMAL;
