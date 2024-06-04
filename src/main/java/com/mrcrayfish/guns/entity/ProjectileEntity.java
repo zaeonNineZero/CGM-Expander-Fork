@@ -186,7 +186,25 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
             }
         }
 
-        return this.getVectorFromRotation(shooter.getXRot() - (gunSpread / 2.0F) + random.nextFloat() * gunSpread, shooter.getYHeadRot() - (gunSpread / 2.0F) + random.nextFloat() * gunSpread);
+        // New spread vector code provided by Poly-1810 and used with permission.
+        // This fix was figured out by unze2unze4 and implemented by Poly into their CGM Refined fork.
+        // Big thanks to both of them for this fix!
+        gunSpread = Math.min(gunSpread, 170F) * 0.5F * Mth.DEG_TO_RAD;
+        
+        Vec3 vecforwards = this.getVectorFromRotation(shooter.getXRot(), shooter.getYRot());
+        Vec3 vecupwards = this.getVectorFromRotation(shooter.getXRot() + 90F, shooter.getYRot());
+        Vec3 vecsideways = vecforwards.cross(vecupwards);
+        
+        float theta = random.nextFloat() * 2F * (float) Math.PI;
+        float r = Mth.sqrt(random.nextFloat()) * (float) Math.tan((double) gunSpread);
+        
+        float a1 = Mth.cos(theta) * r;
+        float a2 = Mth.sin(theta) * r;
+        
+        return vecforwards.add(vecsideways.scale(a1)).add(vecupwards.scale(a2)).normalize();
+        
+        
+        //return this.getVectorFromRotation(shooter.getXRot() - (gunSpread / 2.0F) + random.nextFloat() * gunSpread, shooter.getYHeadRot() - (gunSpread / 2.0F) + random.nextFloat() * gunSpread);
     }
 
     public void setWeapon(ItemStack weapon)
@@ -550,8 +568,7 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
         }
 
         DamageSource source = new DamageSourceProjectile("bullet", this, shooter, weapon).setProjectile();
-        float baseDamage = damage;
-    	float bypassDamage = 0;
+        float bypassDamage = 0;
         if (entity instanceof LivingEntity)
         {
         	damage = ProjectileStatHelper.getArmorReducedDamage(this, (LivingEntity) entity, damage);
@@ -562,11 +579,13 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
         entity.hurt(bypassSource, damage+bypassDamage);
         
         // Since we're bypassing armor, we have to add logic to damage the armor's durability
+        // And since we're doing that, let's make headshots damage only the helmet, and by a larger amount.
         if (entity instanceof Player)
         {
         	Player player = (Player) entity;
         	if (headshot)
-            player.getInventory().hurtArmor(source, 4, Inventory.HELMET_SLOT_ONLY);
+        	// The damage input gets divided by 4, hence why we're multiplying the durability damage value.
+            player.getInventory().hurtArmor(source, 4*4, Inventory.HELMET_SLOT_ONLY);
         	else
         	player.getInventory().hurtArmor(source, 1, Inventory.ALL_ARMOR_SLOTS);
         }

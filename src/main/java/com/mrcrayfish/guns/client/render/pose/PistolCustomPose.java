@@ -134,7 +134,7 @@ public class PistolCustomPose extends WeaponPose
         GunItem gunStack = (GunItem) stack.getItem();
         Gun gun = gunStack.getModifiedGun(stack);
 
-        // Front arm holding the barrel
+        // Off-hand arm
         poseStack.pushPose();
         if (player.getOffhandItem().isEmpty())
         {
@@ -157,7 +157,7 @@ public class PistolCustomPose extends WeaponPose
         }
         poseStack.popPose();
 
-        // Back arm holding the handle
+        // Main-hand arm
         poseStack.pushPose();
         {
             RearHandPos posHand = gun.getDisplay().getRearHand();

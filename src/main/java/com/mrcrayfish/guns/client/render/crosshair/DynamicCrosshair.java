@@ -96,7 +96,7 @@ public class DynamicCrosshair extends Crosshair
         float scale = baseScale + (spread*2);
         float scaleSize = (scale/6F)+1F;
         float crosshairBaseTightness = size1/3.5F;
-        float spreadTranslateFactor = 2.5F;
+        float spreadTranslateFactor = 2.0F;
         
         double windowCenteredX = Math.round((windowWidth) / 2F)-0.5;
         double windowCenteredY = Math.round((windowHeight) / 2F)-0.5;
