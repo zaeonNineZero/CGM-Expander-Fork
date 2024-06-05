@@ -10,6 +10,7 @@ import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
+import com.mrcrayfish.guns.Config;
 import com.mrcrayfish.guns.Reference;
 import com.mrcrayfish.guns.client.handler.AimingHandler;
 import net.minecraft.client.Minecraft;
@@ -58,6 +59,8 @@ public class TechCrosshair extends Crosshair
         float size = 8.0F;
 
         RenderSystem.enableBlend();
+        boolean doBlend = Config.CLIENT.display.blendCrosshair.get();
+        if (doBlend)
         RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.ONE_MINUS_DST_COLOR, GlStateManager.DestFactor.ONE_MINUS_SRC_COLOR, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
         BufferBuilder buffer = Tesselator.getInstance().getBuilder();
 
@@ -67,7 +70,8 @@ public class TechCrosshair extends Crosshair
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
             RenderSystem.setShaderTexture(0, DOT_CROSSHAIR);
             Matrix4f matrix = stack.last().pose();
-            stack.translate((windowWidth - size) / 2F, (windowHeight - size) / 2F, 0);
+            stack.translate(Math.round((windowWidth) / 2F)-0.5, Math.round((windowHeight) / 2F)-0.5, 0);
+            stack.translate(-size / 2F, -size / 2F, 0);
             buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
             buffer.vertex(matrix, 0, size, 0).uv(0, 1).color(1.0F, 1.0F, 1.0F, alpha).endVertex();
             buffer.vertex(matrix, size, size, 0).uv(1, 1).color(1.0F, 1.0F, 1.0F, alpha).endVertex();
@@ -80,7 +84,7 @@ public class TechCrosshair extends Crosshair
         stack.pushPose();
         {
             Matrix4f matrix = stack.last().pose();
-            stack.translate(windowWidth / 2F, windowHeight / 2F, 0);
+            stack.translate(Math.round((windowWidth) / 2F)-0.5, Math.round((windowHeight) / 2F)-0.5, 0);
             float scale = 1F + Mth.lerp(partialTicks, this.prevScale, this.scale);
             stack.scale(scale, scale, scale);
             stack.mulPose(Vector3f.ZP.rotationDegrees(Mth.lerp(partialTicks, this.prevRotation, this.rotation)));
@@ -97,6 +101,7 @@ public class TechCrosshair extends Crosshair
         }
         stack.popPose();
 
+        if (doBlend)
         RenderSystem.defaultBlendFunc();
     }
 }

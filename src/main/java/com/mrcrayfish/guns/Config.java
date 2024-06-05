@@ -1,5 +1,6 @@
 package com.mrcrayfish.guns;
 
+import com.mrcrayfish.guns.client.DotRenderMode;
 import com.mrcrayfish.guns.client.SwayType;
 import com.mrcrayfish.guns.client.render.crosshair.Crosshair;
 import com.mrcrayfish.guns.client.screen.ButtonAlignment;
@@ -72,6 +73,12 @@ public class Config
     {
         public final ForgeConfigSpec.BooleanValue oldAnimations;
         public final ForgeConfigSpec.ConfigValue<String> crosshair;
+        public final ForgeConfigSpec.BooleanValue blendCrosshair;
+        public final ForgeConfigSpec.DoubleValue dynamicCrosshairBaseSpread;
+        public final ForgeConfigSpec.DoubleValue dynamicCrosshairSpreadMultiplier;
+        public final ForgeConfigSpec.DoubleValue dynamicCrosshairReactivity;
+        public final ForgeConfigSpec.EnumValue<DotRenderMode> dynamicCrosshairDotMode;
+        public final ForgeConfigSpec.DoubleValue dynamicCrosshairDotThreshold;
         public final ForgeConfigSpec.BooleanValue displayAmmoCount;
         public final ForgeConfigSpec.BooleanValue cooldownIndicator;
         public final ForgeConfigSpec.BooleanValue weaponSway;
@@ -89,6 +96,12 @@ public class Config
             {
                 this.oldAnimations = builder.comment("If true, uses the old animation poses for weapons. This is only for nostalgic reasons and not recommended to switch back.").define("oldAnimations", false);
                 this.crosshair = builder.comment("The custom crosshair to use for weapons. Go to (Options > Controls > Mouse Settings > Crosshair) in game to change this!").define("crosshair", Crosshair.DEFAULT.getLocation().toString());
+                this.blendCrosshair = builder.comment("If enabled, blends all custom crosshairs to match the behavior of the default crosshair.").define("blendCrosshair", true);
+                this.dynamicCrosshairBaseSpread = builder.comment("The resting size of the Dynamic Crosshair when spread is zero.").defineInRange("dynamicCrosshairBaseSpread", 1.0, 0, 5);
+                this.dynamicCrosshairSpreadMultiplier = builder.comment("The bloom factor of the Dynamic Crosshair when spread increases.").defineInRange("dynamicCrosshairSpreadMultiplier", 1.0, 1.0, 1.5);
+                this.dynamicCrosshairReactivity = builder.comment("How reactive the Dynamic Crosshair is to shooting.").defineInRange("dynamicCrosshairReactivity", 2.0, 0, 10);
+                this.dynamicCrosshairDotMode = builder.comment("The rendering mode used for the Dynamic Crosshair's center dot. At Min Spread renders it only when at resting spread, and Threshold renders it only when spread is below a set threshold").defineEnum("dynamicCrosshairDotMode", DotRenderMode.AT_MIN_SPREAD);
+                this.dynamicCrosshairDotThreshold = builder.comment("The threshold of spread (including modifiers) below which the Dynamic Crosshair's center dot is rendered. Affects the At Min Spread and Threshold modes only.").defineInRange("dynamicCrosshairDotThreshold", 0.8, 0, 90);
                 this.displayAmmoCount = builder.comment("If enabled, renders a HUD element displaying the gun's ammo count and ammo capacity.").define("displayAmmoCount", true);
                 this.cooldownIndicator = builder.comment("If enabled, renders a cooldown indicator to make it easier to learn when you fire again.").define("cooldownIndicator", true);
                 this.weaponSway = builder.comment("If enabled, the weapon will sway when the player moves their look direction. This does not affect aiming and is only visual.").define("weaponSway", true);

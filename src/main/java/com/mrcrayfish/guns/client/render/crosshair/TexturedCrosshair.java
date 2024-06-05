@@ -9,6 +9,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.math.Matrix4f;
+import com.mrcrayfish.guns.Config;
 import com.mrcrayfish.guns.client.handler.AimingHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
@@ -68,8 +69,10 @@ public class TexturedCrosshair extends Crosshair
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         RenderSystem.setShaderTexture(0, this.texture);
         RenderSystem.enableBlend();
+        
+        boolean doBlend = this.blend && Config.CLIENT.display.blendCrosshair.get();
 
-        if(this.blend)
+        if(doBlend)
         {
             RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.ONE_MINUS_DST_COLOR, GlStateManager.DestFactor.ONE_MINUS_SRC_COLOR, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
         }
@@ -83,7 +86,7 @@ public class TexturedCrosshair extends Crosshair
         buffer.vertex(matrix, 0, 0, 0).uv(0, 0).color(1.0F, 1.0F, 1.0F, alpha).endVertex();
         BufferUploader.drawWithShader(buffer.end());
 
-        if(this.blend)
+        if(doBlend)
         {
             RenderSystem.defaultBlendFunc();
         }
