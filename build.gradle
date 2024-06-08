@@ -91,6 +91,7 @@ dependencies {
     implementation fg.deobf('curse.maven:configured-457570:4011355')
     implementation fg.deobf('curse.maven:catalogue-459701:4171024')
     implementation fg.deobf('curse.maven:backpacked-352835:3923045')
+    implementation files('ShoulderSurfing-Forge-1.19.2-3.2.0-c83950e.jar')
     compileOnly fg.deobf('curse.maven:controllable-317269:3936915')
     compileOnly fg.deobf("mezz.jei:jei-1.19.2-common-api:11.4.0.274")
     compileOnly fg.deobf("mezz.jei:jei-1.19.2-forge-api:11.4.0.274")

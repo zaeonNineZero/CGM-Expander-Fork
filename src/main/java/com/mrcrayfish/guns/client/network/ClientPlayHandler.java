@@ -25,11 +25,13 @@ import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.core.Vec3i;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -68,17 +70,28 @@ public class ClientPlayHandler
 
     public static void handleMessageBlood(S2CMessageBlood message)
     {
-        if(!Config.CLIENT.particle.enableBlood.get())
+        if(!Config.CLIENT.particle.enableHitParticle.get())
         {
             return;
         }
+    	ParticleOptions particle = ParticleTypes.SMOKE;
         Level world = Minecraft.getInstance().level;
         if(world != null)
         {
-            for(int i = 0; i < 10; i++)
-            {
-                world.addParticle(ModParticleTypes.BLOOD.get(), true, message.getX(), message.getY(), message.getZ(), 0.5, 0, 0.5);
-            }
+        	if (Config.CLIENT.particle.enableBlood.get())
+        	{
+	        	for(int i = 0; i < 10; i++)
+	            {
+	                world.addParticle(ModParticleTypes.BLOOD.get(), true, message.getX(), message.getY(), message.getZ(), 0.5, 0, 0.5);
+	            }
+        	}
+        	else
+        	{
+        		for(int i = 0; i < 4; i++)
+	            {
+	                world.addParticle(particle, true, message.getX(), message.getY(), message.getZ(), (Math.random()-0.5)*0.15, (Math.random()*0.02)-0.04, (Math.random()-0.5)*0.15);
+	            }
+        	}
         }
     }
 
@@ -180,6 +193,7 @@ public class ClientPlayHandler
             return;
 
         mc.getSoundManager().play(SimpleSoundInstance.forUI(event, 1.0F, 1.0F + world.random.nextFloat() * 0.2F));
+        GunRenderingHandler.get().playHitMarker(message.isCritical() || message.isHeadshot());
     }
 
     @Nullable
@@ -201,9 +215,14 @@ public class ClientPlayHandler
                 return event != null ? event : SoundEvents.PLAYER_ATTACK_KNOCKBACK;
             }
         }
-        else if(player)
+        else
         {
-            return SoundEvents.PLAYER_HURT;
+            //return SoundEvents.PLAYER_HURT;
+        	if(Config.CLIENT.sounds.playHitSound.get() && (!Config.CLIENT.sounds.hitSoundOnlyAgainstPlayers.get() || player))
+            {
+                SoundEvent event = ForgeRegistries.SOUND_EVENTS.getValue(new ResourceLocation(Config.CLIENT.sounds.headshotSound.get()));
+                return event != null ? event : SoundEvents.TRIDENT_HIT;
+            }
         }
         return null;
     }

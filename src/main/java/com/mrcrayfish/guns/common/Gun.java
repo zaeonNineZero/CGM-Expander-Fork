@@ -154,6 +154,8 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         @Optional
         private float spreadAdsReduction = 0.5F;
         @Optional
+        private boolean useShotgunSpread = false;
+        @Optional
         private double adsSpeed = 1;
         @Optional
         private boolean doRampUp = false;
@@ -190,6 +192,7 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             tag.putFloat("Spread", this.spread);
             tag.putFloat("RestingSpread", this.restingSpread);
             tag.putFloat("SpreadAdsReduction", this.spreadAdsReduction);
+            tag.putBoolean("UseShotgunSpread", this.useShotgunSpread);
             tag.putDouble("ADSSpeed", this.adsSpeed);
             tag.putBoolean("DoRampUp", this.doRampUp);
             tag.putInt("RampUpShotsNeeded", this.rampUpShotsNeeded);
@@ -303,6 +306,10 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             {
                 this.spreadAdsReduction = tag.getFloat("SpreadAdsReduction");
             }
+            if(tag.contains("UseShotgunSpread", Tag.TAG_ANY_NUMERIC))
+            {
+                this.useShotgunSpread = tag.getBoolean("UseShotgunSpread");
+            }
             if(tag.contains("ADSSpeed", Tag.TAG_ANY_NUMERIC))
             {
                 this.adsSpeed = tag.getDouble("ADSSpeed");
@@ -345,6 +352,8 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             JsonObject object = new JsonObject();
             if(this.auto) object.addProperty("auto", true);
             object.addProperty("rate", this.rate);
+            if(this.burstCount != 0) object.addProperty("burstCount", this.burstCount);
+            if(this.burstCooldown != -1) object.addProperty("burstCooldown", this.burstCooldown);
             object.addProperty("gripType", this.gripType.getId().toString());
             object.addProperty("maxAmmo", this.maxAmmo);
             object.addProperty("overCapacityAmmo", this.overCapacityAmmo);
@@ -363,10 +372,12 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             if(this.projectileAmount != 1) object.addProperty("projectileAmount", this.projectileAmount);
             if(this.alwaysSpread) object.addProperty("alwaysSpread", true);
             if(this.spread != 0.0F) object.addProperty("spread", this.spread);
-            if(this.restingSpread != 0.0F) object.addProperty("restingSpread", this.spread);
+            if(this.restingSpread != 0.0F) object.addProperty("restingSpread", this.restingSpread);
             if(this.spreadAdsReduction != 0.5F) object.addProperty("spreadAdsReduction", this.spread);
+            if(this.useShotgunSpread) object.addProperty("useShotgunSpread", true);
             if(this.adsSpeed != 1) object.addProperty("adsSpeed", this.adsSpeed);
             if(this.doRampUp) object.addProperty("doRampUp", false);
+            if(this.rampUpShotsNeeded != 8) object.addProperty("rampUpShotsNeeded", this.rampUpShotsNeeded);
             return object;
         }
 
@@ -402,6 +413,7 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             general.spread = this.spread;
             general.restingSpread = this.restingSpread;
             general.spreadAdsReduction = this.spreadAdsReduction;
+            general.useShotgunSpread = this.useShotgunSpread;
             general.adsSpeed = this.adsSpeed;
             general.doRampUp = this.doRampUp;
             general.rampUpShotsNeeded = this.rampUpShotsNeeded;
@@ -632,6 +644,14 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         }
 
         /**
+         * @return If enabled, spread reduction from non-barrel attachments will be heavily reduced.
+         */
+        public boolean usesShotgunSpread()
+        {
+            return this.useShotgunSpread;
+        }
+
+        /**
          * @return The base speed modifier to the gun's aiming speed.
          */
         public double getADSSpeed()
@@ -670,6 +690,8 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         private float damage;
         @Optional
         private float maxRangeDamageMultiplier = 0;
+        @Optional
+        private float pierceDamagePenalty = 0.15F;
         @Optional
         private float headshotExtraDamage = 0;
         @Optional
@@ -712,6 +734,7 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             tag.putBoolean("Visible", this.visible);
             tag.putFloat("Damage", this.damage);
             tag.putFloat("MaxRangeDamageMultiplier", this.maxRangeDamageMultiplier);
+            tag.putFloat("PierceDamagePenalty", this.pierceDamagePenalty);
             tag.putFloat("HeadshotExtraDamage", this.headshotExtraDamage);
             tag.putFloat("HeadshotMultiplierBonus", this.headshotMultiplierBonus);
             tag.putFloat("HeadshotMultiplierMin", this.headshotMultiplierMin);
@@ -756,6 +779,10 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             if(tag.contains("MaxRangeDamageMultiplier", Tag.TAG_ANY_NUMERIC))
             {
                 this.maxRangeDamageMultiplier = tag.getFloat("MaxRangeDamageMultiplier");
+            }
+            if(tag.contains("PierceDamagePenalty", Tag.TAG_ANY_NUMERIC))
+            {
+                this.pierceDamagePenalty = tag.getFloat("PierceDamagePenalty");
             }
             if(tag.contains("HeadshotExtraDamage", Tag.TAG_ANY_NUMERIC))
             {
@@ -819,6 +846,7 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         {
             Preconditions.checkArgument(this.damage >= 0.0F, "Damage must be more than or equal to zero");
             Preconditions.checkArgument(this.maxRangeDamageMultiplier >= 0.0F, "Damage Multiplier at Max Range must be more than or equal to zero");
+            Preconditions.checkArgument(this.pierceDamagePenalty >= 0.0F && this.pierceDamagePenalty <= 0.95F, "Protection bypass multiplier must be between 0.0 and 0.95");
             Preconditions.checkArgument(this.size >= 0.0F, "Projectile size must be more than or equal to zero");
             Preconditions.checkArgument(this.speed >= 0.0, "Projectile speed must be more than or equal to zero");
             Preconditions.checkArgument(this.life > 0, "Projectile life must be more than zero");
@@ -836,6 +864,12 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             else object.addProperty("projectileOverride", "null");
             if(this.visible) object.addProperty("visible", true);
             object.addProperty("damage", this.damage);
+            if(this.maxRangeDamageMultiplier != 0.0F) object.addProperty("maxRangeDamageMultiplier", this.maxRangeDamageMultiplier);
+            if(this.pierceDamagePenalty != 0.1F) object.addProperty("pierceDamagePenalty", this.pierceDamagePenalty);
+            if(this.headshotExtraDamage != 0.0F) object.addProperty("headshotExtraDamage", this.headshotExtraDamage);
+            if(this.headshotMultiplierBonus != 0.0F) object.addProperty("headshotMultiplierBonus", this.headshotMultiplierBonus);
+            if(this.headshotMultiplierMin != 1.0F) object.addProperty("headshotMultiplierMin", this.headshotMultiplierMin);
+            if(this.headshotMultiplierOverride != 0.0F) object.addProperty("headshotMultiplierOverride", this.headshotMultiplierOverride);
             object.addProperty("size", this.size);
             object.addProperty("speed", this.speed);
             object.addProperty("life", this.life);
@@ -856,6 +890,7 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             projectile.visible = this.visible;
             projectile.damage = this.damage;
             projectile.maxRangeDamageMultiplier = this.maxRangeDamageMultiplier;
+            projectile.pierceDamagePenalty = this.pierceDamagePenalty;
             projectile.headshotExtraDamage = this.headshotExtraDamage;
             projectile.headshotMultiplierBonus = this.headshotMultiplierBonus;
             projectile.headshotMultiplierMin = this.headshotMultiplierMin;
@@ -921,11 +956,21 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         /**
          * @return The projectile's damage at the end of its life.
          * This allows for decreasing (or increasing) the projectile's damage output the further it travels.
-         * Requires DamageReduceOverLife for values below 1, and DamageIncreaseOverLife for values above 1.
+         * Automatically enables DamageReduceOverLife for values above 0 but below 1.
          */
         public float getMaxRangeDamageMultiplier()
         {
             return this.maxRangeDamageMultiplier;
+        }
+
+        /**
+         * @return The penalty to damage for each entity hit and pierced by the projectile.
+         * Applies only if the projectile can pierce entities.
+         * (Currently applied only by the Collateral enchantment)
+         */
+        public float getPierceDamagePenalty()
+        {
+            return this.pierceDamagePenalty;
         }
 
         /**
@@ -1021,7 +1066,9 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
          */
         public boolean isDamageReduceOverLife()
         {
-            return this.damageReduceOverLife;
+            if (maxRangeDamageMultiplier>0)
+            	return true;
+        	return this.damageReduceOverLife;
         }
 
         /**
@@ -2442,6 +2489,18 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         public Builder setDamage(float damage)
         {
             this.gun.projectile.damage = damage;
+            return this;
+        }
+
+        public Builder setMaxRangeDamageMultiplier(float maxRangeDamageMultiplier)
+        {
+            this.gun.projectile.maxRangeDamageMultiplier = maxRangeDamageMultiplier;
+            return this;
+        }
+
+        public Builder setPierceDamagePenalty(float pierceDamagePenalty)
+        {
+            this.gun.projectile.pierceDamagePenalty = pierceDamagePenalty;
             return this;
         }
 

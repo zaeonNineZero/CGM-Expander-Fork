@@ -63,6 +63,8 @@ public class AimingHandler
     private final Map<Player, AimTracker> aimingMap = new WeakHashMap<>();
     private double normalisedAdsProgress;
     private boolean aiming = false;
+    private boolean doTempFirstPerson = false;
+    private boolean skipThirdPersonSwitch = false;
 
     private AimingHandler() {}
 
@@ -115,13 +117,24 @@ public class AimingHandler
         if(event.phase != TickEvent.Phase.START)
             return;
 
-        Player player = Minecraft.getInstance().player;
+        Minecraft mc = Minecraft.getInstance();
+        Player player = mc.player;
         if(player == null)
             return;
+        
+        ItemStack heldItem = mc.player.getMainHandItem();
+    	GunItem gunItem = null;
+    	Gun modifiedGun = null;
+    	if (mc.player.getMainHandItem().getItem() instanceof GunItem)
+    	{
+    		gunItem = (GunItem) mc.player.getMainHandItem().getItem();
+    		modifiedGun = gunItem.getModifiedGun(mc.player.getMainHandItem());
+    	}
+        boolean resetPOV = false;
 
         if(this.isAiming())
         {
-        	if (!Minecraft.getInstance().options.keySprint.isDown())
+        	if (!mc.options.keySprint.isDown())
         	player.setSprinting(false);
             if(!this.aiming)
             {
@@ -129,12 +142,51 @@ public class AimingHandler
                 PacketHandler.getPlayChannel().sendToServer(new C2SMessageAim(true));
                 this.aiming = true;
             }
+            if (Config.CLIENT.display.forceFirstPersonOnZoomedAim.get() && getNormalisedAdsProgress()>=0.2 && getNormalisedAdsProgress()<=0.95)
+            {
+            	if (!this.doTempFirstPerson && modifiedGun!=null)
+                {
+                	if(modifiedGun.getModules().getZoom() != null && Gun.getFovModifier(heldItem, modifiedGun) <= Config.CLIENT.display.firstPersonAimZoomThreshold.get())
+                    {
+                    	if (ShoulderSurfingHelper.isShoulderSurfing())
+	                    	{
+	                    		this.doTempFirstPerson = true;
+	                    		ShoulderSurfingHelper.changePerspective("FIRST_PERSON");
+	                        	this.skipThirdPersonSwitch = false;
+	                		}
+                    }
+                    else
+                    if (this.doTempFirstPerson == true)
+                    resetPOV = true;
+                }
+            }
         }
-        else if(this.aiming)
+        else
         {
-            ModSyncedDataKeys.AIMING.setValue(player, false);
-            PacketHandler.getPlayChannel().sendToServer(new C2SMessageAim(false));
-            this.aiming = false;
+        	if (this.doTempFirstPerson && getNormalisedAdsProgress()<=0.3)
+        	resetPOV = true;
+        	if(this.aiming)
+	        {
+	            ModSyncedDataKeys.AIMING.setValue(player, false);
+	            PacketHandler.getPlayChannel().sendToServer(new C2SMessageAim(false));
+	            this.aiming = false;
+	        }
+        }
+        
+        if (this.doTempFirstPerson)
+        {
+        	if (mc.options.getCameraType()!=CameraType.FIRST_PERSON)
+        	this.skipThirdPersonSwitch = true;
+        	if(modifiedGun==null || modifiedGun.getModules().getZoom() == null
+            || Gun.getFovModifier(heldItem, modifiedGun) > Config.CLIENT.display.firstPersonAimZoomThreshold.get())
+            resetPOV = true;
+        }
+
+        if (resetPOV && Config.CLIENT.display.forceFirstPersonOnZoomedAim.get())
+        {
+        	this.doTempFirstPerson = false;
+        	if (mc.options.getCameraType()==CameraType.FIRST_PERSON && !skipThirdPersonSwitch)
+        	ShoulderSurfingHelper.changePerspective("SHOULDER_SURFING");
         }
 
         this.localTracker.handleAiming(player, player.getItemInHand(InteractionHand.MAIN_HAND));

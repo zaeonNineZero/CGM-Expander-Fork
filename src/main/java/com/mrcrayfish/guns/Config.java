@@ -46,6 +46,9 @@ public class Config
      */
     public static class Sounds
     {
+        public final ForgeConfigSpec.BooleanValue playHitSound;
+        public final ForgeConfigSpec.BooleanValue hitSoundOnlyAgainstPlayers;
+        public final ForgeConfigSpec.ConfigValue<String> hitSound;
         public final ForgeConfigSpec.BooleanValue playSoundWhenHeadshot;
         public final ForgeConfigSpec.ConfigValue<String> headshotSound;
         public final ForgeConfigSpec.BooleanValue playSoundWhenCritical;
@@ -56,6 +59,9 @@ public class Config
         {
             builder.comment("Control sounds triggered by guns").push("sounds");
             {
+            	this.playHitSound = builder.comment("If true, a sound will play when you successfully hit an entity with a gun").define("playHitSound", true);
+            	this.hitSoundOnlyAgainstPlayers = builder.comment("If true, a sound will play when you successfully hit a headshot on a entity with a gun").define("hitSoundOnlyAgainstPlayers", true);
+                this.hitSound = builder.comment("The sound to play when a hit is landed").define("hitSound", "minecraft:item.trident.hit");
                 this.playSoundWhenHeadshot = builder.comment("If true, a sound will play when you successfully hit a headshot on a entity with a gun").define("playSoundWhenHeadshot", true);
                 this.headshotSound = builder.comment("The sound to play when a headshot occurs").define("headshotSound", "minecraft:entity.player.attack.knockback");
                 this.playSoundWhenCritical = builder.comment("If true, a sound will play when you successfully hit a critical on a entity with a gun").define("playSoundWhenCritical", true);
@@ -78,6 +84,7 @@ public class Config
         public final ForgeConfigSpec.DoubleValue dynamicCrosshairSpreadMultiplier;
         public final ForgeConfigSpec.DoubleValue dynamicCrosshairReactivity;
         public final ForgeConfigSpec.EnumValue<DotRenderMode> dynamicCrosshairDotMode;
+        public final ForgeConfigSpec.BooleanValue onlyRenderDotWhileAiming;
         public final ForgeConfigSpec.DoubleValue dynamicCrosshairDotThreshold;
         public final ForgeConfigSpec.BooleanValue displayAmmoCount;
         public final ForgeConfigSpec.BooleanValue cooldownIndicator;
@@ -87,6 +94,8 @@ public class Config
         public final ForgeConfigSpec.BooleanValue cameraRollEffect;
         public final ForgeConfigSpec.DoubleValue cameraRollAngle;
         public final ForgeConfigSpec.BooleanValue restrictCameraRollToWeapons;
+        public final ForgeConfigSpec.BooleanValue forceFirstPersonOnZoomedAim;
+        public final ForgeConfigSpec.DoubleValue firstPersonAimZoomThreshold;
         public final ForgeConfigSpec.BooleanValue sprintAnimation;
         public final ForgeConfigSpec.DoubleValue bobbingIntensity;
 
@@ -100,7 +109,8 @@ public class Config
                 this.dynamicCrosshairBaseSpread = builder.comment("The resting size of the Dynamic Crosshair when spread is zero.").defineInRange("dynamicCrosshairBaseSpread", 1.0, 0, 5);
                 this.dynamicCrosshairSpreadMultiplier = builder.comment("The bloom factor of the Dynamic Crosshair when spread increases.").defineInRange("dynamicCrosshairSpreadMultiplier", 1.0, 1.0, 1.5);
                 this.dynamicCrosshairReactivity = builder.comment("How reactive the Dynamic Crosshair is to shooting.").defineInRange("dynamicCrosshairReactivity", 2.0, 0, 10);
-                this.dynamicCrosshairDotMode = builder.comment("The rendering mode used for the Dynamic Crosshair's center dot. At Min Spread renders it only when at resting spread, and Threshold renders it only when spread is below a set threshold").defineEnum("dynamicCrosshairDotMode", DotRenderMode.AT_MIN_SPREAD);
+                this.dynamicCrosshairDotMode = builder.comment("The rendering mode used for the Dynamic Crosshair's center dot. At Min Spread will only render the dot when gun spread is stable.").defineEnum("dynamicCrosshairDotMode", DotRenderMode.AT_MIN_SPREAD);
+                this.onlyRenderDotWhileAiming = builder.comment("If true, the Dynamic Crosshair's center dot will only render while aiming. Obeys dynamicCrosshairDotMode, and has no effect when mode is set to Never.").define("onlyRenderDotWhileAiming", true);
                 this.dynamicCrosshairDotThreshold = builder.comment("The threshold of spread (including modifiers) below which the Dynamic Crosshair's center dot is rendered. Affects the At Min Spread and Threshold modes only.").defineInRange("dynamicCrosshairDotThreshold", 0.8, 0, 90);
                 this.displayAmmoCount = builder.comment("If enabled, renders a HUD element displaying the gun's ammo count and ammo capacity.").define("displayAmmoCount", true);
                 this.cooldownIndicator = builder.comment("If enabled, renders a cooldown indicator to make it easier to learn when you fire again.").define("cooldownIndicator", true);
@@ -110,6 +120,8 @@ public class Config
                 this.cameraRollEffect = builder.comment("If enabled, the camera will roll when strafing while holding a gun. This creates a more immersive feeling.").define("cameraRollEffect", true);
                 this.cameraRollAngle = builder.comment("When Camera Roll Effect is enabled, this is the absolute maximum angle the roll on the camera can approach.").defineInRange("cameraRollAngle", 1.5F, 0F, 45F);
                 this.restrictCameraRollToWeapons = builder.comment("When enabled, the Camera Roll Effect is only applied when holding a weapon.").define("restrictCameraRollToWeapons", true);
+                this.forceFirstPersonOnZoomedAim = builder.comment("When enabled, temporarily switches the camera to first person while aiming. Aim zoom must be above firstPersonAimZoomThreshold, and only applies to third person rear camera modes.").define("forceFirstPersonOnZoomedAim", false);
+                this.firstPersonAimZoomThreshold = builder.comment("The zoom threshold at which the camera switches to first person while aiming. Requires forceFirstPersonOnZoomedAim to be set to true.").defineInRange("firstPersonAimZoomThreshold", 0.5, 0.0, 1.0);
                 this.sprintAnimation = builder.comment("Enables the sprinting animation on weapons for better immersion. This only applies to weapons that support a sprinting animation.").define("sprintingAnimation", true);
                 this.bobbingIntensity = builder.comment("The intensity of the custom bobbing animation while holding a gun").defineInRange("bobbingIntensity", 1.0, 0.0, 2.0);
             }
@@ -125,6 +137,7 @@ public class Config
         public final ForgeConfigSpec.IntValue bulletHoleLifeMin;
         public final ForgeConfigSpec.IntValue bulletHoleLifeMax;
         public final ForgeConfigSpec.DoubleValue bulletHoleFadeThreshold;
+        public final ForgeConfigSpec.BooleanValue enableHitParticle;
         public final ForgeConfigSpec.BooleanValue enableBlood;
         public final ForgeConfigSpec.DoubleValue impactParticleDistance;
 
@@ -135,7 +148,8 @@ public class Config
                 this.bulletHoleLifeMin = builder.comment("The minimum duration in ticks before bullet holes will disappear").defineInRange("bulletHoleLifeMin", 150, 0, Integer.MAX_VALUE);
                 this.bulletHoleLifeMax = builder.comment("The maximum duration in ticks before bullet holes will disappear").defineInRange("bulletHoleLifeMax", 200, 0, Integer.MAX_VALUE);
                 this.bulletHoleFadeThreshold = builder.comment("The percentage of the maximum life that must pass before particles begin fading away. 0 makes the particles always fade and 1 removes facing completely").defineInRange("bulletHoleFadeThreshold", 0.98, 0, 1.0);
-                this.enableBlood = builder.comment("If true, blood will will spawn from entities that are hit from a projectile").define("enableBlood", false);
+                this.enableHitParticle = builder.comment("If true, particles will spawn from entities that are hit from a projectile. This particle is smoke by default").define("enableHitParticle", true);
+                this.enableBlood = builder.comment("If enabled, replaces the smoke hit particle with a blood particle").define("enableBlood", false);
                 this.impactParticleDistance = builder.comment("The maximum distance impact particles can be seen from the player").defineInRange("impactParticleDistance", 32.0, 0.0, 64.0);
             }
             builder.pop();

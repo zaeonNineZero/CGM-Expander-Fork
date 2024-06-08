@@ -141,8 +141,8 @@ public abstract class WeaponPose implements IHeldAnimation
         float rightOffset = this.getValue(targetPose.getIdle().getRenderYawOffset(), targetPose.getAiming().getRenderYawOffset(), this.forwardPose.getIdle().getRenderYawOffset(), this.forwardPose.getAiming().getRenderYawOffset(), 0F, angleAbs, zoom, right ? 1 : -1);
         if ((!player.isSprinting() || GunRenderingHandler.get().getSprintCooldown()>0) && sprintTransition<=0.8F)
         {
-        	if (sprintTransition<=0.6F)
-	        	player.yBodyRotO = player.yRotO + (rightOffset);
+        	/*if (sprintTransition<=0.6F)
+	        	player.yBodyRotO = Mth.lerp(0.2F, player.yBodyRotO, player.yRotO + (rightOffset));*/
         	player.yBodyRot = player.getYRot() + rightOffset;
         }
     }

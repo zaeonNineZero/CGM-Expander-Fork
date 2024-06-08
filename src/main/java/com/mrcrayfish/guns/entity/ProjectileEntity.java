@@ -96,6 +96,7 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
     private ItemStack weapon = ItemStack.EMPTY;
     private ItemStack item = ItemStack.EMPTY;
     protected float additionalDamage = 0.0F;
+    protected float pierceDamageFraction = 1.0F;
     protected EntityDimensions entitySize;
     protected double modifiedGravity;
     protected int life;
@@ -375,6 +376,7 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
                 hitEntities.add(result);
             }
         }
+        Collections.reverse(hitEntities);
         return hitEntities;
     }
 
@@ -535,11 +537,21 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
             boolean isDead = (entity instanceof LivingEntity ? ((LivingEntity) entity).isDeadOrDying() : false);
             this.onHitEntity(entity, result.getLocation(), startVec, endVec, entityHitResult.isHeadshot());
 
-            int collateralLevel = EnchantmentHelper.getItemEnchantmentLevel(ModEnchantments.COLLATERAL.get(), weapon);
-            if(collateralLevel == 0 && !isDead)
-            {
-                this.remove(RemovalReason.KILLED);
-            }
+        	if (!isDead)
+        	{
+        		int collateralLevel = EnchantmentHelper.getItemEnchantmentLevel(ModEnchantments.COLLATERAL.get(), weapon);
+            	if(collateralLevel == 0)
+            	{
+                	this.remove(RemovalReason.KILLED);
+            	}
+            	else
+            	{
+            		if (this.pierceDamageFraction<=0.05F)
+                	this.remove(RemovalReason.KILLED);
+            		else
+            		this.pierceDamageFraction *= 1F-this.modifiedGun.getProjectile().getPierceDamagePenalty();
+            	}
+        	}
 
             entity.invulnerableTime = 0;
         }
@@ -694,22 +706,23 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
     {
         float initialDamage = (this.projectile.getDamage() + this.additionalDamage);
         float maxRangeDamageMultiplier = this.projectile.getMaxRangeDamageMultiplier();
-        if(this.projectile.isDamageReduceOverLife() && maxRangeDamageMultiplier > 1)
+        if(this.projectile.isDamageReduceOverLife() && maxRangeDamageMultiplier < 1)
         {
             float modifier = ((float) this.projectile.getLife() - (float) (this.tickCount - 1)) / (float) this.projectile.getLife();
             float finalModifier = Mth.lerp(modifier, maxRangeDamageMultiplier, 1);
             initialDamage *= Math.min(finalModifier, 1);
         }
-        /*else
-        if(this.projectile.isDamageIncreaseOverLife() && maxRangeDamageMultiplier > 1)
+        else
+        if(maxRangeDamageMultiplier > 1)
         {
             float modifier = ((float) this.projectile.getLife() - (float) (this.tickCount - 1)) / (float) this.projectile.getLife();
             float finalModifier = Mth.lerp(modifier, 1, maxRangeDamageMultiplier);
             initialDamage *= Math.max(finalModifier, 1);
-        }*/
+        }
         float damage = initialDamage / this.general.getProjectileAmount();
         damage = GunModifierHelper.getModifiedDamage(this.weapon, this.modifiedGun, damage);
         damage = GunEnchantmentHelper.getAcceleratorDamage(this.weapon, damage);
+        damage *= pierceDamageFraction;
         return Math.max(0F, damage);
     }
 

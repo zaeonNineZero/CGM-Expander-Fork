@@ -6,6 +6,7 @@ import com.mrcrayfish.guns.Config;
 import com.mrcrayfish.guns.Reference;
 import com.mrcrayfish.guns.client.render.crosshair.Crosshair;
 import com.mrcrayfish.guns.client.render.crosshair.DynamicCrosshair;
+import com.mrcrayfish.guns.client.render.crosshair.SpecialHitMarker;
 import com.mrcrayfish.guns.client.render.crosshair.TechCrosshair;
 import com.mrcrayfish.guns.client.render.crosshair.TexturedCrosshair;
 import com.mrcrayfish.guns.compat.ShoulderSurfingHelper;
@@ -161,6 +162,11 @@ public class CrosshairHandler
         int scaledWidth = event.getWindow().getGuiScaledWidth();
         int scaledHeight = event.getWindow().getGuiScaledHeight();
         crosshair.render(mc, stack, scaledWidth, scaledHeight, event.getPartialTick());
+        if (GunRenderingHandler.get().isRenderingHitMarker())
+        {
+        	Crosshair hitMarker = new SpecialHitMarker();
+        	hitMarker.render(mc, stack, scaledWidth, scaledHeight, event.getPartialTick());
+    	}
         stack.popPose();
     }
 

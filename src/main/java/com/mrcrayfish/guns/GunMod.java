@@ -70,7 +70,7 @@ public class GunMod
             super.fillItemList(items);
             CustomGunManager.fill(items);
         }
-    }.setEnchantmentCategories(EnchantmentTypes.GUN, EnchantmentTypes.SEMI_AUTO_GUN, EnchantmentTypes.AUTO_GUN);
+    }.setEnchantmentCategories(EnchantmentTypes.GUN, EnchantmentTypes.SEMI_AUTO_GUN, EnchantmentTypes.AUTO_GUN, EnchantmentTypes.GUN_SUPPORTS_RAMPUP);
 
     public GunMod()
     {

@@ -97,8 +97,9 @@ public class DynamicCrosshair extends Crosshair
             	
             	DotRenderMode dotRenderMode = Config.CLIENT.display.dynamicCrosshairDotMode.get();
             	renderDot = (dotRenderMode == DotRenderMode.ALWAYS)
-            	|| (dotRenderMode == DotRenderMode.AT_MIN_SPREAD && ((baseSpread != minSpread && SpreadTracker.get(mc.player).getNextSpread(gun,aiming)*spreadModifier <= 0) || (baseSpread == minSpread && spread<=Config.CLIENT.display.dynamicCrosshairDotThreshold.get())))
-    			|| (dotRenderMode == DotRenderMode.THRESHOLD && spread <= Config.CLIENT.display.dynamicCrosshairDotThreshold.get());
+            	|| (dotRenderMode == DotRenderMode.AT_MIN_SPREAD && (SpreadTracker.get(mc.player).getNextSpread(gun,aiming)*spreadModifier <= 0 && spread<=Config.CLIENT.display.dynamicCrosshairDotThreshold.get()))
+    			|| (dotRenderMode == DotRenderMode.THRESHOLD && spread <= Config.CLIENT.display.dynamicCrosshairDotThreshold.get())
+    			&& (!Config.CLIENT.display.onlyRenderDotWhileAiming.get() || aiming > 0.9F);
             }
         }
         

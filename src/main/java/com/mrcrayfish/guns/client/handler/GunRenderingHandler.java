@@ -103,6 +103,12 @@ public class GunRenderingHandler
     private int sprintCooldown;
     private float sprintIntensity;
 
+    private boolean playingHitMarker = false;
+    private int hitMarkerTime;
+    private int prevHitMarkerTime;
+    private int hitMarkerMaxTime = 2;
+    private boolean hitMarkerCrit = false;
+
     private float offhandTranslate;
     private float prevOffhandTranslate;
 
@@ -132,6 +138,24 @@ public class GunRenderingHandler
     }
 
     @Nullable
+    public float getHitMarkerProgress(float partialTicks)
+    {
+    	return ((this.prevHitMarkerTime + (this.hitMarkerTime - this.prevHitMarkerTime) * partialTicks) / (float) hitMarkerMaxTime);
+    }
+
+    @Nullable
+    public boolean isRenderingHitMarker()
+    {
+    	return playingHitMarker;
+    }
+
+    @Nullable
+    public boolean getHitMarkerCrit()
+    {
+    	return hitMarkerCrit;
+    }
+
+    @Nullable
     public int getSprintCooldown()
     {
     	return sprintCooldown;
@@ -144,6 +168,7 @@ public class GunRenderingHandler
             return;
 
         this.updateSprinting();
+        this.updateHitMarker();
         this.updateMuzzleFlash();
         this.updateOffhandTranslate();
         this.updateImmersiveCamera();
@@ -151,7 +176,7 @@ public class GunRenderingHandler
 
     private void updateSprinting()
     {
-        this.prevSprintTransition = this.sprintTransition;
+    	this.prevSprintTransition = this.sprintTransition;
 
         Minecraft mc = Minecraft.getInstance();
         if(mc.player != null && mc.player.isSprinting() && !ModSyncedDataKeys.SHOOTING.getValue(mc.player) && !ModSyncedDataKeys.RELOADING.getValue(mc.player) && !AimingHandler.get().isAiming() && this.sprintCooldown == 0)
@@ -169,6 +194,25 @@ public class GunRenderingHandler
         if(this.sprintCooldown > 0)
         {
             this.sprintCooldown--;
+        }
+    }
+
+    private void updateHitMarker()
+    {
+    	this.prevHitMarkerTime = this.hitMarkerTime;
+
+        if(playingHitMarker)
+        {
+            this.hitMarkerTime++;
+            if(this.hitMarkerTime > hitMarkerMaxTime)
+            {
+            	this.playingHitMarker=false;
+            	this.hitMarkerTime=0;
+            }
+        }
+        else
+        {
+        	this.hitMarkerTime=0;
         }
     }
 
@@ -222,6 +266,13 @@ public class GunRenderingHandler
         this.entityIdForMuzzleFlash.add(entityId);
         this.entityIdToRandomValue.put(entityId, this.random.nextFloat());
     }
+
+	public void playHitMarker(boolean crit) {
+		this.playingHitMarker=true;
+		this.hitMarkerCrit=crit;
+		this.hitMarkerTime=1;
+		this.prevHitMarkerTime=0;
+	}
 
     /**
      * Handles calculating the FOV of the first person viewport when aiming with a scope. Changing
@@ -624,7 +675,7 @@ public class GunRenderingHandler
         if(heldItem.getItem() instanceof GunItem)
         {
         	renderGunInfoHUD(event, heldItem);
-
+        	
             if(Config.CLIENT.display.cooldownIndicator.get())
             {
             	Gun gun = ((GunItem) heldItem.getItem()).getGun();

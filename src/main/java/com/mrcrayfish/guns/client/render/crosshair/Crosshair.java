@@ -70,4 +70,11 @@ public abstract class Crosshair implements IResourceLocation
     {
         return this == DEFAULT;
     }
+
+    /**
+     * Gets the id of the crosshair as a string
+     */
+	public String getIDString() {
+		return id.toString();
+	}
 }

@@ -2,6 +2,7 @@ package com.mrcrayfish.guns.util;
 
 import com.mrcrayfish.guns.common.Gun;
 import com.mrcrayfish.guns.interfaces.IGunModifier;
+import com.mrcrayfish.guns.item.GunItem;
 import com.mrcrayfish.guns.item.attachment.IAttachment;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
@@ -21,6 +22,10 @@ public class GunModifierHelper
             return attachment.getProperties().getModifiers();
         }
         return EMPTY;
+    }
+    private static IAttachment.Type getType(IAttachment.Type type)
+    {
+        return type;
     }
 
     public static int getModifiedProjectileLife(ItemStack weapon, int life)
@@ -59,12 +64,17 @@ public class GunModifierHelper
 
     public static float getModifiedSpread(ItemStack weapon, float spread)
     {
-        for(int i = 0; i < IAttachment.Type.values().length; i++)
+    	Gun modifiedGun = ((GunItem) weapon.getItem()).getModifiedGun(weapon);
+    	for(int i = 0; i < IAttachment.Type.values().length; i++)
         {
             IGunModifier[] modifiers = getModifiers(weapon, IAttachment.Type.values()[i]);
+            IAttachment.Type attachType = getType(IAttachment.Type.values()[i]);
             for(IGunModifier modifier : modifiers)
             {
-                spread = modifier.modifyProjectileSpread(spread);
+            	if (!modifiedGun.getGeneral().usesShotgunSpread())
+            	spread = modifier.modifyProjectileSpread(spread);
+            	else
+            	spread = Mth.lerp((attachType == IAttachment.Type.BARREL ? 0.8F : 0.1F),spread,modifier.modifyProjectileSpread(spread));
             }
         }
         return spread;
