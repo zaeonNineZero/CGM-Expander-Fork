@@ -1,6 +1,7 @@
 package com.mrcrayfish.guns.client.handler;
 
 import com.mrcrayfish.guns.client.KeyBinds;
+import com.mrcrayfish.guns.common.AmmoContext;
 import com.mrcrayfish.guns.common.Gun;
 import com.mrcrayfish.guns.event.GunReloadEvent;
 import com.mrcrayfish.guns.init.ModSyncedDataKeys;
@@ -79,6 +80,7 @@ public class ReloadHandler
         if(KeyBinds.KEY_RELOAD.isDown() && event.getAction() == GLFW.GLFW_PRESS)
         {
             this.setReloading(!ModSyncedDataKeys.RELOADING.getValue(player));
+            KeyBinds.KEY_RELOAD.setDown(false);
         }
         if(KeyBinds.KEY_UNLOAD.consumeClick() && event.getAction() == GLFW.GLFW_PRESS)
         {
@@ -101,6 +103,8 @@ public class ReloadHandler
                     if(tag != null && !tag.contains("IgnoreAmmo", Tag.TAG_BYTE))
                     {
                         Gun gun = ((GunItem) stack.getItem()).getModifiedGun(stack);
+                        if (Gun.findAmmo((Player) player, gun.getProjectile().getItem()) == AmmoContext.NONE && !Gun.hasUnlimitedReloads(stack))
+                        	return;
                         
                         ItemCooldowns tracker = Minecraft.getInstance().player.getCooldowns();
                         float cooldown = 0F;
@@ -115,6 +119,7 @@ public class ReloadHandler
                         PacketHandler.getPlayChannel().sendToServer(new C2SMessageReload(true));
                         this.reloadingSlot = player.getInventory().selected;
                         MinecraftForge.EVENT_BUS.post(new GunReloadEvent.Post(player, stack));
+                        GunRenderingHandler.get().updateReserveAmmo(player, gun);
                     }
                 }
             }

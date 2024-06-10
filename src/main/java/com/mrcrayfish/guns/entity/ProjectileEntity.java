@@ -342,10 +342,11 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
         double closestDistance = Double.MAX_VALUE;
         for(Entity entity : entities)
         {
-            if(!entity.equals(this.shooter))
+        	boolean isDead = (entity instanceof LivingEntity ? ((LivingEntity) entity).isDeadOrDying() : false);
+        	if(!entity.equals(this.shooter))
             {
                 EntityResult result = this.getHitResult(entity, startVec, endVec);
-                if(result == null)
+                if(result == null || isDead)
                     continue;
                 Vec3 hitPos = result.getHitPos();
                 double distanceToHit = startVec.distanceTo(hitPos);
@@ -557,7 +558,8 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
         }
     }
 
-    protected void onHitEntity(Entity entity, Vec3 hitVec, Vec3 startVec, Vec3 endVec, boolean headshot)
+    @SuppressWarnings("deprecation")
+	protected void onHitEntity(Entity entity, Vec3 hitVec, Vec3 startVec, Vec3 endVec, boolean headshot)
     {
         float damage = this.getDamage();
         float newDamage = this.getCriticalDamage(this.weapon, this.random, damage);
@@ -586,7 +588,8 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
         	damage = ProjectileStatHelper.getArmorReducedDamage(this, (LivingEntity) entity, damage);
         	bypassDamage = ProjectileStatHelper.getProtectionBypassDamage(this, (LivingEntity) entity, damage, source);
         }
-        
+
+        boolean isDead = (entity instanceof LivingEntity ? ((LivingEntity) entity).isDeadOrDying() : false);
         DamageSource bypassSource = source.bypassArmor();
         entity.hurt(bypassSource, damage+bypassDamage);
         
@@ -601,16 +604,15 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
         	else
         	player.getInventory().hurtArmor(source, 1, Inventory.ALL_ARMOR_SLOTS);
         }
-        
-        
-        if(this.shooter instanceof Player)
+        if(this.shooter instanceof Player && (!isDead))
         {
             int hitType = critical ? S2CMessageProjectileHitEntity.HitType.CRITICAL : headshot ? S2CMessageProjectileHitEntity.HitType.HEADSHOT : S2CMessageProjectileHitEntity.HitType.NORMAL;
             PacketHandler.getPlayChannel().sendToPlayer(() -> (ServerPlayer) this.shooter, new S2CMessageProjectileHitEntity(hitVec.x, hitVec.y, hitVec.z, hitType, entity instanceof Player));
         }
 
-        /* Send blood particle to tracking clients. */
-        PacketHandler.getPlayChannel().sendToTracking(() -> entity, new S2CMessageBlood(hitVec.x, hitVec.y, hitVec.z));
+        /* Send hit/blood particles to tracking clients. */
+        if (!isDead)
+        PacketHandler.getPlayChannel().sendToTracking(() -> entity, new S2CMessageBlood(hitVec.x, hitVec.y, hitVec.z, entity instanceof LivingEntity));
     }
 
     protected void onHitBlock(BlockState state, BlockPos pos, Direction face, double x, double y, double z)

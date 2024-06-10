@@ -53,11 +53,14 @@ public class C2SMessageReload extends PlayMessage<C2SMessageReload>
                     ModSyncedDataKeys.SWITCHTIME.setValue(player, 6);
                     return;
                 }
+                else
+                {
+                	ServerPlayHandler.playReloadStartSound(player);
+                }
 
                 ItemStack gun = player.getMainHandItem();
                 if(MinecraftForge.EVENT_BUS.post(new GunReloadEvent.Pre(player, gun)))
                 {
-                	//ServerPlayHandler.playReloadStartSound(player);
                 	ModSyncedDataKeys.RELOADING.setValue(player, false);
                     return;
                 }

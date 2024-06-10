@@ -3,6 +3,7 @@ package com.mrcrayfish.guns.common;
 import com.mrcrayfish.framework.api.network.LevelLocation;
 import com.mrcrayfish.guns.Config;
 import com.mrcrayfish.guns.Reference;
+import com.mrcrayfish.guns.client.handler.GunRenderingHandler;
 import com.mrcrayfish.guns.init.ModSyncedDataKeys;
 import com.mrcrayfish.guns.item.GunItem;
 import com.mrcrayfish.guns.network.PacketHandler;
@@ -56,6 +57,11 @@ public class SwitchGunTracker
     {
         return !this.stack.isEmpty() && player.getInventory().selected == this.slot && player.getInventory().getSelected() == this.stack;
     }
+    
+    private int getInventoryAmmo(Player player, Gun gun)
+    {
+    	return Gun.getReserveAmmoCount(player, gun.getProjectile().getItem());
+    }
 
     @SubscribeEvent
     public static void onPlayerTick(TickEvent.PlayerTickEvent event)
@@ -96,6 +102,12 @@ public class SwitchGunTracker
             if (doGunSwitch)
             {
             	ModSyncedDataKeys.SWITCHTIME.setValue(player, 4);
+            	if(player.getInventory().getSelected().getItem() instanceof GunItem)
+            	{
+            		ItemStack newStack = player.getInventory().getSelected();
+            		Gun newGun = ((GunItem) newStack.getItem()).getModifiedGun(newStack);
+                	GunRenderingHandler.get().forceSetReserveAmmo(tracker.getInventoryAmmo(player, newGun));
+            	}
             	if(SWITCHGUN_TRACKER_MAP.containsKey(player))
                 {
             		SWITCHGUN_TRACKER_MAP.remove(player);

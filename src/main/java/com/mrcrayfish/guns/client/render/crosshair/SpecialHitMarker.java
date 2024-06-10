@@ -41,13 +41,13 @@ public class SpecialHitMarker extends Crosshair
         float size = 9.0F;
         float hitMarkerProgress = GunRenderingHandler.get().getHitMarkerProgress(partialTicks);
         boolean crit = GunRenderingHandler.get().getHitMarkerCrit();
-        float scale = 1.5F + (hitMarkerProgress*2F);
+        float scale = 1.5F + (hitMarkerProgress*1.0F);
         stack.translate(Math.round((windowWidth) / 2F)-0.5, Math.round((windowHeight) / 2F)-0.5, 0);
         stack.scale(scale, scale, scale);
         stack.translate(-size / 2F, -size / 2F, 0);
 
         RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
-        RenderSystem.setShaderColor(1.0F, (!crit ? 1.0F : 0.1F), (!crit ? 1.0F : 0.1F), 1.0F - (hitMarkerProgress*0.3F));
+        RenderSystem.setShaderColor(1.0F, (!crit ? 1.0F : 0.25F), (!crit ? 1.0F : 0.25F), 1.0F - (hitMarkerProgress*0.3F));
         boolean useAltHitMarker = (CrosshairHandler.get().getCurrentCrosshair().getIDString() == "cgm:hit_marker");
         ResourceLocation texture = (useAltHitMarker ? ALT_HITMARKER : NORMAL_HITMARKER);
         RenderSystem.setShaderTexture(0, texture);

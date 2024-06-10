@@ -43,6 +43,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.NeutralMob;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DyeItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -233,7 +234,7 @@ public class ServerPlayHandler
      *
      * @param player the player who is performing the reload
      */
-    /*public static void playReloadStartSound(ServerPlayer player)
+    public static void playReloadStartSound(ServerPlayer player)
     {
         ItemStack heldItem = player.getItemInHand(InteractionHand.MAIN_HAND);
     	if(heldItem.getItem() instanceof GunItem item)
@@ -263,7 +264,7 @@ public class ServerPlayHandler
             return modifiedGun.getSounds().getReloadStart();
         }
         return null;
-    }*/
+    }
 
     /**
      * Crafts the specified item at the workstation the player is currently using.

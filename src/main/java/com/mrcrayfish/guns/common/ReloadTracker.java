@@ -3,6 +3,7 @@ package com.mrcrayfish.guns.common;
 import com.mrcrayfish.framework.api.network.LevelLocation;
 import com.mrcrayfish.guns.Config;
 import com.mrcrayfish.guns.Reference;
+import com.mrcrayfish.guns.client.handler.GunRenderingHandler;
 import com.mrcrayfish.guns.init.ModSyncedDataKeys;
 import com.mrcrayfish.guns.item.GunItem;
 import com.mrcrayfish.guns.network.PacketHandler;
@@ -39,6 +40,7 @@ public class ReloadTracker
     private final int slot;
     private final ItemStack stack;
     private final Gun gun;
+    private int reserveAmmo = 0;
 
     private ReloadTracker(Player player)
     {
@@ -78,6 +80,11 @@ public class ReloadTracker
         int deltaTicks = player.tickCount - this.startTick;
         int interval = GunEnchantmentHelper.getRealReloadSpeed(this.stack);
         return deltaTicks > 0 && deltaTicks % interval == 0;
+    }
+    
+    private int getInventoryAmmo(Player player)
+    {
+    	return Gun.getReserveAmmoCount(player, this.gun.getProjectile().getItem());
     }
 
     private void increaseAmmo(Player player)
@@ -123,6 +130,12 @@ public class ReloadTracker
             if ((ammoLoaded<trueReloadAmount || this.gun.getGeneral().getUseMagReload()) && !endReload)
             context = Gun.findAmmo(player, this.gun.getProjectile().getItem());
         }
+        
+        int ammoAfterLoad = getInventoryAmmo(player);
+        DelayedTask.runAfter(1, () ->
+        {
+        	GunRenderingHandler.get().forceSetReserveAmmo(ammoAfterLoad);
+        });
 
         ResourceLocation reloadSound = this.gun.getSounds().getReload();
         if(reloadSound != null)
@@ -138,56 +151,97 @@ public class ReloadTracker
     
     public static void attemptReload(Player player)
     {
-        	if(ModSyncedDataKeys.RELOADING.getValue(player))
+    	if(ModSyncedDataKeys.RELOADING.getValue(player))
+        {
+            if(!RELOAD_TRACKER_MAP.containsKey(player))
             {
-                if(!RELOAD_TRACKER_MAP.containsKey(player))
+                if(!(player.getInventory().getSelected().getItem() instanceof GunItem))
                 {
-                    if(!(player.getInventory().getSelected().getItem() instanceof GunItem))
-                    {
-                        ModSyncedDataKeys.RELOADING.setValue(player, false);
-                        return;
-                    }
-                    RELOAD_TRACKER_MAP.put(player, new ReloadTracker(player));
-                }
-                ReloadTracker tracker = RELOAD_TRACKER_MAP.get(player);
-                if(!tracker.isSameWeapon(player) || tracker.isWeaponFull() || tracker.hasNoAmmo(player))
-                {
-                    RELOAD_TRACKER_MAP.remove(player);
                     ModSyncedDataKeys.RELOADING.setValue(player, false);
                     return;
                 }
-                if(tracker.canReload(player))
-                {
-                    tracker.increaseAmmo(player);
-                    final Gun gun = tracker.gun;
-                    if(tracker.isWeaponFull() || tracker.hasNoAmmo(player) || gun.getGeneral().getUseMagReload())
-                    {
-                        RELOAD_TRACKER_MAP.remove(player);
-                        ModSyncedDataKeys.RELOADING.setValue(player, false);
-                        //ModSyncedDataKeys.SWITCHTIME.setValue(player, gun.getGeneral().getPostReloadCooldown());
-                        ModSyncedDataKeys.SWITCHTIME.setValue(player, 8);
-
-                        final Player finalPlayer = player;
-                        DelayedTask.runAfter(4, () ->
-                        {
-                            ResourceLocation cockSound = gun.getSounds().getCock();
-                            if(cockSound != null && finalPlayer.isAlive())
-                            {
-                                double soundX = finalPlayer.getX();
-                                double soundY = finalPlayer.getY() + 1.0;
-                                double soundZ = finalPlayer.getZ();
-                                double radius = Config.SERVER.reloadMaxDistance.get();
-                                S2CMessageGunSound messageSound = new S2CMessageGunSound(cockSound, SoundSource.PLAYERS, (float) soundX, (float) soundY, (float) soundZ, 1.0F, 1.0F, finalPlayer.getId(), false, true);
-                                PacketHandler.getPlayChannel().sendToNearbyPlayers(() -> LevelLocation.create(finalPlayer.level, soundX, soundY, soundZ, radius), messageSound);
-                            }
-                        });
-                    }
-                }
+                RELOAD_TRACKER_MAP.put(player, new ReloadTracker(player));
             }
-            else if(RELOAD_TRACKER_MAP.containsKey(player))
+            ReloadTracker tracker = RELOAD_TRACKER_MAP.get(player);
+            if(!tracker.isSameWeapon(player) || tracker.isWeaponFull() || tracker.hasNoAmmo(player))
             {
                 RELOAD_TRACKER_MAP.remove(player);
+                ModSyncedDataKeys.RELOADING.setValue(player, false);
+                return;
             }
+            if(tracker.canReload(player))
+            {
+                tracker.increaseAmmo(player);
+                final Gun gun = tracker.gun;
+                if(tracker.isWeaponFull() || tracker.hasNoAmmo(player) || gun.getGeneral().getUseMagReload())
+                {
+                    RELOAD_TRACKER_MAP.remove(player);
+                    ModSyncedDataKeys.RELOADING.setValue(player, false);
+                    //ModSyncedDataKeys.SWITCHTIME.setValue(player, gun.getGeneral().getPostReloadCooldown());
+                    ModSyncedDataKeys.SWITCHTIME.setValue(player, 8);
+
+                    final Player finalPlayer = player;
+                    DelayedTask.runAfter(4, () ->
+                    {
+                        ResourceLocation cockSound = gun.getSounds().getCock();
+                        if(cockSound != null)
+                        playReloadSound(finalPlayer, cockSound);
+                    });
+                }
+            }
+        }
+        else if(RELOAD_TRACKER_MAP.containsKey(player))
+        {
+            RELOAD_TRACKER_MAP.remove(player);
+        }
+    }
+
+    private static void playReloadSound(Player player, ResourceLocation sound)
+    {
+    	if(sound != null && player.isAlive())
+        {
+            double soundX = player.getX();
+            double soundY = player.getY() + 1.0;
+            double soundZ = player.getZ();
+            double radius = Config.SERVER.reloadMaxDistance.get();
+            S2CMessageGunSound messageSound = new S2CMessageGunSound(sound, SoundSource.PLAYERS, (float) soundX, (float) soundY, (float) soundZ, 1.0F, 1.0F, player.getId(), false, true);
+            PacketHandler.getPlayChannel().sendToNearbyPlayers(() -> LevelLocation.create(player.level, soundX, soundY, soundZ, radius), messageSound);
+        }
+    }
+    
+    public static void playReloadMidSound1(Player player)
+    {
+    	if(!RELOAD_TRACKER_MAP.containsKey(player))
+    		return;
+    	ReloadTracker tracker = RELOAD_TRACKER_MAP.get(player);
+        ResourceLocation sound = tracker.gun.getSounds().getReload();
+        if (sound != null)
+        playReloadSound(player, sound);
+    }
+    
+    public static void playReloadMidSound2(Player player)
+    {
+    	if(!RELOAD_TRACKER_MAP.containsKey(player))
+    		return;
+    	ReloadTracker tracker = RELOAD_TRACKER_MAP.get(player);
+        ResourceLocation sound = tracker.gun.getSounds().getReload();
+        if (sound != null)
+        playReloadSound(player, sound);
+    }
+    
+    public static void playReloadMidSound3(Player player)
+    {
+    	if(!RELOAD_TRACKER_MAP.containsKey(player))
+    		return;
+    	ReloadTracker tracker = RELOAD_TRACKER_MAP.get(player);
+        ResourceLocation sound = tracker.gun.getSounds().getReload();
+        if (sound != null)
+        playReloadSound(player, sound);
+    }
+    
+    public int getReserveAmmo()
+    {
+    	return reserveAmmo;
     }
 
     @SubscribeEvent

@@ -59,8 +59,8 @@ public class Config
         {
             builder.comment("Control sounds triggered by guns").push("sounds");
             {
-            	this.playHitSound = builder.comment("If true, a sound will play when you successfully hit an entity with a gun").define("playHitSound", true);
-            	this.hitSoundOnlyAgainstPlayers = builder.comment("If true, a sound will play when you successfully hit a headshot on a entity with a gun").define("hitSoundOnlyAgainstPlayers", true);
+            	this.playHitSound = builder.comment("If true, a sound will play when you successfully hit an entity with a gun.").define("playHitSound", true);
+            	this.hitSoundOnlyAgainstPlayers = builder.comment("If true, the normal hit sound will only play when hitting players. Does not apply to headshots and criticals").define("hitSoundOnlyAgainstPlayers", true);
                 this.hitSound = builder.comment("The sound to play when a hit is landed").define("hitSound", "minecraft:item.trident.hit");
                 this.playSoundWhenHeadshot = builder.comment("If true, a sound will play when you successfully hit a headshot on a entity with a gun").define("playSoundWhenHeadshot", true);
                 this.headshotSound = builder.comment("The sound to play when a headshot occurs").define("headshotSound", "minecraft:entity.player.attack.knockback");

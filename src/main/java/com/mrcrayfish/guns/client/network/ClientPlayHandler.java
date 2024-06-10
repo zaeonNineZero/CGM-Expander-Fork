@@ -78,7 +78,7 @@ public class ClientPlayHandler
         Level world = Minecraft.getInstance().level;
         if(world != null)
         {
-        	if (Config.CLIENT.particle.enableBlood.get())
+        	if (Config.CLIENT.particle.enableBlood.get() && message.getAllowBlood())
         	{
 	        	for(int i = 0; i < 10; i++)
 	            {
@@ -217,10 +217,9 @@ public class ClientPlayHandler
         }
         else
         {
-            //return SoundEvents.PLAYER_HURT;
         	if(Config.CLIENT.sounds.playHitSound.get() && (!Config.CLIENT.sounds.hitSoundOnlyAgainstPlayers.get() || player))
             {
-                SoundEvent event = ForgeRegistries.SOUND_EVENTS.getValue(new ResourceLocation(Config.CLIENT.sounds.headshotSound.get()));
+                SoundEvent event = ForgeRegistries.SOUND_EVENTS.getValue(new ResourceLocation(Config.CLIENT.sounds.hitSound.get()));
                 return event != null ? event : SoundEvents.TRIDENT_HIT;
             }
         }

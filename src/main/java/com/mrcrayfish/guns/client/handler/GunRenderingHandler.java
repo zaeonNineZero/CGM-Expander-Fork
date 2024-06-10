@@ -108,6 +108,10 @@ public class GunRenderingHandler
     private int prevHitMarkerTime;
     private int hitMarkerMaxTime = 2;
     private boolean hitMarkerCrit = false;
+    
+    private int reserveAmmo = 0;
+    private int ammoAutoUpdateTimer = 0;
+    private boolean doUpdateAmmo = false;
 
     private float offhandTranslate;
     private float prevOffhandTranslate;
@@ -172,6 +176,13 @@ public class GunRenderingHandler
         this.updateMuzzleFlash();
         this.updateOffhandTranslate();
         this.updateImmersiveCamera();
+        
+        ammoAutoUpdateTimer++;
+        if (ammoAutoUpdateTimer>=20)
+        {
+        	doUpdateAmmo = true;
+        	ammoAutoUpdateTimer=0;
+        }
     }
 
     private void updateSprinting()
@@ -213,6 +224,40 @@ public class GunRenderingHandler
         else
         {
         	this.hitMarkerTime=0;
+        }
+    }
+    private void fetchReserveAmmo(Player player, Gun gun)
+    {
+    	this.reserveAmmo = Gun.getReserveAmmoCount(player, gun.getProjectile().getItem());
+    	this.doUpdateAmmo = false;
+    	this.ammoAutoUpdateTimer=0;
+    }
+    
+    public void updateReserveAmmo(Player player, Gun gun)
+    {
+    	fetchReserveAmmo(player, gun);
+    }
+    
+    public void stageReserveAmmoUpdate()
+    {
+    	this.ammoAutoUpdateTimer=9001;
+    }
+    
+    public void forceSetReserveAmmo(int ammoCount)
+    {
+    	this.reserveAmmo = ammoCount;
+    	this.doUpdateAmmo = false;
+    	this.ammoAutoUpdateTimer=0;
+    }
+    
+    public void updateReserveAmmo(Player player)
+    {
+
+        ItemStack heldItem = player.getMainHandItem();
+        if(heldItem.getItem() instanceof GunItem)
+        {
+        	Gun modifiedGun = ((GunItem) heldItem.getItem()).getModifiedGun(heldItem);
+        	fetchReserveAmmo(player, modifiedGun);
         }
     }
 
@@ -731,13 +776,21 @@ public class GunRenderingHandler
             MutableComponent ammoCountValue = (Component.literal(currentAmmo + " / " + GunEnchantmentHelper.getAmmoCapacity(heldItem, gun)).withStyle(ChatFormatting.BOLD));
             if (Gun.hasInfiniteAmmo(heldItem))
             	ammoCountValue = (Component.literal("∞ / ∞").withStyle(ChatFormatting.BOLD));
-            GuiComponent.drawString(poseStack, Minecraft.getInstance().font, ammoCountValue, ammoPosX, ammoPosY, (currentAmmo>0 ? 0xFFFFFF : 0xFF5555));
+            GuiComponent.drawString(poseStack, Minecraft.getInstance().font, ammoCountValue, ammoPosX, ammoPosY, (currentAmmo>0 || Gun.hasInfiniteAmmo(heldItem) ? 0xFFFFFF : 0xFF5555));
             if (ModSyncedDataKeys.RELOADING.getValue(player))
             	GuiComponent.drawString(poseStack, Minecraft.getInstance().font, "Reloading...", ammoPosX, ammoPosY-10, 0xFFFF55);
-
-	        /*int inventoryAmmo = ReloadTracker.getInventoryAmmo(Gun.findAmmo(Minecraft.getInstance().player, gun.getProjectile().getItem()));
-            MutableComponent reserveAmmoValue = (Component.literal("( " + GunEnchantmentHelper.getAmmoCapacity(heldItem, gun) + " )").withStyle(ChatFormatting.BOLD));
-            GuiComponent.drawString(poseStack, Minecraft.getInstance().font, reserveAmmoValue, ammoPosX, ammoPosY+10, 0xFFFFFF);*/
+            
+            if (!Gun.hasInfiniteAmmo(heldItem))
+            {
+            	if (this.doUpdateAmmo)
+            	{
+            		this.fetchReserveAmmo(player, gun);
+            		this.doUpdateAmmo = false;
+            	}
+            	String displayReserveAmmo = (!Gun.hasUnlimitedReloads(heldItem) ? "" + reserveAmmo: "∞");
+	            MutableComponent reserveAmmoValue = (Component.literal("( " + displayReserveAmmo + " )"));
+	            GuiComponent.drawString(poseStack, Minecraft.getInstance().font, reserveAmmoValue, ammoPosX, ammoPosY+10, 0xFFFFFF);
+            }
 
             RenderSystem.disableBlend();
         }

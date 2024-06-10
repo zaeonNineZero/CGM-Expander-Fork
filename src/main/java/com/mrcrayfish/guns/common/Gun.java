@@ -1098,6 +1098,9 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         private ResourceLocation reload;
         @Optional
         @Nullable
+        private ResourceLocation reloadStart;
+        @Optional
+        @Nullable
         private ResourceLocation cock;
         @Optional
         @Nullable
@@ -1117,6 +1120,10 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             if(this.reload != null)
             {
                 tag.putString("Reload", this.reload.toString());
+            }
+            if(this.reloadStart != null)
+            {
+                tag.putString("ReloadStart", this.reloadStart.toString());
             }
             if(this.cock != null)
             {
@@ -1144,6 +1151,10 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             {
                 this.reload = this.createSound(tag, "Reload");
             }
+            if(tag.contains("ReloadStart", Tag.TAG_STRING))
+            {
+                this.reloadStart = this.createSound(tag, "ReloadStart");
+            }
             if(tag.contains("Cock", Tag.TAG_STRING))
             {
                 this.cock = this.createSound(tag, "Cock");
@@ -1169,6 +1180,10 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             {
                 object.addProperty("reload", this.reload.toString());
             }
+            if(this.reload != null)
+            {
+                object.addProperty("reloadStart", this.reloadStart.toString());
+            }
             if(this.cock != null)
             {
                 object.addProperty("cock", this.cock.toString());
@@ -1189,6 +1204,7 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             Sounds sounds = new Sounds();
             sounds.fire = this.fire;
             sounds.reload = this.reload;
+            sounds.reloadStart = this.reloadStart;
             sounds.cock = this.cock;
             sounds.silencedFire = this.silencedFire;
             sounds.enchantedFire = this.enchantedFire;
@@ -1218,6 +1234,15 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         public ResourceLocation getReload()
         {
             return this.reload;
+        }
+
+        /**
+         * @return The registry iid of the sound event when reloading this weapon
+         */
+        @Nullable
+        public ResourceLocation getReloadStart()
+        {
+            return this.reloadStart;
         }
 
         /**
@@ -2182,6 +2207,26 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         }
         return AmmoContext.NONE;
     }
+    
+    public static int getReserveAmmoCount(Player player, ResourceLocation id)
+    {
+    	int ammoCount = 0;
+    	for(int i = 0; i < player.getInventory().getContainerSize(); ++i)
+        {
+            ItemStack stack = player.getInventory().getItem(i);
+            if(isAmmo(stack, id))
+            {
+            	AmmoContext context = new AmmoContext(stack, player.getInventory());
+            	ammoCount += context.stack().getCount();
+            }
+        }
+        if(GunMod.backpackedLoaded)
+        {
+            AmmoContext context = BackpackHelper.findAmmo(player, id);;
+        	ammoCount += context.stack().getCount();
+        }
+        return ammoCount;
+    }
 
     public static boolean hasUnlimitedReloads(ItemStack gunStack)
     {
@@ -2543,6 +2588,12 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         public Builder setReloadSound(SoundEvent sound)
         {
             this.gun.sounds.reload = ForgeRegistries.SOUND_EVENTS.getKey(sound);
+            return this;
+        }
+
+        public Builder setReloadStartSound(SoundEvent sound)
+        {
+            this.gun.sounds.reloadStart = ForgeRegistries.SOUND_EVENTS.getKey(sound);
             return this;
         }
 
