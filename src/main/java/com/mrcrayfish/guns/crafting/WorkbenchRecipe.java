@@ -38,6 +38,11 @@ public class WorkbenchRecipe implements Recipe<WorkbenchBlockEntity>
         return this.materials;
     }
 
+    public WorkbenchIngredient getSpecificMaterial(int i)
+    {
+        return this.materials.get(i);
+    }
+
     @Override
     public boolean matches(WorkbenchBlockEntity inv, Level worldIn)
     {

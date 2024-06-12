@@ -6,6 +6,10 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Matrix3f;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
+import com.mrcrayfish.guns.common.Gun;
+import com.mrcrayfish.guns.item.GunItem;
+import com.mrcrayfish.guns.item.IColored;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
@@ -229,9 +233,17 @@ public class RenderUtil
     public static int getItemStackColor(ItemStack stack, ItemStack parent, int tintIndex)
     {
         int color = Minecraft.getInstance().getItemColors().getColor(stack, tintIndex);
-        if(color == -1)
+        if(color == -1 || stack.getItem() instanceof GunItem)
         {
-            if(!parent.isEmpty())
+        	if (stack.getItem() instanceof GunItem)
+        	{
+        		Gun gun = ((GunItem) stack.getItem()).getModifiedGun(stack);
+        		int baseColor = gun.getGeneral().getDefaultColor();
+        		if (baseColor!=-1 /*&& !((IColored) stack.getItem()).hasColor(stack)*/)
+        			return baseColor;
+        	}
+        	else
+        	if(!parent.isEmpty())
             {
                 return getItemStackColor(parent, ItemStack.EMPTY, tintIndex);
             }

@@ -14,6 +14,7 @@ import net.minecraftforge.common.crafting.IIngredientSerializer;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.stream.Stream;
 
 /**
@@ -41,6 +42,11 @@ public class WorkbenchIngredient extends Ingredient
     public int getCount()
     {
         return this.count;
+    }
+
+    public Collection<ItemStack> getItemList()
+    {
+        return itemList.getItems();
     }
 
     @Override

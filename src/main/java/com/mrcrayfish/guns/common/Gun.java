@@ -112,6 +112,8 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         private int burstCooldown = -1;
         @Ignored
         private GripType gripType = GripType.ONE_HANDED;
+        @Optional
+        private int defaultColor = -1;
         private int maxAmmo;
         @Optional
         private int overCapacityAmmo = 0;
@@ -171,6 +173,7 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             tag.putInt("BurstCount", this.burstCount);
             tag.putInt("BurstCooldown", this.burstCooldown);
             tag.putString("GripType", this.gripType.getId().toString());
+            tag.putInt("DefaultColor", this.defaultColor);
             tag.putInt("MaxAmmo", this.maxAmmo);
             tag.putInt("OverCapacityAmmo", this.overCapacityAmmo);
             tag.putBoolean("InfiniteAmmo", this.infiniteAmmo);
@@ -221,6 +224,10 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             if(tag.contains("GripType", Tag.TAG_STRING))
             {
                 this.gripType = GripType.getType(ResourceLocation.tryParse(tag.getString("GripType")));
+            }
+            if(tag.contains("DefaultColor", Tag.TAG_ANY_NUMERIC))
+            {
+                this.defaultColor = tag.getInt("DefaultColor");
             }
             if(tag.contains("MaxAmmo", Tag.TAG_ANY_NUMERIC))
             {
@@ -327,6 +334,7 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         public JsonObject toJsonObject()
         {
             Preconditions.checkArgument(this.rate > 0, "Rate must be more than zero");
+            Preconditions.checkArgument(this.defaultColor == -1 || this.defaultColor>=0, "Default color must be a valid RGBA-integer-format color; use -1 to disable this.");
             Preconditions.checkArgument(this.maxAmmo > 0, "Max ammo must be more than zero");
             Preconditions.checkArgument(this.burstCount >= 0, "Burst count cannot be negative; set to zero to disable bursts");
             Preconditions.checkArgument(this.burstCooldown >= 0, "Burst cooldown cannot be negative; set to zero to disable the cooldown");
@@ -355,6 +363,7 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             if(this.burstCount != 0) object.addProperty("burstCount", this.burstCount);
             if(this.burstCooldown != -1) object.addProperty("burstCooldown", this.burstCooldown);
             object.addProperty("gripType", this.gripType.getId().toString());
+            if(this.defaultColor != 1) object.addProperty("defaultColor", this.defaultColor);
             object.addProperty("maxAmmo", this.maxAmmo);
             object.addProperty("overCapacityAmmo", this.overCapacityAmmo);
             if(this.infiniteAmmo != false) object.addProperty("infiniteAmmo", this.infiniteAmmo);
@@ -392,6 +401,7 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             general.burstCount = this.burstCount;
             general.burstCooldown = this.burstCooldown;
             general.gripType = this.gripType;
+            general.defaultColor = this.defaultColor;
             general.maxAmmo = this.maxAmmo;
             general.overCapacityAmmo = this.overCapacityAmmo;
             general.infiniteAmmo = this.infiniteAmmo;
@@ -471,6 +481,16 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         public GripType getGripType()
         {
             return this.gripType;
+        }
+
+        /**
+         * @return The default color of the gun without dyes
+         * A value of -1 indicates no default color override,
+         * in which case the standard white color will be used.
+         */
+        public int getDefaultColor()
+        {
+            return this.defaultColor;
         }
 
         /**

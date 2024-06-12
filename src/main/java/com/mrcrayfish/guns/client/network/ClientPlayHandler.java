@@ -187,13 +187,14 @@ public class ClientPlayHandler
         Level world = mc.level;
         if(world == null)
             return;
+        
+        GunRenderingHandler.get().playHitMarker(message.isCritical() || message.isHeadshot());
 
         SoundEvent event = getHitSound(message.isCritical(), message.isHeadshot(), message.isPlayer());
         if(event == null)
             return;
 
         mc.getSoundManager().play(SimpleSoundInstance.forUI(event, 1.0F, 1.0F + world.random.nextFloat() * 0.2F));
-        GunRenderingHandler.get().playHitMarker(message.isCritical() || message.isHeadshot());
     }
 
     @Nullable

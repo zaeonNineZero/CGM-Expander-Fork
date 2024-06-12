@@ -74,7 +74,7 @@ public class GunModifierHelper
             	if (!modifiedGun.getGeneral().usesShotgunSpread())
             	spread = modifier.modifyProjectileSpread(spread);
             	else
-            	spread = Mth.lerp((attachType == IAttachment.Type.BARREL ? 0.8F : 0.1F),spread,modifier.modifyProjectileSpread(spread));
+            	spread = Mth.lerp((attachType == IAttachment.Type.BARREL ? 0.8F : 0.2F),spread,modifier.modifyProjectileSpread(spread));
             }
         }
         return spread;

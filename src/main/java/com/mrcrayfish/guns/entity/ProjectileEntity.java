@@ -97,6 +97,7 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
     private ItemStack item = ItemStack.EMPTY;
     protected float additionalDamage = 0.0F;
     protected float pierceDamageFraction = 1.0F;
+    protected int pierceCount = 0;
     protected EntityDimensions entitySize;
     protected double modifiedGravity;
     protected int life;
@@ -547,10 +548,13 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
             	}
             	else
             	{
-            		if (this.pierceDamageFraction<=0.05F)
+            		if (this.pierceDamageFraction<=0.05F || this.pierceCount>100)
                 	this.remove(RemovalReason.KILLED);
             		else
-            		this.pierceDamageFraction *= 1F-this.modifiedGun.getProjectile().getPierceDamagePenalty();
+            		{
+            			this.pierceCount++;
+            			this.pierceDamageFraction *= 1F-this.modifiedGun.getProjectile().getPierceDamagePenalty();
+            		}
             	}
         	}
 
@@ -578,7 +582,7 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
             }
             
             if (this.modifiedGun.getProjectile().getHeadshotExtraDamage()>0)
-            	damage += this.modifiedGun.getProjectile().getHeadshotExtraDamage();
+            	damage += this.modifiedGun.getProjectile().getHeadshotExtraDamage()*this.pierceDamageFraction;
         }
 
         DamageSource source = new DamageSourceProjectile("bullet", this, shooter, weapon).setProjectile();

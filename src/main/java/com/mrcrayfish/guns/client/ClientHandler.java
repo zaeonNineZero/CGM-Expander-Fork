@@ -9,11 +9,13 @@ import com.mrcrayfish.guns.client.render.gun.model.*;
 import com.mrcrayfish.guns.client.screen.AttachmentScreen;
 import com.mrcrayfish.guns.client.screen.WorkbenchScreen;
 import com.mrcrayfish.guns.client.util.PropertyHelper;
+import com.mrcrayfish.guns.common.Gun;
 import com.mrcrayfish.guns.debug.IEditorMenu;
 import com.mrcrayfish.guns.debug.client.screen.EditorScreen;
 import com.mrcrayfish.guns.init.ModBlocks;
 import com.mrcrayfish.guns.init.ModContainers;
 import com.mrcrayfish.guns.init.ModItems;
+import com.mrcrayfish.guns.item.GunItem;
 import com.mrcrayfish.guns.item.IColored;
 import com.mrcrayfish.guns.item.attachment.IAttachment;
 import com.mrcrayfish.guns.network.PacketHandler;
@@ -91,6 +93,15 @@ public class ClientHandler
             if(index == 0 && stack.hasTag() && stack.getTag().contains("Color", Tag.TAG_INT))
             {
                 return stack.getTag().getInt("Color");
+            }
+            if(index == 0 && stack.getItem() instanceof GunItem)
+            {
+                ItemStack renderingWeapon = GunRenderingHandler.get().getRenderingWeapon();
+                if(renderingWeapon != null)
+                {
+                	Gun gun = ((GunItem) stack.getItem()).getModifiedGun(stack);
+                	return gun.getGeneral().getDefaultColor();
+                }
             }
             if(index == 0 && stack.getItem() instanceof IAttachment)
             {

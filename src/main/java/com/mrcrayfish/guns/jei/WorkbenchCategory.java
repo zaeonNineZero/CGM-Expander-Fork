@@ -6,6 +6,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3f;
 import com.mrcrayfish.guns.Reference;
 import com.mrcrayfish.guns.client.util.RenderUtil;
+import com.mrcrayfish.guns.crafting.WorkbenchIngredient;
 import com.mrcrayfish.guns.crafting.WorkbenchRecipe;
 import com.mrcrayfish.guns.init.ModBlocks;
 import com.mrcrayfish.guns.item.IColored;
@@ -33,8 +34,11 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.DyeItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraftforge.registries.ForgeRegistries;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -101,7 +105,16 @@ public class WorkbenchCategory implements IRecipeCategory<WorkbenchRecipe>
         }
         for(int i = 0; i < recipe.getMaterials().size(); i++)
         {
-            builder.addSlot(RecipeIngredientRole.INPUT, (i % 8) * 18 + 1, 88 + (i / 8) * 18).addIngredients(recipe.getMaterials().get(i));
+        	/*WorkbenchIngredient ingredient = recipe.getSpecificMaterial(i);
+        	Collection<ItemStack> input = ingredient.getItemList();
+        	List<ItemStack> itemInput = null;
+        	itemInput.addAll(input);
+            for(int j = 0; j < itemInput.size(); j++)
+            {
+            	itemInput.get(j).setCount(ingredient.getCount());
+            }
+            builder.addSlot(RecipeIngredientRole.INPUT, (i % 8) * 18 + 1, 88 + (i / 8) * 18).addItemStacks(itemInput);*/
+            builder.addSlot(RecipeIngredientRole.INPUT, (i % 8) * 18 + 1, 88 + (i / 8) * 18).addIngredients(recipe.getSpecificMaterial(i));
         }
         builder.addInvisibleIngredients(RecipeIngredientRole.OUTPUT).addItemStack(output);
     }
@@ -123,6 +136,12 @@ public class WorkbenchCategory implements IRecipeCategory<WorkbenchRecipe>
         }
         int titleX = this.window.getWidth() / 2;
         GuiComponent.drawCenteredString(poseStack, Minecraft.getInstance().font, displayName, titleX, 5, 0xFFFFFFFF);
+
+        for(int i = 0; i < recipe.getMaterials().size(); i++)
+        {
+        	if (recipe.getMaterials().get(i).getCount()>1)
+        	GuiComponent.drawString(poseStack, Minecraft.getInstance().font, recipe.getMaterials().get(i).getCount() + "", (i % 8) * 18 + 1, 84 + (i / 8) * 18, 0xFFFFFFFF);
+        }
 
         PoseStack stack = RenderSystem.getModelViewStack();
         stack.pushPose();
