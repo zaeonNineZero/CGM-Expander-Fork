@@ -101,7 +101,7 @@ public class SwitchGunTracker
             
             if (doGunSwitch)
             {
-            	ModSyncedDataKeys.SWITCHTIME.setValue(player, 4);
+            	ModSyncedDataKeys.SWITCHTIME.setValue(player, 5);
             	if(player.getInventory().getSelected().getItem() instanceof GunItem)
             	{
             		ItemStack newStack = player.getInventory().getSelected();

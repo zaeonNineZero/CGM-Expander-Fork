@@ -17,15 +17,17 @@ public class S2CMessageBlood extends PlayMessage<S2CMessageBlood>
     private double y;
     private double z;
     private boolean allowBlood;
+    private boolean isHeadshot;
 
     public S2CMessageBlood() {}
 
-    public S2CMessageBlood(double x, double y, double z, boolean allowBlood)
+    public S2CMessageBlood(double x, double y, double z, boolean allowBlood, boolean isHeadshot)
     {
         this.x = x;
         this.y = y;
         this.z = z;
         this.allowBlood = allowBlood;
+        this.isHeadshot = isHeadshot;
     }
 
     @Override
@@ -35,12 +37,13 @@ public class S2CMessageBlood extends PlayMessage<S2CMessageBlood>
         buffer.writeDouble(message.y);
         buffer.writeDouble(message.z);
         buffer.writeBoolean(message.allowBlood);
+        buffer.writeBoolean(message.isHeadshot);
     }
 
     @Override
     public S2CMessageBlood decode(FriendlyByteBuf buffer)
     {
-        return new S2CMessageBlood(buffer.readDouble(), buffer.readDouble(), buffer.readDouble(), buffer.readBoolean());
+        return new S2CMessageBlood(buffer.readDouble(), buffer.readDouble(), buffer.readDouble(), buffer.readBoolean(), buffer.readBoolean());
     }
 
     @Override
@@ -68,5 +71,10 @@ public class S2CMessageBlood extends PlayMessage<S2CMessageBlood>
     public boolean getAllowBlood()
     {
         return this.allowBlood;
+    }
+
+    public boolean isHeadshot()
+    {
+        return this.isHeadshot;
     }
 }

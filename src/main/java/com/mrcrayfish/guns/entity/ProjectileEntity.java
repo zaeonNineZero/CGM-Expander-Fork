@@ -553,7 +553,7 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
             		else
             		{
             			this.pierceCount++;
-            			this.pierceDamageFraction *= 1F-this.modifiedGun.getProjectile().getPierceDamagePenalty();
+            			this.pierceDamageFraction -= this.modifiedGun.getProjectile().getPierceDamagePenalty();
             		}
             	}
         	}
@@ -616,7 +616,7 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
 
         /* Send hit/blood particles to tracking clients. */
         if (!isDead)
-        PacketHandler.getPlayChannel().sendToTracking(() -> entity, new S2CMessageBlood(hitVec.x, hitVec.y, hitVec.z, entity instanceof LivingEntity));
+        PacketHandler.getPlayChannel().sendToTracking(() -> entity, new S2CMessageBlood(hitVec.x, hitVec.y, hitVec.z, entity instanceof LivingEntity, headshot));
     }
 
     protected void onHitBlock(BlockState state, BlockPos pos, Direction face, double x, double y, double z)

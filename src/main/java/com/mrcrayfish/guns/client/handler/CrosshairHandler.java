@@ -124,6 +124,21 @@ public class CrosshairHandler
         if(event.getOverlay() != VanillaGuiOverlay.CROSSHAIR.type())
             return;
 
+        ItemStack heldItem = mc.player.getMainHandItem();
+        if(!(heldItem.getItem() instanceof GunItem))
+            return;
+        
+        PoseStack stack = event.getPoseStack();
+        stack.pushPose();
+        int scaledWidth = event.getWindow().getGuiScaledWidth();
+        int scaledHeight = event.getWindow().getGuiScaledHeight();
+        
+        if (GunRenderingHandler.get().isRenderingHitMarker())
+        {
+        	Crosshair hitMarker = new SpecialHitMarker();
+        	hitMarker.render(mc, stack, scaledWidth, scaledHeight, event.getPartialTick());
+    	}
+        
         Crosshair crosshair = this.getCurrentCrosshair();
         if(AimingHandler.get().getNormalisedAdsProgress() > 0.5 && (mc.options.getCameraType().isFirstPerson()))
         {
@@ -144,10 +159,6 @@ public class CrosshairHandler
             return;
         }
 
-        ItemStack heldItem = mc.player.getMainHandItem();
-        if(!(heldItem.getItem() instanceof GunItem))
-            return;
-
         event.setCanceled(true);
 
         //if(!mc.options.getCameraType().isFirstPerson())
@@ -156,17 +167,7 @@ public class CrosshairHandler
 
         if(mc.player.getUseItem().getItem() == Items.SHIELD)
             return;
-
-        PoseStack stack = event.getPoseStack();
-        stack.pushPose();
-        int scaledWidth = event.getWindow().getGuiScaledWidth();
-        int scaledHeight = event.getWindow().getGuiScaledHeight();
         crosshair.render(mc, stack, scaledWidth, scaledHeight, event.getPartialTick());
-        if (GunRenderingHandler.get().isRenderingHitMarker())
-        {
-        	Crosshair hitMarker = new SpecialHitMarker();
-        	hitMarker.render(mc, stack, scaledWidth, scaledHeight, event.getPartialTick());
-    	}
         stack.popPose();
     }
 

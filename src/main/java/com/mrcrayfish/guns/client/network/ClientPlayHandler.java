@@ -92,6 +92,14 @@ public class ClientPlayHandler
 	                world.addParticle(particle, true, message.getX(), message.getY(), message.getZ(), (Math.random()-0.5)*0.15, (Math.random()*0.02)-0.04, (Math.random()-0.5)*0.15);
 	            }
         	}
+        	if (message.isHeadshot())
+        	{
+        		for(int i = 0; i < 2; i++)
+	            {
+        			world.addParticle(ParticleTypes.CRIT, true, message.getX()+((Math.random()-0.5)*0.5), message.getY()+((Math.random()-0.5)*0.1)+0.1, message.getZ()+((Math.random()-0.5)*0.5), 0, 0, 0);
+	            }
+        	}
+        	
         }
     }
 
