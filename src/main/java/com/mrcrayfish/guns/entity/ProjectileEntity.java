@@ -339,7 +339,7 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
         Vec3 hitVec = null;
         Entity hitEntity = null;
         boolean headshot = false;
-        List<Entity> entities = this.level.getEntities(this, this.getBoundingBox().expandTowards(this.getDeltaMovement()).inflate(1.0), PROJECTILE_TARGETS);
+        List<Entity> entities = this.level.getEntities(this, this.getBoundingBox().expandTowards(this.getDeltaMovement()).inflate(1.0+this.projectile.getSize()), PROJECTILE_TARGETS);
         double closestDistance = Double.MAX_VALUE;
         for(Entity entity : entities)
         {

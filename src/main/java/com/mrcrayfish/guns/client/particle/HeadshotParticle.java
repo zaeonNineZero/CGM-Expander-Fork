@@ -33,6 +33,11 @@ public class HeadshotParticle extends TextureSheetParticle
     {
         return ParticleRenderType.PARTICLE_SHEET_LIT;
     }
+    
+    public int getLightColor(float pPartialTick)
+    {
+        return 255;
+    }
 
     @Override
     public void render(VertexConsumer buffer, Camera renderInfo, float partialTicks)

@@ -1,0 +1,47 @@
+// SMG, Assault Rifle, Machine Gun, etc.
+{
+  "ai": {
+    "type": "automatic",
+	
+	"minAutoShots": 3,
+	"maxAutoShots": 7,
+	
+	"minAutoCooldown": 10,
+	"maxAutoCooldown": 20,
+	
+	"minOptimalRange": 12,
+	"maxOptimalRange": 24,
+	
+	"inaccuracy": 4,
+	"perfectAimChance": 0.2,
+	
+	"sprayAtCloseRange": true,
+	"sprayRangeThreshold": 8,
+	
+	"waitForSpreadAtRange": true,
+	"waitForSpreadRangeThreshold": 24,
+	
+	"reloadMinExtraDelay": 5,
+	"reloadMaxExtraDelay": 15
+  }
+}
+
+// Pistol or other semi-automatic weapon
+{
+  "ai": {
+    "minSingleCooldown": 10,
+	"maxSingleCooldown": 20,
+	
+	"minOptimalRange": 12,
+	"maxOptimalRange": 24,
+	
+	"inaccuracy": 2,
+	"perfectAimChance": 0.1,
+	
+	"waitForSpreadAtRange": true,
+	"waitForSpreadRangeThreshold": 24,
+	
+	"reloadMinExtraDelay": 5,
+	"reloadMaxExtraDelay": 15
+  }
+}
