@@ -195,8 +195,8 @@ public abstract class Attachment
             {
                 addPerk(negativePerks, false, "perk.cgm.projectile_speed.negative");
             }*/
-            thisOutput = (float) inputSpeed;
-            thisInput = (float) outputSpeed;
+            thisOutput = (float) outputSpeed;
+            thisInput = (float) inputSpeed;
             if (thisOutput != thisInput)
             {
 	            perkType = (thisOutput >= thisInput ? positivePerks : negativePerks);
