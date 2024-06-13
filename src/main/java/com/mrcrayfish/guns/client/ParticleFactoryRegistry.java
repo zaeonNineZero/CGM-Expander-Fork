@@ -3,6 +3,7 @@ package com.mrcrayfish.guns.client;
 import com.mrcrayfish.guns.Reference;
 import com.mrcrayfish.guns.client.particle.BloodParticle;
 import com.mrcrayfish.guns.client.particle.BulletHoleParticle;
+import com.mrcrayfish.guns.client.particle.HeadshotParticle;
 import com.mrcrayfish.guns.client.particle.TrailParticle;
 import com.mrcrayfish.guns.init.ModParticleTypes;
 import net.minecraft.client.Minecraft;
@@ -24,6 +25,7 @@ public class ParticleFactoryRegistry
         ParticleEngine particleManager = Minecraft.getInstance().particleEngine;
         particleManager.register(ModParticleTypes.BULLET_HOLE.get(), (typeIn, worldIn, x, y, z, xSpeed, ySpeed, zSpeed) -> new BulletHoleParticle(worldIn, x, y, z, typeIn.getDirection(), typeIn.getPos()));
         particleManager.register(ModParticleTypes.BLOOD.get(), BloodParticle.Factory::new);
+        particleManager.register(ModParticleTypes.HEADSHOT.get(), HeadshotParticle.Factory::new);
         particleManager.register(ModParticleTypes.TRAIL.get(), TrailParticle.Factory::new);
     }
 }
