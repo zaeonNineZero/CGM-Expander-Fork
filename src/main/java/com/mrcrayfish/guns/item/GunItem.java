@@ -7,9 +7,11 @@ import com.mrcrayfish.guns.common.Gun;
 import com.mrcrayfish.guns.common.NetworkGunManager;
 import com.mrcrayfish.guns.debug.Debug;
 import com.mrcrayfish.guns.enchantment.EnchantmentTypes;
+import com.mrcrayfish.guns.util.GunCompositeStatHelper;
 import com.mrcrayfish.guns.util.GunEnchantmentHelper;
 import com.mrcrayfish.guns.util.GunModifierHelper;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
@@ -75,44 +77,16 @@ public class GunItem extends Item implements IColored, IMeta
         Gun modifiedGun = this.getModifiedGun(stack);
 
         Item ammo = ForgeRegistries.ITEMS.getValue(modifiedGun.getProjectile().getItem());
-        if(ammo != null)
+        if(ammo != null && (!Gun.hasInfiniteAmmo(stack) && !Gun.usesEnergy(stack)))
         {
-            tooltip.add(Component.translatable("info.cgm.ammo_type", Component.translatable(ammo.getDescriptionId()).withStyle(ChatFormatting.WHITE)).withStyle(ChatFormatting.GRAY));
+        	tooltip.add(Component.translatable("info.cgm.ammo_type", Component.translatable(ammo.getDescriptionId()).withStyle(ChatFormatting.WHITE)).withStyle(ChatFormatting.GRAY));
         }
 
         String additionalDamageText = "";
         CompoundTag tagCompound = stack.getTag();
         if(tagCompound != null)
         {
-            if(tagCompound.contains("AdditionalDamage", Tag.TAG_ANY_NUMERIC))
-            {
-                float additionalDamage = tagCompound.getFloat("AdditionalDamage");
-                additionalDamage += GunModifierHelper.getAdditionalDamage(stack);
-
-                if(additionalDamage > 0)
-                {
-                    additionalDamageText = ChatFormatting.GREEN + " +" + ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(additionalDamage);
-                }
-                else if(additionalDamage < 0)
-                {
-                    additionalDamageText = ChatFormatting.RED + " " + ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(additionalDamage);
-                }
-            }
-        }
-
-        float damage = modifiedGun.getProjectile().getDamage();
-        damage = GunModifierHelper.getModifiedProjectileDamage(stack, damage);
-        damage = GunEnchantmentHelper.getAcceleratorDamage(stack, damage);
-        tooltip.add(Component.translatable("info.cgm.damage", ChatFormatting.WHITE + ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(damage) + additionalDamageText).withStyle(ChatFormatting.GRAY));
-
-        if(tagCompound != null)
-        {
-            if(Gun.usesEnergy(stack))
-            {
-                    int energy = tagCompound.getInt("Energy");
-                	tooltip.add(Component.translatable("info.cgm.energy", ChatFormatting.WHITE.toString() + energy + "/" + modifiedGun.getGeneral().getEnergyCapacity()).withStyle(ChatFormatting.AQUA));
-            }
-        	if(Gun.hasInfiniteAmmo(stack))
+            if(Gun.hasInfiniteAmmo(stack))
             {
                 if(!Gun.usesEnergy(stack))
                 	tooltip.add(Component.translatable("info.cgm.ignore_ammo").withStyle(ChatFormatting.AQUA));
@@ -122,9 +96,86 @@ public class GunItem extends Item implements IColored, IMeta
                 int ammoCount = tagCompound.getInt("AmmoCount");
                 tooltip.add(Component.translatable("info.cgm.ammo", ChatFormatting.WHITE.toString() + ammoCount + "/" + GunEnchantmentHelper.getAmmoCapacity(stack, modifiedGun)).withStyle(ChatFormatting.GRAY));
             }
+            if(Gun.usesEnergy(stack))
+            {
+                    int energy = tagCompound.getInt("Energy");
+                	tooltip.add(Component.translatable("info.cgm.energy", ChatFormatting.WHITE.toString() + energy + "/" + modifiedGun.getGeneral().getEnergyCapacity()).withStyle(ChatFormatting.DARK_AQUA));
+            }
         }
+        
+        if (Screen.hasShiftDown())
+        {
+        	tooltip.add(Component.translatable("info.cgm.gun_details").withStyle(ChatFormatting.GOLD));
 
-        tooltip.add(Component.translatable("info.cgm.attachment_help", KeyBinds.KEY_ATTACHMENTS.getTranslatedKeyMessage().getString().toUpperCase(Locale.ENGLISH)).withStyle(ChatFormatting.YELLOW));
+        	// Additional Damage
+        	if(tagCompound != null)
+            {
+                if(tagCompound.contains("AdditionalDamage", Tag.TAG_ANY_NUMERIC))
+                {
+                    float additionalDamage = tagCompound.getFloat("AdditionalDamage");
+                    additionalDamage += GunModifierHelper.getAdditionalDamage(stack);
+
+                    if(additionalDamage > 0)
+                    {
+                        additionalDamageText = ChatFormatting.GREEN + " +" + ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(additionalDamage);
+                    }
+                    else if(additionalDamage < 0)
+                    {
+                        additionalDamageText = ChatFormatting.RED + " " + ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(additionalDamage);
+                    }
+                }
+            }
+        	
+        	// Damage
+            float damage = modifiedGun.getProjectile().getDamage();
+            damage = GunModifierHelper.getModifiedProjectileDamage(stack, damage);
+            damage = GunEnchantmentHelper.getAcceleratorDamage(stack, damage);
+            tooltip.add(Component.translatable("info.cgm.damage", ChatFormatting.WHITE + ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(damage) + additionalDamageText).withStyle(ChatFormatting.GRAY));
+
+        	// Fire Rate
+            int rate = modifiedGun.getGeneral().getRate();
+            rate = GunCompositeStatHelper.getCompositeBaseRate(stack, modifiedGun);
+            tooltip.add(Component.translatable("info.cgm.rate", ChatFormatting.WHITE + ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(rate)).withStyle(ChatFormatting.GRAY));
+
+        	// Recoil
+            float recoil = modifiedGun.getGeneral().getRecoilAngle();
+            //recoil = GunCompositeStatHelper.getCompositeRecoil(stack, modifiedGun);
+            recoil *= 1.0F - GunModifierHelper.getRecoilModifier(stack);
+            //tooltip.add(Component.translatable("info.cgm.recoil", ChatFormatting.WHITE + ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(recoil)).withStyle(ChatFormatting.GRAY));
+            tooltip.add(Component.translatable("info.cgm.recoil").withStyle(ChatFormatting.GRAY).append(Component.literal(ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(recoil) + "°").withStyle(ChatFormatting.WHITE)));
+            
+            // Spread
+            float spread = modifiedGun.getGeneral().getSpread();
+            float minSpread = modifiedGun.getGeneral().getRestingSpread();
+            spread = GunCompositeStatHelper.getCompositeSpread(stack, modifiedGun);
+            minSpread = GunCompositeStatHelper.getCompositeMinSpread(stack, modifiedGun);
+            boolean isAlwaysSpread = (minSpread<=0 && modifiedGun.getGeneral().isAlwaysSpread());
+            minSpread = (minSpread<=0 ? (isAlwaysSpread ? spread : 0) : minSpread);
+            if ((minSpread!=spread) && ((minSpread>0) || (!isAlwaysSpread)))
+            tooltip.add(Component.translatable("info.cgm.spread").withStyle(ChatFormatting.GRAY).append(Component.literal(ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(minSpread) + "° Min. - " + ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(spread) + "° Max.").withStyle(ChatFormatting.WHITE)));
+            else
+            tooltip.add(Component.translatable("info.cgm.spread").withStyle(ChatFormatting.GRAY).append(Component.literal(ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(spread) + "°").withStyle(ChatFormatting.WHITE)));
+
+        	// ADS Spread
+            float adsSpread = spread * (1-(modifiedGun.getGeneral().getSpreadAdsReduction()));
+            float adsMinSpread = minSpread * (1-(modifiedGun.getGeneral().getSpreadAdsReduction()));
+            if (adsSpread!=spread)
+            {
+            	//if (adsSpread>0)
+            	//tooltip.add(Component.translatable("info.cgm.ads_spread").withStyle(ChatFormatting.GRAY).append(Component.literal(ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(adsSpread) + "°").withStyle(ChatFormatting.WHITE)));
+            	if ((adsMinSpread!=adsSpread) && ((adsMinSpread>0) || (!isAlwaysSpread)))
+                tooltip.add(Component.translatable("info.cgm.ads_spread").withStyle(ChatFormatting.GRAY).append(Component.literal(ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(adsMinSpread) + "° Min. - " + ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(adsSpread) + "° Max.").withStyle(ChatFormatting.WHITE)));
+                else
+                tooltip.add(Component.translatable("info.cgm.ads_spread").withStyle(ChatFormatting.GRAY).append(Component.literal(ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(adsSpread) + "°").withStyle(ChatFormatting.WHITE)));
+            }
+            
+        }
+        else
+        {
+        	// Helper tooltips
+        	tooltip.add(Component.translatable("info.cgm.attachment_help", KeyBinds.KEY_ATTACHMENTS.getTranslatedKeyMessage().getString().toUpperCase(Locale.ENGLISH)).withStyle(ChatFormatting.YELLOW));
+        	tooltip.add(Component.translatable("info.cgm.gun_details_help").withStyle(ChatFormatting.GOLD));
+        }
     }
 
     @Override

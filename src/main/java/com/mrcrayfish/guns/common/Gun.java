@@ -1128,6 +1128,9 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         @Optional
         @Nullable
         private ResourceLocation enchantedFire;
+        @Optional
+        @Nullable
+        private ResourceLocation emptyClick;
 
         @Override
         public CompoundTag serializeNBT()
@@ -1156,6 +1159,10 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             if(this.enchantedFire != null)
             {
                 tag.putString("EnchantedFire", this.enchantedFire.toString());
+            }
+            if(this.emptyClick != null)
+            {
+                tag.putString("EmptyClick", this.emptyClick.toString());
             }
             return tag;
         }
@@ -1187,6 +1194,10 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             {
                 this.enchantedFire = this.createSound(tag, "EnchantedFire");
             }
+            if(tag.contains("EmptyClick", Tag.TAG_STRING))
+            {
+                this.emptyClick = this.createSound(tag, "EmptyClick");
+            }
         }
 
         public JsonObject toJsonObject()
@@ -1216,6 +1227,10 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             {
                 object.addProperty("enchantedFire", this.enchantedFire.toString());
             }
+            if(this.emptyClick != null)
+            {
+                object.addProperty("emptyClick", this.emptyClick.toString());
+            }
             return object;
         }
 
@@ -1228,6 +1243,7 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             sounds.cock = this.cock;
             sounds.silencedFire = this.silencedFire;
             sounds.enchantedFire = this.enchantedFire;
+            sounds.emptyClick = this.emptyClick;
             return sounds;
         }
 
@@ -1248,7 +1264,7 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         }
 
         /**
-         * @return The registry iid of the sound event when reloading this weapon
+         * @return The registry id of the sound event when reloading this weapon
          */
         @Nullable
         public ResourceLocation getReload()
@@ -1257,7 +1273,7 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         }
 
         /**
-         * @return The registry iid of the sound event when reloading this weapon
+         * @return The registry id of the sound event when starting to reload this weapon
          */
         @Nullable
         public ResourceLocation getReloadStart()
@@ -1266,7 +1282,7 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         }
 
         /**
-         * @return The registry iid of the sound event when cocking this weapon
+         * @return The registry id of the sound event when cocking/chambering this weapon
          */
         @Nullable
         public ResourceLocation getCock()
@@ -1275,7 +1291,7 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         }
 
         /**
-         * @return The registry iid of the sound event when silenced firing this weapon
+         * @return The registry id of the sound event when firing this weapon while it's silenced
          */
         @Nullable
         public ResourceLocation getSilencedFire()
@@ -1284,12 +1300,23 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         }
 
         /**
-         * @return The registry iid of the sound event when silenced firing this weapon
+         * @return The registry id of the sound event when firing this weapon while it's enchanted
          */
         @Nullable
         public ResourceLocation getEnchantedFire()
         {
             return this.enchantedFire;
+        }
+
+        /**
+         * @return The registry id of the sound event when attempting to shoot while the gun is empty.
+         */
+        @Nullable
+        public ResourceLocation getEmptyClick()
+        {
+            if (this.emptyClick==null)
+            	return new ResourceLocation(Reference.MOD_ID, "item.empty_click");
+        	return this.emptyClick;
         }
     }
 

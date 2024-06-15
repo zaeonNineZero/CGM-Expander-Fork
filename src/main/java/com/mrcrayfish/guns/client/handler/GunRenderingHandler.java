@@ -788,8 +788,8 @@ public class GunRenderingHandler
             		this.doUpdateAmmo = false;
             	}
             	String displayReserveAmmo = (!Gun.hasUnlimitedReloads(heldItem) ? "" + reserveAmmo: "∞");
-	            MutableComponent reserveAmmoValue = (Component.literal("( " + displayReserveAmmo + " )"));
-	            GuiComponent.drawString(poseStack, Minecraft.getInstance().font, reserveAmmoValue, ammoPosX, ammoPosY+10, 0xFFFFFF);
+	            MutableComponent reserveAmmoValue = (Component.literal("  " + displayReserveAmmo));
+	            GuiComponent.drawString(poseStack, Minecraft.getInstance().font, reserveAmmoValue, ammoPosX, ammoPosY+10, 0xAAAAAA);
             }
 
             RenderSystem.disableBlend();

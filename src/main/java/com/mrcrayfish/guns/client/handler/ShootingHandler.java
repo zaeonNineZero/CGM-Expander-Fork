@@ -2,11 +2,13 @@ package com.mrcrayfish.guns.client.handler;
 
 import com.mrcrayfish.guns.Config;
 import com.mrcrayfish.guns.GunMod;
+import com.mrcrayfish.guns.Reference;
 import com.mrcrayfish.guns.client.KeyBinds;
 import com.mrcrayfish.guns.common.GripType;
 import com.mrcrayfish.guns.common.Gun;
 import com.mrcrayfish.guns.compat.PlayerReviveHelper;
 import com.mrcrayfish.guns.event.GunFireEvent;
+import com.mrcrayfish.guns.init.ModSounds;
 import com.mrcrayfish.guns.init.ModSyncedDataKeys;
 import com.mrcrayfish.guns.item.GunItem;
 import com.mrcrayfish.guns.network.PacketHandler;
@@ -17,6 +19,11 @@ import com.mrcrayfish.guns.util.GunCompositeStatHelper;
 import com.mrcrayfish.guns.util.GunEnchantmentHelper;
 import com.mrcrayfish.guns.util.GunModifierHelper;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.client.resources.sounds.SoundInstance;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemCooldowns;
@@ -27,6 +34,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.registries.ForgeRegistries;
 
 /**
  * Author: MrCrayfish
@@ -45,6 +53,7 @@ public class ShootingHandler
     }
 
     private boolean shooting;
+    private boolean doEmptyClick;
 
     private int slot = -1;
 
@@ -85,36 +94,39 @@ public class ShootingHandler
                 event.setCanceled(true);
             }
         }
-        else if(Config.CLIENT.controls.flipControls.get() ? event.isAttack() : event.isUseItem())
+        else 
         {
-            ItemStack heldItem = player.getMainHandItem();
-            if(heldItem.getItem() instanceof GunItem gunItem)
-            {
-                if(event.getHand() == InteractionHand.OFF_HAND)
-                {
-                    // Allow shields to be used if weapon is one-handed
-                    if(player.getOffhandItem().getItem() == Items.SHIELD)
-                    {
-                        Gun modifiedGun = gunItem.getModifiedGun(heldItem);
-                        if(modifiedGun.getGeneral().getGripType() == GripType.ONE_HANDED || modifiedGun.getGeneral().getGripType() == GripType.PISTOL_CUSTOM)
-                        {
-                            return;
-                        }
-                    }
-                    event.setCanceled(true);
-                    event.setSwingHand(false);
-                    return;
-                }
-                if(Config.CLIENT.controls.flipControls.get() || AimingHandler.get().isZooming() && AimingHandler.get().isLookingAtInteractableBlock())
-                {
-                    event.setCanceled(true);
-                    event.setSwingHand(false);
-                }
-            }
+        	if(Config.CLIENT.controls.flipControls.get() ? event.isAttack() : event.isUseItem())
+	        {
+	            ItemStack heldItem = player.getMainHandItem();
+	            if(heldItem.getItem() instanceof GunItem gunItem)
+	            {
+	                if(event.getHand() == InteractionHand.OFF_HAND)
+	                {
+	                    // Allow shields to be used if weapon is one-handed
+	                    if(player.getOffhandItem().getItem() == Items.SHIELD)
+	                    {
+	                        Gun modifiedGun = gunItem.getModifiedGun(heldItem);
+	                        if(modifiedGun.getGeneral().getGripType() == GripType.ONE_HANDED || modifiedGun.getGeneral().getGripType() == GripType.PISTOL_CUSTOM)
+	                        {
+	                            return;
+	                        }
+	                    }
+	                    event.setCanceled(true);
+	                    event.setSwingHand(false);
+	                    return;
+	                }
+	                if(Config.CLIENT.controls.flipControls.get() || AimingHandler.get().isZooming() && AimingHandler.get().isLookingAtInteractableBlock())
+	                {
+	                    event.setCanceled(true);
+	                    event.setSwingHand(false);
+	                }
+	            }
+	        }
         }
     }
 
-    @SubscribeEvent
+	@SubscribeEvent
     public void onHandleShooting(TickEvent.ClientTickEvent event)
     {
         if(event.phase != TickEvent.Phase.START)
@@ -128,7 +140,7 @@ public class ShootingHandler
         if(player != null)
         {
             ItemStack heldItem = player.getMainHandItem();
-            if(heldItem.getItem() instanceof GunItem && (Gun.hasAmmo(heldItem) || player.isCreative()) && !PlayerReviveHelper.isBleeding(player))
+            if(heldItem.getItem() instanceof GunItem && !isEmpty(player, heldItem) && !PlayerReviveHelper.isBleeding(player))
             {
                 Gun gun = ((GunItem) heldItem.getItem()).getModifiedGun(heldItem);
                 boolean shooting = (KeyBinds.getShootMapping().isDown() && !ModSyncedDataKeys.ONBURSTCOOLDOWN.getValue(player)) || (ModSyncedDataKeys.BURSTCOUNT.getValue(player)>0 && gun.getGeneral().hasBurstFire());
@@ -198,6 +210,8 @@ public class ShootingHandler
                     	KeyBinds.getShootMapping().setDown(false);
                     }
                 }
+            	else
+                doEmptyClick = true;
             }
             
             // Update stack and slot variables
@@ -205,19 +219,13 @@ public class ShootingHandler
         }
     }
 
-    public void fire(Player player, ItemStack heldItem)
+    private boolean canFire(Player player, ItemStack heldItem)
     {
-        if(!(heldItem.getItem() instanceof GunItem))
-            return;
+    	if(!(heldItem.getItem() instanceof GunItem))
+            return false;
         
         if(player.isSpectator())
-            return;
-
-        if((!Gun.hasAmmo(heldItem) || !Gun.canShoot(heldItem)) && !player.isCreative())
-            return;
-        
-        if(player.isSprinting()) //*NEW* Stop sprinting when attempting to shoot a gun.
-            player.setSprinting(false);
+            return false;
         
         if(ModSyncedDataKeys.RELOADING.getValue(player)) //*NEW* Disallow firing while reloading, and cancel reload.
         {
@@ -227,24 +235,99 @@ public class ShootingHandler
         		ModSyncedDataKeys.RELOADING.setValue(player, false);
         		PacketHandler.getPlayChannel().sendToServer(new C2SMessageReload(false));
         	}
-        	return;
+        	return false;
         }
         
         if(ModSyncedDataKeys.SWITCHTIME.getValue(player) > 0) //*NEW* Disallow firing during the weapon switch/reload time.
         {
-        	return;
+        	return false;
         }
         
         if(ModSyncedDataKeys.ONBURSTCOOLDOWN.getValue(player)) //*NEW* Disallow firing during the burst cooldown period.
         {
         	GunItem gunItem = (GunItem) heldItem.getItem();
         	if (gunItem.getModifiedGun(heldItem).getGeneral().hasBurstFire() && ModSyncedDataKeys.BURSTCOUNT.getValue(player)<=0)
-        	return;
+        	return false;
         }
 
         if(player.getUseItem().getItem() == Items.SHIELD)
+            return false;
+        
+        return true;
+	}
+
+    private boolean isEmpty(Player player, ItemStack heldItem)
+    {
+    	if(!(heldItem.getItem() instanceof GunItem))
+            return false;
+        
+        if(player.isSpectator())
+            return false;
+
+        if((!Gun.hasAmmo(heldItem) || !Gun.canShoot(heldItem)) && !player.isCreative())
+            return true;
+        return false;
+	}
+    
+    private boolean canUseTrigger(Player player, ItemStack heldItem)
+    {
+    	if(!(heldItem.getItem() instanceof GunItem))
+            return false;
+        
+        if(player.isSpectator())
+            return false;
+        
+        if(ModSyncedDataKeys.RELOADING.getValue(player))
+        {
+        	return false;
+        }
+        
+        if(ModSyncedDataKeys.SWITCHTIME.getValue(player) > 0)
+        {
+        	return false;
+        }
+        
+        if(ModSyncedDataKeys.ONBURSTCOOLDOWN.getValue(player))
+        {
+        	GunItem gunItem = (GunItem) heldItem.getItem();
+        	if (gunItem.getModifiedGun(heldItem).getGeneral().hasBurstFire() && ModSyncedDataKeys.BURSTCOUNT.getValue(player)<=0)
+        	return false;
+        }
+
+        if(player.getUseItem().getItem() == Items.SHIELD)
+            return false;
+        
+        return true;
+	}
+
+    public void fire(Player player, ItemStack heldItem)
+    {
+        if(!(heldItem.getItem() instanceof GunItem))
             return;
 
+        if(isEmpty(player, heldItem))
+        {	
+
+            ItemCooldowns tracker = player.getCooldowns();
+            if(!tracker.isOnCooldown(heldItem.getItem()))
+            {
+            	if (doEmptyClick && heldItem.getItem() instanceof GunItem gunItem && canUseTrigger(player, heldItem))
+	        	{
+		            Minecraft.getInstance().getSoundManager().play(new SimpleSoundInstance(gunItem.getModifiedGun(heldItem).getSounds().getEmptyClick(), SoundSource.PLAYERS, 0.8F, 1.0F, Minecraft.getInstance().level.getRandom(), false, 0, SoundInstance.Attenuation.NONE, 0, 0, 0, true));
+		        	doEmptyClick = false;
+	        	}
+        	}
+        	if (ModSyncedDataKeys.BURSTCOUNT.getValue(player)>0)
+        	ModSyncedDataKeys.BURSTCOUNT.setValue(player, 0);
+        	return;
+        }
+        
+        if(player.isSprinting()) //*NEW* Stop sprinting when attempting to shoot a gun.
+            player.setSprinting(false);
+        
+        if(!canFire(player, heldItem))
+            return;
+        
         ItemCooldowns tracker = player.getCooldowns();
         if(!tracker.isOnCooldown(heldItem.getItem()))
         {

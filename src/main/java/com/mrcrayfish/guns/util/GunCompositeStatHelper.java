@@ -27,6 +27,18 @@ public class GunCompositeStatHelper
         return GunEnchantmentHelper.getRampUpRate(player, weapon, b);
 	}
 	
+	public static int getCompositeBaseRate(ItemStack weapon, Gun modifiedGun)
+    {
+        int a = GunEnchantmentHelper.getRate(weapon, modifiedGun);
+        return GunModifierHelper.getModifiedRate(weapon, a);
+    }
+	public static int getCompositeBaseRate(ItemStack weapon) {
+		// Version of getCompositeBaseRate that only requires an ItemStack input
+    	Gun modifiedGun = ((GunItem) weapon.getItem()).getModifiedGun(weapon);
+		int a = GunEnchantmentHelper.getRate(weapon, modifiedGun);
+		return GunModifierHelper.getModifiedRate(weapon, a);
+	}
+	
 	public static float getCompositeSpread(ItemStack weapon, Gun modifiedGun)
     {
         //float a = GunEnchantmentHelper.getSpread(weapon, modifiedGun);
