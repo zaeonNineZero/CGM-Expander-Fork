@@ -102,12 +102,12 @@ public class SwitchGunTracker
             if (doGunSwitch)
             {
             	ModSyncedDataKeys.SWITCHTIME.setValue(player, 5);
-            	if(player.getInventory().getSelected().getItem() instanceof GunItem)
+            	/*if(player.getInventory().getSelected().getItem() instanceof GunItem)
             	{
             		ItemStack newStack = player.getInventory().getSelected();
             		Gun newGun = ((GunItem) newStack.getItem()).getModifiedGun(newStack);
                 	GunRenderingHandler.get().forceSetReserveAmmo(tracker.getInventoryAmmo(player, newGun));
-            	}
+            	}*/
             	if(SWITCHGUN_TRACKER_MAP.containsKey(player))
                 {
             		SWITCHGUN_TRACKER_MAP.remove(player);

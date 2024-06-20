@@ -548,12 +548,13 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
             	}
             	else
             	{
-            		if (this.pierceDamageFraction<=0.05F || this.pierceCount>100)
+            		int maxPierceCount = projectile.getMaxPierceCount(); //(projectile.getMaxPierceCount()>0 ? projectile.getMaxPierceCount()+(collateralLevel*4) : 0);
+            		if (this.pierceCount>maxPierceCount && maxPierceCount>0)
                 	this.remove(RemovalReason.KILLED);
             		else
             		{
             			this.pierceCount++;
-            			this.pierceDamageFraction -= this.modifiedGun.getProjectile().getPierceDamagePenalty();
+            			//this.pierceDamageFraction -= this.modifiedGun.getProjectile().getPierceDamagePenalty();
             		}
             	}
         	}

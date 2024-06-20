@@ -194,6 +194,8 @@ public class ShootingHandler
             {
             	ModSyncedDataKeys.SWITCHTIME.setValue(player, 1);
             	ModSyncedDataKeys.BURSTCOUNT.setValue(player, 0);
+                if(player.getMainHandItem().getItem() instanceof GunItem)
+            	GunRenderingHandler.get().updateReserveAmmo(player);
             }
             
             ItemStack heldItem = player.getMainHandItem();

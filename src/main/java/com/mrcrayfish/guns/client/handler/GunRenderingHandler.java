@@ -18,6 +18,7 @@ import com.mrcrayfish.guns.client.util.PropertyHelper;
 import com.mrcrayfish.guns.client.util.RenderUtil;
 import com.mrcrayfish.guns.common.GripType;
 import com.mrcrayfish.guns.common.Gun;
+import com.mrcrayfish.guns.common.ProjectileManager;
 import com.mrcrayfish.guns.common.ReloadTracker;
 import com.mrcrayfish.guns.common.properties.SightAnimation;
 import com.mrcrayfish.guns.event.GunFireEvent;
@@ -41,7 +42,9 @@ import net.minecraft.client.renderer.ItemInHandRenderer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
+import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
@@ -770,7 +773,16 @@ public class GunRenderingHandler
 
             int ammoPosX = (int) (window.getGuiScaledWidth()*0.87);
             int ammoPosY = (int) (window.getGuiScaledHeight()*0.8);
-
+            
+            // Ammo Item Icon
+            Item ammoItem = ForgeRegistries.ITEMS.getValue(gun.getProjectile().getItem());
+            if(ammoItem != null && (!Gun.hasInfiniteAmmo(heldItem) || gun.getProjectile().getProjectileOverride()==null))
+            {
+                ItemStack ammoStack = new ItemStack(ammoItem, 1);
+                ItemRenderer itemRenderer = Minecraft.getInstance().getItemRenderer();
+				itemRenderer.renderGuiItem(ammoStack, ammoPosX-17, ammoPosY);
+            }
+            
             PoseStack poseStack = new PoseStack();
             int currentAmmo = tagCompound.getInt("AmmoCount");
             MutableComponent ammoCountValue = (Component.literal(currentAmmo + " / " + GunEnchantmentHelper.getAmmoCapacity(heldItem, gun)).withStyle(ChatFormatting.BOLD));
@@ -788,8 +800,8 @@ public class GunRenderingHandler
             		this.doUpdateAmmo = false;
             	}
             	String displayReserveAmmo = (!Gun.hasUnlimitedReloads(heldItem) ? "" + reserveAmmo: "∞");
-	            MutableComponent reserveAmmoValue = (Component.literal("  " + displayReserveAmmo));
-	            GuiComponent.drawString(poseStack, Minecraft.getInstance().font, reserveAmmoValue, ammoPosX, ammoPosY+10, 0xAAAAAA);
+	            MutableComponent reserveAmmoValue = (Component.literal(" " + displayReserveAmmo));
+	            GuiComponent.drawString(poseStack, Minecraft.getInstance().font, reserveAmmoValue, ammoPosX, ammoPosY+10, (reserveAmmo<=0 && !Gun.hasUnlimitedReloads(heldItem) ? 0x555555 : 0xAAAAAA));
             }
 
             RenderSystem.disableBlend();
@@ -1005,6 +1017,7 @@ public class GunRenderingHandler
         poseStack.translate(translateX * side, 0, 0);
 
         float interval = GunEnchantmentHelper.getRealReloadSpeed(stack);
+        interval *= (modifiedGun.getGeneral().getUseMagReload() ? 0.5F : 1F);
         float reload = ((mc.player.tickCount - ReloadHandler.get().getStartReloadTick() + mc.getFrameTime()) % interval) / interval;
         float percent = 1.0F - reload;
         if(percent >= 0.5F)
