@@ -374,7 +374,12 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
                 EntityResult result = this.getHitResult(entity, startVec, endVec);
                 if(result == null)
                     continue;
-                hitEntities.add(result);
+                int maxPierceCount = projectile.getMaxPierceCount(); //(projectile.getMaxPierceCount()>0 ? projectile.getMaxPierceCount()+(collateralLevel*4) : 0);
+        		if (this.pierceCount<=maxPierceCount || maxPierceCount<=0)
+        		{
+        			hitEntities.add(result);
+        			this.pierceCount++;
+        		}
             }
         }
         Collections.reverse(hitEntities);
@@ -545,7 +550,7 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
             	{
                 	this.remove(RemovalReason.KILLED);
             	}
-            	else
+            	/*else
             	{
             		int maxPierceCount = projectile.getMaxPierceCount(); //(projectile.getMaxPierceCount()>0 ? projectile.getMaxPierceCount()+(collateralLevel*4) : 0);
             		if (this.pierceCount>=maxPierceCount && maxPierceCount>0)
@@ -555,7 +560,7 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
             			this.pierceCount++;
             			//this.pierceDamageFraction -= this.modifiedGun.getProjectile().getPierceDamagePenalty();
             		}
-            	}
+            	}*/
         	}
 
             entity.invulnerableTime = 0;
