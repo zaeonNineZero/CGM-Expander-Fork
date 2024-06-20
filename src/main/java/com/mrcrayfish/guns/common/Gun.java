@@ -800,7 +800,7 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             {
                 this.maxRangeDamageMultiplier = tag.getFloat("MaxRangeDamageMultiplier");
             }
-            if(tag.contains("PierceDamagePenalty", Tag.TAG_ANY_NUMERIC))
+            if(tag.contains("MaxPierceCount", Tag.TAG_ANY_NUMERIC))
             {
                 this.maxPierceCount = tag.getInt("MaxPierceCount");
             }
@@ -885,7 +885,7 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             if(this.visible) object.addProperty("visible", true);
             object.addProperty("damage", this.damage);
             if(this.maxRangeDamageMultiplier != 0.0F) object.addProperty("maxRangeDamageMultiplier", this.maxRangeDamageMultiplier);
-            if(this.maxPierceCount != 0) object.addProperty("pierceDamagePenalty", this.maxPierceCount);
+            if(this.maxPierceCount != 0) object.addProperty("maxPierceCount", this.maxPierceCount);
             if(this.headshotExtraDamage != 0.0F) object.addProperty("headshotExtraDamage", this.headshotExtraDamage);
             if(this.headshotMultiplierBonus != 0.0F) object.addProperty("headshotMultiplierBonus", this.headshotMultiplierBonus);
             if(this.headshotMultiplierMin != 1.0F) object.addProperty("headshotMultiplierMin", this.headshotMultiplierMin);

@@ -96,7 +96,6 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
     private ItemStack weapon = ItemStack.EMPTY;
     private ItemStack item = ItemStack.EMPTY;
     protected float additionalDamage = 0.0F;
-    protected float pierceDamageFraction = 1.0F;
     protected int pierceCount = 0;
     protected EntityDimensions entitySize;
     protected double modifiedGravity;
@@ -549,7 +548,7 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
             	else
             	{
             		int maxPierceCount = projectile.getMaxPierceCount(); //(projectile.getMaxPierceCount()>0 ? projectile.getMaxPierceCount()+(collateralLevel*4) : 0);
-            		if (this.pierceCount>maxPierceCount && maxPierceCount>0)
+            		if (this.pierceCount>=maxPierceCount && maxPierceCount>0)
                 	this.remove(RemovalReason.KILLED);
             		else
             		{
@@ -583,7 +582,7 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
             }
             
             if (this.modifiedGun.getProjectile().getHeadshotExtraDamage()>0)
-            	damage += this.modifiedGun.getProjectile().getHeadshotExtraDamage()*this.pierceDamageFraction;
+            	damage += this.modifiedGun.getProjectile().getHeadshotExtraDamage();
         }
 
         DamageSource source = new DamageSourceProjectile("bullet", this, shooter, weapon).setProjectile();
@@ -729,7 +728,6 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
         float damage = initialDamage / this.general.getProjectileAmount();
         damage = GunModifierHelper.getModifiedDamage(this.weapon, this.modifiedGun, damage);
         damage = GunEnchantmentHelper.getAcceleratorDamage(this.weapon, damage);
-        damage *= pierceDamageFraction;
         return Math.max(0F, damage);
     }
 
