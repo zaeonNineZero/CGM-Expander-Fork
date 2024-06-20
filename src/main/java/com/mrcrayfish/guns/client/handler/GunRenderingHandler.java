@@ -14,6 +14,7 @@ import com.mrcrayfish.guns.client.render.IHeldAnimation;
 import com.mrcrayfish.guns.client.render.gun.IOverrideModel;
 import com.mrcrayfish.guns.client.render.gun.ModelOverrides;
 import com.mrcrayfish.guns.client.render.pose.OneHandedPose;
+import com.mrcrayfish.guns.client.util.GunAnimationHelper;
 import com.mrcrayfish.guns.client.util.PropertyHelper;
 import com.mrcrayfish.guns.client.util.RenderUtil;
 import com.mrcrayfish.guns.common.GripType;
@@ -59,6 +60,7 @@ import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemCooldowns;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
@@ -894,8 +896,24 @@ public class GunRenderingHandler
                         poseStack.translate(gunOrigin.x * 0.0625, gunOrigin.y * 0.0625, gunOrigin.z * 0.0625);
 
                         /* Translate to the position this attachment mounts on the weapon */
+                        /* Also apply any attachment animations while we're here */
                         Vec3 translation = PropertyHelper.getAttachmentPosition(stack, modifiedGun, type).subtract(gunOrigin);
-                        poseStack.translate(translation.x * 0.0625, translation.y * 0.0625, translation.z * 0.0625);
+                        if (PropertyHelper.hasAttachmentAnimation(stack, type))
+                        {
+                        	Vec3 animate = Vec3.ZERO;
+                        	boolean isPlayer = (entity != null && entity.equals(Minecraft.getInstance().player) ? true : false);
+                        	boolean correctContext = (transformType == ItemTransforms.TransformType.FIRST_PERSON_RIGHT_HAND || transformType == ItemTransforms.TransformType.THIRD_PERSON_RIGHT_HAND || transformType == ItemTransforms.TransformType.FIRST_PERSON_LEFT_HAND || transformType == ItemTransforms.TransformType.THIRD_PERSON_LEFT_HAND);
+                        	float cooldown = 0F;
+                        	if (isPlayer && correctContext)
+                        	{
+                            	ItemCooldowns tracker = Minecraft.getInstance().player.getCooldowns();
+                                cooldown = tracker.getCooldownPercent(stack.getItem(), Minecraft.getInstance().getFrameTime());
+                        	}
+                        	animate = GunAnimationHelper.getAttachmentTranslation(stack, type, cooldown);
+                        	poseStack.translate((translation.x + animate.x) * 0.0625, (translation.y + animate.y) * 0.0625, (translation.z + animate.z) * 0.0625);
+                    	}
+                        else
+                        poseStack.translate((translation.x) * 0.0625, (translation.y) * 0.0625, (translation.z) * 0.0625);
 
                         /* Scales the attachment. Also translates the delta of the attachment origin to (8, 8, 8) since this is the centered origin for scaling */
                         Vec3 scale = PropertyHelper.getAttachmentScale(stack, modifiedGun, type);
@@ -1017,7 +1035,6 @@ public class GunRenderingHandler
         poseStack.translate(translateX * side, 0, 0);
 
         float interval = GunEnchantmentHelper.getRealReloadSpeed(stack);
-        interval *= (modifiedGun.getGeneral().getUseMagReload() ? 0.5F : 1F);
         float reload = ((mc.player.tickCount - ReloadHandler.get().getStartReloadTick() + mc.getFrameTime()) % interval) / interval;
         float percent = 1.0F - reload;
         if(percent >= 0.5F)

@@ -2,6 +2,7 @@ package com.mrcrayfish.guns.client.util;
 
 import com.mrcrayfish.framework.api.client.FrameworkClientAPI;
 import com.mrcrayfish.framework.api.serialize.DataArray;
+import com.mrcrayfish.framework.api.serialize.DataBoolean;
 import com.mrcrayfish.framework.api.serialize.DataNumber;
 import com.mrcrayfish.framework.api.serialize.DataObject;
 import com.mrcrayfish.framework.api.serialize.DataType;
@@ -11,6 +12,7 @@ import com.mrcrayfish.guns.common.Gun;
 import com.mrcrayfish.guns.common.properties.SightAnimation;
 import com.mrcrayfish.guns.item.IMeta;
 import com.mrcrayfish.guns.item.attachment.IAttachment;
+import com.mrcrayfish.guns.item.attachment.IAttachment.Type;
 import com.mrcrayfish.guns.item.attachment.IBarrel;
 import com.mrcrayfish.guns.item.attachment.IScope;
 import com.mrcrayfish.guns.item.attachment.impl.Scope;
@@ -344,6 +346,161 @@ public final class PropertyHelper
         // Return zero, which means current fov is used
         return 0;
     }
+    
+    
+    // Gun animation stuff
+
+	public static boolean hasAnimation(ItemStack weapon) {
+		DataObject weaponObject = getObjectByPath(weapon, WEAPON_KEY);
+        return weaponObject.has("animTranslate", DataType.OBJECT) || weaponObject.has("animRotation", DataType.OBJECT);
+	}
+	public static boolean hasBoltAnimation(ItemStack weapon) {
+		DataObject animationObject = getObjectByPath(weapon, WEAPON_KEY, "animation");
+        return animationObject.has("boltAnimRotation", DataType.ARRAY);
+	}
+	public static boolean hasAttachmentAnimation(ItemStack weapon, Type type) {
+		DataObject scopeObject = getObjectByPath(weapon, WEAPON_KEY, "attachments", type.getSerializeKey());
+        return scopeObject.has("animTranslate", DataType.ARRAY);
+	}
+	public static boolean hasHandAnimation(ItemStack weapon, boolean isRearHand) {
+		DataObject handObject = getObjectByPath(weapon, WEAPON_KEY, "hands", isRearHand ? "rear" : "forward");
+        return handObject.has("animTranslate", DataType.ARRAY);
+	}
+	public static boolean hasHandBoltAnimation(ItemStack weapon, boolean isRearHand) {
+		DataObject handObject = getObjectByPath(weapon, WEAPON_KEY, "hands", isRearHand ? "rear" : "forward");
+        return handObject.has("boltAnimTranslate", DataType.ARRAY);
+	}
+	
+
+	public static float getCooldownDivider(ItemStack weapon) {
+		DataObject animationObject = getObjectByPath(weapon, WEAPON_KEY, "animation");
+        if(animationObject.has("cooldownDivider", DataType.NUMBER))
+        {
+        	DataNumber cooldownDivider = animationObject.getDataNumber("cooldownDivider");
+        	return cooldownDivider.asFloat();
+		}
+        
+        return 1F;
+	}
+	public static float getCooldownOffset(ItemStack weapon) {
+		DataObject animationObject = getObjectByPath(weapon, WEAPON_KEY, "animation");
+        if(animationObject.has("cooldownOffset", DataType.NUMBER))
+        {
+        	DataNumber cooldownOffset = animationObject.getDataNumber("cooldownOffset");
+            return cooldownOffset.asFloat();
+		}
+        
+        return 0F;
+	}
+	public static float getAnimIntensity(ItemStack weapon) {
+		DataObject animationObject = getObjectByPath(weapon, WEAPON_KEY, "animation");
+        if(animationObject.has("animIntensity", DataType.NUMBER))
+        {
+        	DataNumber animIntensity = animationObject.getDataNumber("animIntensity");
+            return animIntensity.asFloat();
+		}
+        
+        return 1F;
+	}
+	public static float getBoltLeadTime(ItemStack weapon) {
+		DataObject animationObject = getObjectByPath(weapon, WEAPON_KEY, "animation");
+        if(animationObject.has("boltLeadTime", DataType.NUMBER))
+        {
+        	DataNumber boltLeadTime = animationObject.getDataNumber("boltLeadTime");
+            return boltLeadTime.asFloat();
+		}
+        
+        return 0F;
+	}
+	public static float getHandBoltLeadTime(ItemStack weapon, boolean isRearHand) {
+		DataObject handObject = getObjectByPath(weapon, WEAPON_KEY, "hands", isRearHand ? "rear" : "forward");
+        if(handObject.has("boltLeadTime", DataType.NUMBER))
+        {
+        	DataNumber boltLeadTime = handObject.getDataNumber("boltLeadTime");
+            return boltLeadTime.asFloat();
+		}
+        
+        return 0F;
+	}
+	
+
+	public static double getHandAnimScalar(ItemStack weapon) {
+		DataObject handObject = getObjectByPath(weapon, WEAPON_KEY, "hands");
+        if(handObject.has("animScalar", DataType.NUMBER))
+        {
+        	DataNumber animScalar = handObject.getDataNumber("animScalar");
+        	return animScalar.asDouble();
+		}
+        
+        return 1.6;
+	}
+	
+
+	public static Vec3 getAnimTranslation(ItemStack weapon, boolean isBoltAnim) {
+		DataObject animationObject = getObjectByPath(weapon, WEAPON_KEY, "animation");
+		if (animationObject.has("animTranslate", DataType.ARRAY) && !isBoltAnim)
+		{
+			DataArray translationArray = animationObject.getDataArray("animation");
+			if (translationArray!=null)
+            return arrayToVec3(translationArray, Vec3.ZERO);
+		}
+		if (animationObject.has("boltAnimTranslate", DataType.ARRAY) && isBoltAnim)
+		{
+			DataArray translationArray = animationObject.getDataArray("boltAnimation");
+			if (translationArray!=null)
+            return arrayToVec3(translationArray, Vec3.ZERO);
+		}
+		
+		return Vec3.ZERO;
+	}
+	public static Vec3 getAnimRotation(ItemStack weapon, boolean isBoltAnim) {
+		DataObject animationObject = getObjectByPath(weapon, WEAPON_KEY, "animation");
+		if (animationObject.has("animRotation", DataType.ARRAY) && !isBoltAnim)
+		{
+			DataArray rotationArray = animationObject.getDataArray("animRotation");
+			if (rotationArray!=null)
+            return arrayToVec3(rotationArray, Vec3.ZERO);
+		}
+		if (animationObject.has("boltAnimRotation", DataType.ARRAY) && isBoltAnim)
+		{
+			DataArray rotationArray = animationObject.getDataArray("boltAnimRotation");
+			if (rotationArray!=null)
+            return arrayToVec3(rotationArray, Vec3.ZERO);
+		}
+		
+		return Vec3.ZERO;
+	}
+	public static Vec3 getAttachmentAnimTranslation(ItemStack weapon, IAttachment.Type type) {
+		DataObject scopeObject = getObjectByPath(weapon, WEAPON_KEY, "attachments", type.getSerializeKey());
+		if (scopeObject.has("animTranslate", DataType.ARRAY))
+		{
+			DataArray translationArray = scopeObject.getDataArray("animTranslate");
+			if (translationArray!=null)
+            return arrayToVec3(translationArray, Vec3.ZERO);
+		}
+		
+		return Vec3.ZERO;
+	}
+	public static Vec3 getHandAnimationTranslation(ItemStack weapon, boolean isRearHand, boolean isBoltAnim) {
+		DataObject handObject = getObjectByPath(weapon, WEAPON_KEY, "hands", isRearHand ? "rear" : "forward");
+		if (handObject.has("animTranslate", DataType.ARRAY) && !isBoltAnim)
+		{
+			DataArray translationArray = handObject.getDataArray("animTranslate");
+			if (translationArray!=null)
+            return arrayToVec3(translationArray, Vec3.ZERO);
+		}
+		if (handObject.has("boltAnimTranslate", DataType.ARRAY) && isBoltAnim)
+		{
+			DataArray translationArray = handObject.getDataArray("boltAnimTranslate");
+			if (translationArray!=null)
+            return arrayToVec3(translationArray, Vec3.ZERO);
+		}
+		
+		return Vec3.ZERO;
+	}
+	
+	
+	
 
     private static SightAnimation objectToSightAnimation(DataObject object)
     {
