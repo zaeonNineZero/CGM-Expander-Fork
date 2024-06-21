@@ -25,7 +25,7 @@ public final class GunAnimationHelper
         ObjectCache.getInstance(CACHE_KEY).reset();
     }
     
-	public static float getAnimationValue(ItemStack weapon, float progress)
+	public static float getAnimationValue(ItemStack weapon, float progress, String param)
 	{
 		float cooldownDivider = PropertyHelper.getCooldownDivider(weapon);
         float cooldownOffset = PropertyHelper.getCooldownOffset(weapon);
@@ -41,12 +41,14 @@ public final class GunAnimationHelper
         return cooldown_d;
 	}
 	
-	public static float getBoltAnimationValue(ItemStack weapon, float progress)
+	public static float getBoltAnimationValue(ItemStack weapon, float progress, String param)
 	{
 		float cooldownDivider = PropertyHelper.getCooldownDivider(weapon);
         float cooldownOffset = PropertyHelper.getCooldownOffset(weapon);
         float intensity = PropertyHelper.getAnimIntensity(weapon) +1;
         float boltLeadTime = PropertyHelper.getBoltLeadTime(weapon);
+        if (param.equals("viewModel"))
+        boltLeadTime = PropertyHelper.getViewmodelBoltLeadTime(weapon);
         
         float cooldown = progress*cooldownDivider;
         float cooldown_a = cooldown-cooldownOffset;
@@ -73,15 +75,15 @@ public final class GunAnimationHelper
         return cooldown_d;
 	}
 	
-	protected static Vec3 applyAnimation(ItemStack weapon, Vec3 input, float progress)
+	protected static Vec3 applyAnimation(ItemStack weapon, Vec3 input, float progress, String param)
 	{
-		return input.scale(getAnimationValue(weapon, progress));
+		return input.scale(getAnimationValue(weapon, progress, param));
 		//return new Vec3(input.x*applyAnimation(weapon,progress),input.y*applyAnimation(weapon,progress),input.z*applyAnimation(weapon,progress));
 	}
 	
-	protected static Vec3 applyBoltAnimation(ItemStack weapon, Vec3 input, float progress)
+	protected static Vec3 applyBoltAnimation(ItemStack weapon, Vec3 input, float progress, String param)
 	{
-		return input.scale(getBoltAnimationValue(weapon, progress));
+		return input.scale(getBoltAnimationValue(weapon, progress,param));
 	}
 	
 	protected static Vec3 applyHandBoltAnimation(ItemStack weapon, Vec3 input, boolean isRearHand, float progress)
@@ -89,12 +91,60 @@ public final class GunAnimationHelper
 		return input.scale(getHandBoltAnimationValue(weapon, isRearHand, progress));
 	}
 	
+	public static Vec3 getViewModelTranslation(ItemStack weapon, float progress)
+	{
+		Vec3 anim1 = PropertyHelper.getViewModelAnimTranslation(weapon, false);
+		Vec3 anim2 = PropertyHelper.getViewModelAnimTranslation(weapon, true);
+		
+		anim1 = applyAnimation(weapon, anim1, progress, "viewModel");
+		anim2 = applyBoltAnimation(weapon, anim2, progress, "viewModel");
+		
+		Vec3 animation = anim1.add(anim2);
+		return animation;
+	}
+	
+	public static Vec3 getViewModelRotation(ItemStack weapon, float progress)
+	{
+		Vec3 anim1 = PropertyHelper.getViewModelAnimRotation(weapon, false);
+		Vec3 anim2 = PropertyHelper.getViewModelAnimRotation(weapon, true);
+		
+		anim1 = applyAnimation(weapon, anim1, progress, "viewModel");
+		anim2 = applyBoltAnimation(weapon, anim2, progress, "viewModel");
+		
+		Vec3 animation = anim1.add(anim2);
+		return animation;
+	}
+	
+	public static Vec3 getComponentTranslation(ItemStack weapon, float progress)
+	{
+		Vec3 anim1 = PropertyHelper.getComponentAnimTranslation(weapon, false);
+		Vec3 anim2 = PropertyHelper.getComponentAnimTranslation(weapon, true);
+		
+		anim1 = applyAnimation(weapon, anim1, progress, "component");
+		anim2 = applyBoltAnimation(weapon, anim2, progress, "component");
+		
+		Vec3 animation = anim1.add(anim2);
+		return animation;
+	}
+	
+	public static Vec3 getComponentRotation(ItemStack weapon, float progress)
+	{
+		Vec3 anim1 = PropertyHelper.getComponentAnimRotation(weapon, false);
+		Vec3 anim2 = PropertyHelper.getComponentAnimRotation(weapon, true);
+		
+		anim1 = applyAnimation(weapon, anim1, progress, "component");
+		anim2 = applyBoltAnimation(weapon, anim2, progress, "component");
+		
+		Vec3 animation = anim1.add(anim2);
+		return animation;
+	}
+	
 	public static Vec3 getAttachmentTranslation(ItemStack weapon, IAttachment.Type type, float progress)
 	{
 		if (PropertyHelper.hasAttachmentAnimation(weapon, type))
 		{
 			Vec3 animation = PropertyHelper.getAttachmentAnimTranslation(weapon, type);
-			animation = applyAnimation(weapon, animation, progress);
+			animation = applyAnimation(weapon, animation, progress, type.toString());
 			return animation;
 		}
 		return Vec3.ZERO;
@@ -107,7 +157,7 @@ public final class GunAnimationHelper
 			Vec3 anim1 = PropertyHelper.getHandAnimationTranslation(weapon, isRearHand, false);
 			Vec3 anim2 = PropertyHelper.getHandAnimationTranslation(weapon, isRearHand, true);
 			
-			anim1 = applyAnimation(weapon,anim1,progress);
+			anim1 = applyAnimation(weapon, anim1, progress, "hands");
 			anim2 = applyHandBoltAnimation(weapon, anim2, isRearHand, progress);
 			
 			Vec3 animation = anim1.add(anim2);

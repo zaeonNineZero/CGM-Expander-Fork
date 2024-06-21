@@ -511,6 +511,7 @@ public class GunRenderingHandler
         this.applyAimingTransforms(poseStack, heldItem, modifiedGun, translateX, translateY, translateZ, offset);
         this.applySwayTransforms(poseStack, modifiedGun, player, translateX, translateY, translateZ, event.getPartialTick());
         this.applySprintingTransforms(modifiedGun, hand, poseStack, event.getPartialTick());
+        this.applyAnimationTransforms(poseStack, player, heldItem);
         this.applyRecoilTransforms(poseStack, heldItem, modifiedGun);
         this.applyReloadTransforms(poseStack, event.getPartialTick());
         this.applyShieldTransforms(poseStack, player, modifiedGun, event.getPartialTick());
@@ -624,6 +625,18 @@ public class GunRenderingHandler
             	poseStack.mulPose(Vector3f.XP.rotationDegrees(-25F * transition));
         	}
         }
+    }
+
+    private void applyAnimationTransforms(PoseStack poseStack, LocalPlayer player, ItemStack item)
+    {
+    	ItemCooldowns tracker = Minecraft.getInstance().player.getCooldowns();
+        float cooldown = tracker.getCooldownPercent(item.getItem(), Minecraft.getInstance().getFrameTime());
+        Vec3 translations = GunAnimationHelper.getViewModelTranslation(item, cooldown);
+        Vec3 rotations = GunAnimationHelper.getViewModelRotation(item, cooldown);
+        poseStack.translate(translations.x * 0.0625, translations.y * 0.0625, translations.z * 0.0625);
+        poseStack.mulPose(Vector3f.XP.rotationDegrees((float) rotations.x));
+        poseStack.mulPose(Vector3f.YP.rotationDegrees((float) rotations.y));
+        poseStack.mulPose(Vector3f.ZP.rotationDegrees((float) rotations.z));
     }
 
     private void applyReloadTransforms(PoseStack poseStack, float partialTicks)

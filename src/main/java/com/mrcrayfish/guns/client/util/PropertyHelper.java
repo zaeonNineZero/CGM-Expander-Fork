@@ -347,17 +347,38 @@ public final class PropertyHelper
         return 0;
     }
     
+	public static Vec3 getHandPosition(ItemStack weapon, Gun modifiedGun, boolean isRearHand) {
+		double scaleFactor = PropertyHelper.getHandAnimScalar(weapon);
+		DataObject handObject = getObjectByPath(weapon, WEAPON_KEY, "hands", isRearHand ? "rear" : "forward");
+		if (handObject.has("offset", DataType.ARRAY))
+		{
+			DataArray translationArray = handObject.getDataArray("offset");
+			if (translationArray!=null)
+            return arrayToVec3(translationArray, Vec3.ZERO).scale(scaleFactor);
+		}
+		if (isRearHand)
+		{
+	        Gun.Display.RearHandPos handPos = modifiedGun.getDisplay().getRearHand();
+	        if(handPos != null)
+	        {
+	            return new Vec3(handPos.getXOffset(), handPos.getYOffset(), handPos.getZOffset());
+	        }
+		}
+		else
+		{
+	        Gun.Display.ForwardHandPos handPos = modifiedGun.getDisplay().getForwardHand();
+	        if(handPos != null)
+	        {
+	            return new Vec3(handPos.getXOffset(), handPos.getYOffset(), handPos.getZOffset());
+	        }
+		}
+		
+		return Vec3.ZERO;
+	}
+    
     
     // Gun animation stuff
 
-	public static boolean hasAnimation(ItemStack weapon) {
-		DataObject weaponObject = getObjectByPath(weapon, WEAPON_KEY);
-        return weaponObject.has("animTranslate", DataType.OBJECT) || weaponObject.has("animRotation", DataType.OBJECT);
-	}
-	public static boolean hasBoltAnimation(ItemStack weapon) {
-		DataObject animationObject = getObjectByPath(weapon, WEAPON_KEY, "animation");
-        return animationObject.has("boltAnimRotation", DataType.ARRAY);
-	}
 	public static boolean hasAttachmentAnimation(ItemStack weapon, Type type) {
 		DataObject scopeObject = getObjectByPath(weapon, WEAPON_KEY, "attachments", type.getSerializeKey());
         return scopeObject.has("animTranslate", DataType.ARRAY);
@@ -365,10 +386,6 @@ public final class PropertyHelper
 	public static boolean hasHandAnimation(ItemStack weapon, boolean isRearHand) {
 		DataObject handObject = getObjectByPath(weapon, WEAPON_KEY, "hands", isRearHand ? "rear" : "forward");
         return handObject.has("animTranslate", DataType.ARRAY);
-	}
-	public static boolean hasHandBoltAnimation(ItemStack weapon, boolean isRearHand) {
-		DataObject handObject = getObjectByPath(weapon, WEAPON_KEY, "hands", isRearHand ? "rear" : "forward");
-        return handObject.has("boltAnimTranslate", DataType.ARRAY);
 	}
 	
 
@@ -412,6 +429,16 @@ public final class PropertyHelper
         
         return 0F;
 	}
+	public static float getViewmodelBoltLeadTime(ItemStack weapon) {
+		DataObject animationObject = getObjectByPath(weapon, WEAPON_KEY, "animation", "viewModel");
+        if(animationObject.has("boltLeadTime", DataType.NUMBER))
+        {
+        	DataNumber boltLeadTime = animationObject.getDataNumber("boltLeadTime");
+            return boltLeadTime.asFloat();
+		}
+        
+        return 0F;
+	}
 	public static float getHandBoltLeadTime(ItemStack weapon, boolean isRearHand) {
 		DataObject handObject = getObjectByPath(weapon, WEAPON_KEY, "hands", isRearHand ? "rear" : "forward");
         if(handObject.has("boltLeadTime", DataType.NUMBER))
@@ -420,7 +447,7 @@ public final class PropertyHelper
             return boltLeadTime.asFloat();
 		}
         
-        return 0F;
+        return getBoltLeadTime(weapon);
 	}
 	
 
@@ -429,32 +456,32 @@ public final class PropertyHelper
         if(handObject.has("animScalar", DataType.NUMBER))
         {
         	DataNumber animScalar = handObject.getDataNumber("animScalar");
-        	return animScalar.asDouble();
+        	return animScalar.asDouble()*2.0;
 		}
         
         return 1.6;
 	}
 	
 
-	public static Vec3 getAnimTranslation(ItemStack weapon, boolean isBoltAnim) {
-		DataObject animationObject = getObjectByPath(weapon, WEAPON_KEY, "animation");
+	public static Vec3 getViewModelAnimTranslation(ItemStack weapon, boolean isBoltAnim) {
+		DataObject animationObject = getObjectByPath(weapon, WEAPON_KEY, "animation", "viewModel");
 		if (animationObject.has("animTranslate", DataType.ARRAY) && !isBoltAnim)
 		{
-			DataArray translationArray = animationObject.getDataArray("animation");
+			DataArray translationArray = animationObject.getDataArray("animTranslate");
 			if (translationArray!=null)
             return arrayToVec3(translationArray, Vec3.ZERO);
 		}
 		if (animationObject.has("boltAnimTranslate", DataType.ARRAY) && isBoltAnim)
 		{
-			DataArray translationArray = animationObject.getDataArray("boltAnimation");
+			DataArray translationArray = animationObject.getDataArray("boltAnimTranslate");
 			if (translationArray!=null)
             return arrayToVec3(translationArray, Vec3.ZERO);
 		}
 		
 		return Vec3.ZERO;
 	}
-	public static Vec3 getAnimRotation(ItemStack weapon, boolean isBoltAnim) {
-		DataObject animationObject = getObjectByPath(weapon, WEAPON_KEY, "animation");
+	public static Vec3 getViewModelAnimRotation(ItemStack weapon, boolean isBoltAnim) {
+		DataObject animationObject = getObjectByPath(weapon, WEAPON_KEY, "animation", "viewModel");
 		if (animationObject.has("animRotation", DataType.ARRAY) && !isBoltAnim)
 		{
 			DataArray rotationArray = animationObject.getDataArray("animRotation");
@@ -470,6 +497,42 @@ public final class PropertyHelper
 		
 		return Vec3.ZERO;
 	}
+	
+	public static Vec3 getComponentAnimTranslation(ItemStack weapon, boolean isBoltAnim) {
+		DataObject animationObject = getObjectByPath(weapon, WEAPON_KEY, "animation", "component");
+		if (animationObject.has("animTranslate", DataType.ARRAY) && !isBoltAnim)
+		{
+			DataArray translationArray = animationObject.getDataArray("animTranslate");
+			if (translationArray!=null)
+            return arrayToVec3(translationArray, Vec3.ZERO);
+		}
+		if (animationObject.has("boltAnimTranslate", DataType.ARRAY) && isBoltAnim)
+		{
+			DataArray translationArray = animationObject.getDataArray("boltAnimTranslate");
+			if (translationArray!=null)
+            return arrayToVec3(translationArray, Vec3.ZERO);
+		}
+		
+		return Vec3.ZERO;
+	}
+	public static Vec3 getComponentAnimRotation(ItemStack weapon, boolean isBoltAnim) {
+		DataObject animationObject = getObjectByPath(weapon, WEAPON_KEY, "animation", "component");
+		if (animationObject.has("animRotation", DataType.ARRAY) && !isBoltAnim)
+		{
+			DataArray rotationArray = animationObject.getDataArray("animRotation");
+			if (rotationArray!=null)
+            return arrayToVec3(rotationArray, Vec3.ZERO);
+		}
+		if (animationObject.has("boltAnimRotation", DataType.ARRAY) && isBoltAnim)
+		{
+			DataArray rotationArray = animationObject.getDataArray("boltAnimRotation");
+			if (rotationArray!=null)
+            return arrayToVec3(rotationArray, Vec3.ZERO);
+		}
+		
+		return Vec3.ZERO;
+	}
+	
 	public static Vec3 getAttachmentAnimTranslation(ItemStack weapon, IAttachment.Type type) {
 		DataObject scopeObject = getObjectByPath(weapon, WEAPON_KEY, "attachments", type.getSerializeKey());
 		if (scopeObject.has("animTranslate", DataType.ARRAY))
@@ -481,6 +544,7 @@ public final class PropertyHelper
 		
 		return Vec3.ZERO;
 	}
+	
 	public static Vec3 getHandAnimationTranslation(ItemStack weapon, boolean isRearHand, boolean isBoltAnim) {
 		DataObject handObject = getObjectByPath(weapon, WEAPON_KEY, "hands", isRearHand ? "rear" : "forward");
 		if (handObject.has("animTranslate", DataType.ARRAY) && !isBoltAnim)

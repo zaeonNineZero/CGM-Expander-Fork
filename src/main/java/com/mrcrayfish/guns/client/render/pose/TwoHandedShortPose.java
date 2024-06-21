@@ -5,6 +5,7 @@ import com.mojang.math.Vector3f;
 import com.mrcrayfish.guns.Config;
 import com.mrcrayfish.guns.client.handler.ReloadHandler;
 import com.mrcrayfish.guns.client.util.GunAnimationHelper;
+import com.mrcrayfish.guns.client.util.PropertyHelper;
 import com.mrcrayfish.guns.client.util.RenderUtil;
 import com.mrcrayfish.guns.common.GripType;
 import com.mrcrayfish.guns.common.Gun;
@@ -105,17 +106,17 @@ public class TwoHandedShortPose extends WeaponPose
         // Front arm holding the barrel
         poseStack.pushPose();
         {
-            ForwardHandPos posHand = gun.getDisplay().getForwardHand();
-            double xOffset = (posHand != null ? posHand.getXOffset() : 0);
-            double yOffset = (posHand != null ? posHand.getYOffset() : 0);
-            double zOffset = (posHand != null ? posHand.getZOffset() : 0);
+        	Vec3 posHand = PropertyHelper.getHandPosition(stack, gun, false);
+            double xOffset = (posHand != null ? posHand.x : 0);
+            double yOffset = (posHand != null ? posHand.y : 0);
+            double zOffset = (posHand != null ? posHand.z : 0);
         	float reloadProgress = ReloadHandler.get().getReloadProgress(partialTicks);
             poseStack.translate(reloadProgress * 0.5, -reloadProgress, -reloadProgress * 0.5);
 
             Vec3 animate = GunAnimationHelper.getHandTranslation(stack, false, cooldown);
 
             poseStack.scale(0.5F, 0.5F, 0.5F);
-            poseStack.translate((1.55 + xOffset + animate.x) * 0.0625 * side, (0.6 + yOffset + animate.y) * 0.0625, (-3.5 + zOffset - animate.z) * 0.0625);
+            poseStack.translate((1.55 + xOffset + animate.x) * 0.0625 * side, (0.6 + yOffset + animate.y) * 0.0625, (-3.5 - zOffset - animate.z) * 0.0625);
             //poseStack.translate((1.55) * 0.0625 * side, (0.4) * 0.0625, (-3.5) * 0.0625);
             poseStack.translate((armWidth / 2.0) * 0.0625 * side, 0, 0);
             poseStack.translate(-0.3125 * side, -0.1, -0.4375);
@@ -132,16 +133,16 @@ public class TwoHandedShortPose extends WeaponPose
         // Back arm holding the handle
         poseStack.pushPose();
         {
-            RearHandPos posHand = gun.getDisplay().getRearHand();
-            double xOffset = (posHand != null ? posHand.getXOffset() : 0);
-            double yOffset = (posHand != null ? posHand.getYOffset() : 0);
-            double zOffset = (posHand != null ? posHand.getZOffset() : 0);
+        	Vec3 posHand = PropertyHelper.getHandPosition(stack, gun, true);
+            double xOffset = (posHand != null ? posHand.x : 0);
+            double yOffset = (posHand != null ? posHand.y : 0);
+            double zOffset = (posHand != null ? posHand.z : 0);
             
             Vec3 animate = GunAnimationHelper.getHandTranslation(stack, true, cooldown);
             
             poseStack.translate(0, 0.1, -0.675);
             poseStack.scale(0.5F, 0.5F, 0.5F);
-            poseStack.translate((-4.0 + xOffset + animate.x) * 0.0625 * side, (0 + yOffset + animate.y) * 0.0625, (0 + zOffset - animate.z) * 0.0625);
+            poseStack.translate((-4.0 + xOffset + animate.x) * 0.0625 * side, (0 + yOffset + animate.y) * 0.0625, (0 - zOffset - animate.z) * 0.0625);
             //poseStack.translate((-4.0) * 0.0625 * side, (0) * 0.0625, (0) * 0.0625);
             poseStack.translate(-(armWidth / 2.0) * 0.0625 * side, 0, 0);
             poseStack.mulPose(Vector3f.XP.rotationDegrees(80F));
