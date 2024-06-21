@@ -97,9 +97,11 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
     private ItemStack item = ItemStack.EMPTY;
     protected float additionalDamage = 0.0F;
     protected int pierceCount = 0;
+    protected float pierceDamageFraction = 1.0F;
     protected EntityDimensions entitySize;
     protected double modifiedGravity;
     protected int life;
+    protected boolean deadProjectile = false;
 
     public ProjectileEntity(EntityType<? extends Entity> entityType, Level worldIn)
     {
@@ -256,8 +258,9 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
             }
 
             List<EntityResult> hitEntities = null;
-            int level = EnchantmentHelper.getItemEnchantmentLevel(ModEnchantments.COLLATERAL.get(), this.weapon);
-            if(level == 0)
+            int collateralLevel = EnchantmentHelper.getItemEnchantmentLevel(ModEnchantments.COLLATERAL.get(), this.weapon);
+    		int maxPierceCount = (collateralLevel == 0 ? projectile.getMaxPierceCount() : projectile.getCollateralMaxPierce());
+            if(maxPierceCount == 0)
             {
                 EntityResult entityResult = this.findEntityOnPath(startVec, endVec);
                 if(entityResult != null)
@@ -359,30 +362,32 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
                 }
             }
         }
-        return hitEntity != null ? new EntityResult(hitEntity, hitVec, headshot) : null;
+        return hitEntity != null ? new EntityResult(hitEntity, startVec, hitVec, headshot) : null;
     }
 
     @Nullable
     protected List<EntityResult> findEntitiesOnPath(Vec3 startVec, Vec3 endVec)
     {
         List<EntityResult> hitEntities = new ArrayList<>();
-        List<Entity> entities = this.level.getEntities(this, this.getBoundingBox().expandTowards(this.getDeltaMovement()).inflate(1.0), PROJECTILE_TARGETS);
+        List<Entity> entities = this.level.getEntities(this, this.getBoundingBox().expandTowards(this.getDeltaMovement()).inflate(1.0+this.projectile.getSize()), PROJECTILE_TARGETS);
         for(Entity entity : entities)
         {
-            if(!entity.equals(this.shooter))
+        	boolean isDead = (entity instanceof LivingEntity ? ((LivingEntity) entity).isDeadOrDying() : false);
+        	if(!entity.equals(this.shooter))
             {
                 EntityResult result = this.getHitResult(entity, startVec, endVec);
-                if(result == null)
+                if(result == null || isDead)
                     continue;
-                int maxPierceCount = projectile.getMaxPierceCount(); //(projectile.getMaxPierceCount()>0 ? projectile.getMaxPierceCount()+(collateralLevel*4) : 0);
+    			hitEntities.add(result);
+                /*int maxPierceCount = projectile.getMaxPierceCount(); //(projectile.getMaxPierceCount()>0 ? projectile.getMaxPierceCount()+(collateralLevel*4) : 0);
         		if (this.pierceCount<=maxPierceCount || maxPierceCount<=0)
         		{
         			hitEntities.add(result);
         			this.pierceCount++;
-        		}
+        		}*/
             }
         }
-        Collections.reverse(hitEntities);
+		Collections.sort(hitEntities, new HitComparator());
         return hitEntities;
     }
 
@@ -442,7 +447,7 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
             return null;
         }
 
-        return new EntityResult(entity, hitPos, headshot);
+        return new EntityResult(entity, startVec, hitPos, headshot);
     }
 
     private void onHit(HitResult result, Vec3 startVec, Vec3 endVec)
@@ -520,6 +525,11 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
 
         if(result instanceof ExtendedEntityRayTraceResult entityHitResult)
         {
+            if(this.deadProjectile)
+            {
+                return;
+            }
+            
             Entity entity = entityHitResult.getEntity();
             if(entity.getId() == this.shooterId)
             {
@@ -546,21 +556,26 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
         	if (!isDead)
         	{
         		int collateralLevel = EnchantmentHelper.getItemEnchantmentLevel(ModEnchantments.COLLATERAL.get(), weapon);
-            	if(collateralLevel == 0)
+        		int maxPierceCount = (collateralLevel == 0 ? projectile.getMaxPierceCount() : projectile.getCollateralMaxPierce());
+        		if(maxPierceCount == 0)
             	{
                 	this.remove(RemovalReason.KILLED);
+        			this.deadProjectile = true;
             	}
-            	/*else
+            	else
             	{
-            		int maxPierceCount = projectile.getMaxPierceCount(); //(projectile.getMaxPierceCount()>0 ? projectile.getMaxPierceCount()+(collateralLevel*4) : 0);
-            		if (this.pierceCount>=maxPierceCount && maxPierceCount>0)
-                	this.remove(RemovalReason.KILLED);
+            		if (this.pierceCount>=maxPierceCount && maxPierceCount>=0)
+            		{
+            			this.remove(RemovalReason.KILLED);
+            			this.deadProjectile = true;
+            		}
             		else
             		{
             			this.pierceCount++;
-            			//this.pierceDamageFraction -= this.modifiedGun.getProjectile().getPierceDamagePenalty();
+            			this.pierceDamageFraction -= this.modifiedGun.getProjectile().getPierceDamagePenalty();
+            			this.pierceDamageFraction = Mth.clamp(pierceDamageFraction, 1F-this.modifiedGun.getProjectile().getPierceDamageMaxPenalty(), 1.0F);
             		}
-            	}*/
+            	}
         	}
 
             entity.invulnerableTime = 0;
@@ -589,6 +604,8 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
             if (this.modifiedGun.getProjectile().getHeadshotExtraDamage()>0)
             	damage += this.modifiedGun.getProjectile().getHeadshotExtraDamage();
         }
+        
+        damage *= this.pierceDamageFraction;
 
         DamageSource source = new DamageSourceProjectile("bullet", this, shooter, weapon).setProjectile();
         float bypassDamage = 0;
@@ -935,12 +952,14 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
     public static class EntityResult
     {
         private Entity entity;
+        private Vec3 startVec;
         private Vec3 hitVec;
         private boolean headshot;
 
-        public EntityResult(Entity entity, Vec3 hitVec, boolean headshot)
+        public EntityResult(Entity entity, Vec3 startVec, Vec3 hitVec, boolean headshot)
         {
             this.entity = entity;
+            this.startVec = startVec;
             this.hitVec = hitVec;
             this.headshot = headshot;
         }
@@ -956,9 +975,25 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
         /**
          * Gets the position the projectile hit
          */
+        public Vec3 getStartVec()
+        {
+            return this.startVec;
+        }
+
+        /**
+         * Gets the position the projectile hit
+         */
         public Vec3 getHitPos()
         {
             return this.hitVec;
+        }
+
+        /**
+         * Gets the position the projectile hit
+         */
+        public double getDistanceToHit()
+        {
+            return this.startVec.distanceTo(this.hitVec);
         }
 
         /**
@@ -967,6 +1002,15 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
         public boolean isHeadshot()
         {
             return this.headshot;
+        }
+    }
+    /**
+     * Author: MrCrayfish
+     */
+    class HitComparator implements java.util.Comparator<EntityResult> {
+        @Override
+        public int compare(EntityResult a, EntityResult b) {
+            return (int) (a.getDistanceToHit()*100 - b.getDistanceToHit()*100);
         }
     }
 }
