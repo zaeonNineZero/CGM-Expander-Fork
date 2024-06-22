@@ -174,10 +174,11 @@ public class PistolCustomPose extends WeaponPose
             double xOffset = (posHand != null ? posHand.x : 0);
             double yOffset = (posHand != null ? posHand.y : 0);
             double zOffset = (posHand != null ? posHand.z : 0);
-            if (player.getOffhandItem().isEmpty())
+            
+            Vec3 animate = GunAnimationHelper.getHandTranslation(stack, true, cooldown);
+            
+        	if (player.getOffhandItem().isEmpty())
             {
-                Vec3 animate = GunAnimationHelper.getHandTranslation(stack, true, cooldown);
-            	
             	poseStack.translate(0, 0.1, -0.675);
             	poseStack.scale(0.5F, 0.5F, 0.5F);
             	poseStack.translate((-1.7 + xOffset + animate.x) * 0.0625 * side, (0 + yOffset + animate.y) * 0.0625, (3.2 - zOffset - animate.z) * 0.0625);
@@ -190,7 +191,7 @@ public class PistolCustomPose extends WeaponPose
             {
             	poseStack.translate(0, 0.1, -0.675);
             	poseStack.scale(0.5F, 0.5F, 0.5F);
-            	poseStack.translate((-4.0 + xOffset) * 0.0625 * side, (0 + yOffset) * 0.0625, (3.2 + zOffset) * 0.0625);
+            	poseStack.translate((-4.0 + xOffset) * 0.0625 * side, (0 + yOffset) * 0.0625, (3.2 - zOffset) * 0.0625);
             	//poseStack.translate((-4.0) * 0.0625 * side, (0) * 0.0625, (0) * 0.0625);
             	poseStack.translate(-(armWidth / 2.0) * 0.0625 * side, 0, 0);
             	poseStack.mulPose(Vector3f.XP.rotationDegrees(80F));
