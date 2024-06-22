@@ -20,6 +20,7 @@ import com.mrcrayfish.guns.interfaces.IProjectileFactory;
 import com.mrcrayfish.guns.item.GunItem;
 import com.mrcrayfish.guns.item.IColored;
 import com.mrcrayfish.guns.network.PacketHandler;
+import com.mrcrayfish.guns.network.message.C2SMessageFireSwitch;
 import com.mrcrayfish.guns.network.message.C2SMessageShoot;
 import com.mrcrayfish.guns.network.message.S2CMessageBulletTrail;
 import com.mrcrayfish.guns.network.message.S2CMessageGunSound;
@@ -206,7 +207,22 @@ public class ServerPlayHandler
         }
         else
         {
-            world.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.LEVER_CLICK, SoundSource.BLOCKS, 0.3F, 0.8F);
+            //world.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.LEVER_CLICK, SoundSource.BLOCKS, 0.3F, 0.8F);
+        }
+    }
+    
+    /**
+     * Handles server-side fire mode switch logic.
+     * This is only intended for use on the logical server.
+     */
+    public static void handleFireSwitch(C2SMessageFireSwitch message, ServerPlayer player)
+    {
+        ItemStack heldItem = player.getItemInHand(InteractionHand.MAIN_HAND);
+        if(heldItem.getItem() instanceof GunItem item)
+        {
+    		//GunMod.LOGGER.info("Switching fire mode to " + message.getFireMode());
+        	CompoundTag tag = heldItem.getOrCreateTag();
+        	tag.putInt("FireMode", message.getFireMode());
         }
     }
 

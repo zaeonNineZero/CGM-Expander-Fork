@@ -1,5 +1,7 @@
 package com.mrcrayfish.guns.client.handler;
 
+import org.lwjgl.glfw.GLFW;
+
 import com.mrcrayfish.guns.Config;
 import com.mrcrayfish.guns.GunMod;
 import com.mrcrayfish.guns.Reference;
@@ -12,6 +14,7 @@ import com.mrcrayfish.guns.init.ModSounds;
 import com.mrcrayfish.guns.init.ModSyncedDataKeys;
 import com.mrcrayfish.guns.item.GunItem;
 import com.mrcrayfish.guns.network.PacketHandler;
+import com.mrcrayfish.guns.network.message.C2SMessageFireSwitch;
 import com.mrcrayfish.guns.network.message.C2SMessageReload;
 import com.mrcrayfish.guns.network.message.C2SMessageShoot;
 import com.mrcrayfish.guns.network.message.C2SMessageShooting;
@@ -21,6 +24,7 @@ import com.mrcrayfish.guns.util.GunModifierHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
@@ -201,12 +205,11 @@ public class ShootingHandler
             ItemStack heldItem = player.getMainHandItem();
             if(heldItem.getItem() instanceof GunItem)
             {
-            	Gun gun = ((GunItem) heldItem.getItem()).getModifiedGun(heldItem);
-            	
-            	if(KeyBinds.getShootMapping().isDown() || (ModSyncedDataKeys.BURSTCOUNT.getValue(player)>0 && gun.getGeneral().hasBurstFire()))
+            	//Gun gun = ((GunItem) heldItem.getItem()).getModifiedGun(heldItem);
+            	if(KeyBinds.getShootMapping().isDown() || (ModSyncedDataKeys.BURSTCOUNT.getValue(player)>0 && Gun.hasBurstFire(heldItem)))
                 {
                     this.fire(player, heldItem);
-                    boolean doAutoFire = (gun.getGeneral().isAuto());
+                    boolean doAutoFire = Gun.isAuto(heldItem) || (Gun.hasBurstFire(heldItem) && Gun.hasAutoBurst(heldItem));
                     if(!doAutoFire)
                     {
                     	KeyBinds.getShootMapping().setDown(false);
@@ -214,6 +217,54 @@ public class ShootingHandler
                 }
             	else
                 doEmptyClick = true;
+            }
+
+            // Handling fire mode switch logic here for convenience.
+            if(KeyBinds.KEY_FIRE_MODE.isDown())
+            {
+            	if(heldItem.getItem() instanceof GunItem gunItem)
+                {
+                	Gun modifiedGun = gunItem.getModifiedGun(heldItem);
+                	if (modifiedGun.getFireModes().usesFireModes() && (!ModSyncedDataKeys.SHOOTING.getValue(player) && !ModSyncedDataKeys.RELOADING.getValue(player) && ModSyncedDataKeys.BURSTCOUNT.getValue(player)<=0))
+                	{
+                    	CompoundTag tag = heldItem.getOrCreateTag();
+                        //Gun.FireModes fireModes = modifiedGun.getFireModes();
+                        Boolean changedFireMode = false;
+                        int newFireMode = 0;
+                        
+                        if (Gun.canDoAutoFire(heldItem) &&
+                        (Gun.getFireMode(heldItem)==0 ||
+                        !Gun.canDoSemiFire(heldItem) && Gun.getFireMode(heldItem)==2))
+                        {
+                        	changedFireMode = true;
+                        	newFireMode = 1;
+                		}
+                        else
+                        if (Gun.canDoBurstFire(heldItem) &&
+                        (Gun.getFireMode(heldItem)==1 ||
+                       	!Gun.canDoAutoFire(heldItem) && Gun.getFireMode(heldItem)==0))
+                        {
+                        	changedFireMode = true;
+                        	newFireMode = 2;
+                		}
+                        else
+                        if (Gun.canDoSemiFire(heldItem) &&
+                        (Gun.getFireMode(heldItem)==2 ||
+                       	!Gun.canDoBurstFire(heldItem) && Gun.getFireMode(heldItem)==1))
+                        {
+                        	changedFireMode = true;
+                        	newFireMode = 0;
+                		}
+                        
+                        if (changedFireMode)
+                        {
+                        	PacketHandler.getPlayChannel().sendToServer(new C2SMessageFireSwitch(newFireMode));
+                        	//tag.putInt("FireMode", newFireMode);
+                        	Minecraft.getInstance().getSoundManager().play(new SimpleSoundInstance(gunItem.getModifiedGun(heldItem).getSounds().getEmptyClick(), SoundSource.PLAYERS, 0.8F, 1.0F, Minecraft.getInstance().level.getRandom(), false, 0, SoundInstance.Attenuation.NONE, 0, 0, 0, true));
+                        }
+                	}
+                }
+                KeyBinds.KEY_FIRE_MODE.setDown(false);
             }
             
             // Update stack and slot variables
@@ -247,8 +298,8 @@ public class ShootingHandler
         
         if(ModSyncedDataKeys.ONBURSTCOOLDOWN.getValue(player)) //*NEW* Disallow firing during the burst cooldown period.
         {
-        	GunItem gunItem = (GunItem) heldItem.getItem();
-        	if (gunItem.getModifiedGun(heldItem).getGeneral().hasBurstFire() && ModSyncedDataKeys.BURSTCOUNT.getValue(player)<=0)
+        	//GunItem gunItem = (GunItem) heldItem.getItem();
+        	if (Gun.hasBurstFire(heldItem) && ModSyncedDataKeys.BURSTCOUNT.getValue(player)<=0)
         	return false;
         }
 
@@ -291,8 +342,8 @@ public class ShootingHandler
         
         if(ModSyncedDataKeys.ONBURSTCOOLDOWN.getValue(player))
         {
-        	GunItem gunItem = (GunItem) heldItem.getItem();
-        	if (gunItem.getModifiedGun(heldItem).getGeneral().hasBurstFire() && ModSyncedDataKeys.BURSTCOUNT.getValue(player)<=0)
+        	//GunItem gunItem = (GunItem) heldItem.getItem();
+        	if (Gun.hasBurstFire(heldItem) && ModSyncedDataKeys.BURSTCOUNT.getValue(player)<=0)
         	return false;
         }
 
@@ -346,8 +397,8 @@ public class ShootingHandler
             tracker.addCooldown(heldItem.getItem(), rate);
             ModSyncedDataKeys.RAMPUPSHOT.setValue(player, ModSyncedDataKeys.RAMPUPSHOT.getValue(player)+1);
             
-            int gunBurstCount = modifiedGun.getGeneral().getBurstCount();
-            if (gunBurstCount > 0)
+            int gunBurstCount = Gun.getBurstCount(heldItem);
+            if (Gun.hasBurstFire(heldItem))
             {
                 // Burst has not begun yet:
             	if (ModSyncedDataKeys.BURSTCOUNT.getValue(player)<=0)

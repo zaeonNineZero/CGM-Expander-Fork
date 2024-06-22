@@ -168,8 +168,8 @@ public class ControllerHandler
             ItemStack heldItem = player.getMainHandItem();
             if(heldItem.getItem() instanceof GunItem)
             {
-                Gun gun = ((GunItem) heldItem.getItem()).getModifiedGun(heldItem);
-                if(gun.getGeneral().isAuto())
+                //Gun gun = ((GunItem) heldItem.getItem()).getModifiedGun(heldItem);
+                if(Gun.isAuto(heldItem))
                 {
                     ShootingHandler.get().fire(player, heldItem);
                 }

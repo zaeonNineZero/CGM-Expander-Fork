@@ -256,7 +256,7 @@ public class GunItem extends Item implements IColored, IMeta
         if(enchantment.category == EnchantmentTypes.SEMI_AUTO_GUN)
         {
             Gun modifiedGun = this.getModifiedGun(stack);
-            return !modifiedGun.getGeneral().isAuto();
+            return !modifiedGun.getGeneral().isAuto() || modifiedGun.getFireModes().hasSemiMode();
         }
         return super.canApplyAtEnchantingTable(stack, enchantment);
     }

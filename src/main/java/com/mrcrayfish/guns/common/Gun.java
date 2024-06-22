@@ -46,6 +46,7 @@ import java.util.function.Supplier;
 public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
 {
     protected General general = new General();
+    protected FireModes fireModes = new FireModes();
     protected Projectile projectile = new Projectile();
     protected Sounds sounds = new Sounds();
     protected Display display = new Display();
@@ -54,6 +55,11 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
     public General getGeneral()
     {
         return this.general;
+    }
+
+    public FireModes getFireModes()
+    {
+        return this.fireModes;
     }
 
     public Projectile getProjectile()
@@ -337,6 +343,7 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             Preconditions.checkArgument(this.defaultColor == -1 || this.defaultColor>=0, "Default color must be a valid RGBA-integer-format color; use -1 to disable this.");
             Preconditions.checkArgument(this.maxAmmo > 0, "Max ammo must be more than zero");
             Preconditions.checkArgument(this.burstCount >= 0, "Burst count cannot be negative; set to zero to disable bursts");
+            Preconditions.checkArgument(this.burstCount != 1, "Burst count must be greater than one, or equal to zero; set to zero to disable bursts");
             Preconditions.checkArgument(this.burstCooldown >= 0, "Burst cooldown cannot be negative; set to zero to disable the cooldown");
             Preconditions.checkArgument(this.overCapacityAmmo > 0, "Over Capacity bonus ammo must be more than zero");
             Preconditions.checkArgument(this.reloadAmount >= 1, "Reload amount must be more than or equal to one");
@@ -454,7 +461,8 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
 		}
 
         /**
-         * @return How many shots per burst this gun has
+         * @return How many shots this weapon fires per burst.
+         * A value of zero disables burst fire.
          */
         public int getBurstCount()
         {
@@ -466,11 +474,11 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
          */
         public int getBurstCooldown()
         {
-        	if (burstCooldown<0)
+        	/*if (burstCooldown<0)
         	{
         		int defaultBurstCooldown = (isAuto() ? 3 : 1 );
         		return defaultBurstCooldown;
-        	}
+        	}*/
         	
             return this.burstCooldown;
         }
@@ -693,6 +701,151 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         public int getRampUpShotsNeeded()
         {
             return this.rampUpShotsNeeded;
+        }
+    }
+
+    public static class FireModes implements INBTSerializable<CompoundTag>
+    {
+    	@Optional
+        private boolean useFireModes;
+    	@Optional
+        private boolean hasSemiMode;
+    	@Optional
+        private boolean hasAutoMode;
+    	@Optional
+        private boolean hasBurstMode;
+    	@Optional
+        private boolean useAutoBurst;
+    	@Optional
+        private int burstCount;
+
+        @Override
+        public CompoundTag serializeNBT()
+        {
+            CompoundTag tag = new CompoundTag();
+            tag.putBoolean("UseFireModes", this.useFireModes);
+            tag.putBoolean("HasSemiMode", this.hasSemiMode);
+            tag.putBoolean("HasAutoMode", this.hasAutoMode);
+            tag.putBoolean("HasBurstMode", this.hasBurstMode);
+            tag.putBoolean("UseAutoBurst", this.useAutoBurst);
+            tag.putInt("BurstCount", this.burstCount);
+            return tag;
+        }
+
+        @Override
+        public void deserializeNBT(CompoundTag tag)
+        {
+            if(tag.contains("UseFireModes", Tag.TAG_ANY_NUMERIC))
+            {
+                this.useFireModes = tag.getBoolean("UseFireModes");
+            }
+            if(tag.contains("HasSemiMode", Tag.TAG_ANY_NUMERIC))
+            {
+                this.hasSemiMode = tag.getBoolean("HasSemiMode");
+            }
+            if(tag.contains("HasAutoMode", Tag.TAG_ANY_NUMERIC))
+            {
+                this.hasAutoMode = tag.getBoolean("HasAutoMode");
+            }
+            if(tag.contains("HasBurstMode", Tag.TAG_ANY_NUMERIC))
+            {
+                this.hasBurstMode = tag.getBoolean("HasBurstMode");
+            }
+            if(tag.contains("UseAutoBurst", Tag.TAG_ANY_NUMERIC))
+            {
+                this.useAutoBurst = tag.getBoolean("UseAutoBurst");
+            }
+            if(tag.contains("BurstCount", Tag.TAG_ANY_NUMERIC))
+            {
+                this.burstCount = tag.getInt("BurstCount");
+            }
+        }
+
+        public JsonObject toJsonObject()
+        {
+            JsonObject object = new JsonObject();
+            Preconditions.checkArgument(this.burstCount > 1 || this.burstCount == 0, "Burst count must be greater than one, or equal to zero; set to zero to use general.burstCount.");
+            object.addProperty("useFireModes", this.useFireModes);
+            if(this.hasSemiMode) object.addProperty("hasSemiMode", this.hasSemiMode);
+            if(this.hasAutoMode) object.addProperty("hasAutoMode", this.hasAutoMode);
+            if(this.hasBurstMode) object.addProperty("hasBurstMode", this.hasBurstMode);
+            if(this.useAutoBurst) object.addProperty("useAutoBurst", this.useAutoBurst);
+            if(this.burstCount != 0) object.addProperty("burstCount", this.burstCount);
+            return object;
+        }
+
+        public FireModes copy()
+        {
+        	FireModes fireModes = new FireModes();
+            fireModes.useFireModes = this.useFireModes;
+            fireModes.hasSemiMode = this.hasSemiMode;
+            fireModes.hasAutoMode = this.hasAutoMode;
+            fireModes.hasBurstMode = this.hasBurstMode;
+            fireModes.useAutoBurst = this.useAutoBurst;
+            fireModes.burstCount = this.burstCount;
+            return fireModes;
+        }
+
+        /**
+         * @return Whether this weapon uses the new fire mode system.
+         */
+        public boolean usesFireModes()
+        {
+            return this.useFireModes;
+        }
+
+        /**
+         * @return Whether this weapon uses the new fire mode system.
+         */
+        public boolean hasAnyFireMode()
+        {
+            return this.hasSemiMode || this.hasAutoMode || this.hasBurstMode;
+        }
+
+        /**
+         * @return Whether this weapon has the semi-automatic fire mode.
+         */
+        public boolean hasSemiMode()
+        {
+            return this.hasSemiMode;
+        }
+
+        /**
+         * @return Whether this weapon has the automatic fire mode.
+         */
+        public boolean hasAutoMode()
+        {
+            return this.hasAutoMode;
+        }
+
+        /**
+         * @return Whether this weapon has the burst fire mode.
+         */
+        public boolean hasBurstMode()
+        {
+            return this.hasBurstMode;
+        }
+
+        /**
+         * @return Whether the weapon uses 'auto-burst' when in the burst fire mode.
+         * 'Auto-burst' causes the gun to automatically fire another burst after a short delay,
+         * as long as the fire button is held. This is the same behavior that occurs when 'isAuto'
+         * is set to true with a burst-fire weapon.
+         */
+        public boolean usesAutoBurst()
+        {
+            return this.useAutoBurst;
+        }
+
+        /**
+         * @return How many shots this weapon fires per burst in burst-fire mode.
+         * The weapon must have access to the burst fire mode for this to have any effect.
+         * A value of zero indicates the gun should use the general.burstCount parameter.
+         */
+        @Nullable
+        public int getBurstCount()
+        {
+            return this.burstCount;
         }
     }
 
@@ -2123,6 +2276,7 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
     {
         CompoundTag tag = new CompoundTag();
         tag.put("General", this.general.serializeNBT());
+        tag.put("FireModes", this.fireModes.serializeNBT());
         tag.put("Projectile", this.projectile.serializeNBT());
         tag.put("Sounds", this.sounds.serializeNBT());
         tag.put("Display", this.display.serializeNBT());
@@ -2136,6 +2290,10 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         if(tag.contains("General", Tag.TAG_COMPOUND))
         {
             this.general.deserializeNBT(tag.getCompound("General"));
+        }
+        if(tag.contains("FireModes", Tag.TAG_COMPOUND))
+        {
+            this.fireModes.deserializeNBT(tag.getCompound("FireModes"));
         }
         if(tag.contains("Projectile", Tag.TAG_COMPOUND))
         {
@@ -2160,6 +2318,7 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         JsonObject object = new JsonObject();
         object.add("general", this.general.toJsonObject());
         object.add("projectile", this.projectile.toJsonObject());
+        GunJsonUtil.addObjectIfNotEmpty(object, "fireModes", this.fireModes.toJsonObject());
         GunJsonUtil.addObjectIfNotEmpty(object, "sounds", this.sounds.toJsonObject());
         GunJsonUtil.addObjectIfNotEmpty(object, "display", this.display.toJsonObject());
         GunJsonUtil.addObjectIfNotEmpty(object, "modules", this.modules.toJsonObject());
@@ -2177,6 +2336,7 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
     {
         Gun gun = new Gun();
         gun.general = this.general.copy();
+        gun.fireModes = this.fireModes.copy();
         gun.projectile = this.projectile.copy();
         gun.sounds = this.sounds.copy();
         gun.display = this.display.copy();
@@ -2386,6 +2546,135 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
     {
         Gun modifiedGun = ((GunItem) gunStack.getItem()).getModifiedGun(gunStack);
         return modifiedGun.getGeneral().getEnergyPerShot()>0 && modifiedGun.getGeneral().getEnergyCapacity()>0;
+    }
+    
+    public static int getDefaultFireMode(ItemStack gunStack)
+    {
+        Gun modifiedGun = ((GunItem) gunStack.getItem()).getModifiedGun(gunStack);
+        
+        if (modifiedGun.getFireModes().usesFireModes() && modifiedGun.getFireModes().hasAnyFireMode())
+        {
+        	if (modifiedGun.getFireModes().hasAutoMode())
+            	return 1;
+        	else
+        	if (modifiedGun.getFireModes().hasBurstMode())
+            	return 2;
+        	else
+        	if (modifiedGun.getFireModes().hasSemiMode())
+            	return 0;
+        }
+        else
+        {
+        	if (modifiedGun.getGeneral().hasBurstFire())
+            	return 2;
+        	else
+            if (modifiedGun.getGeneral().isAuto())
+            	return 1;
+        }
+        
+    	return 0;
+    }
+
+    public static int getFireMode(ItemStack gunStack)
+    {
+        CompoundTag tag = gunStack.getOrCreateTag();
+        Gun modifiedGun = ((GunItem) gunStack.getItem()).getModifiedGun(gunStack);
+        
+        if ((!tag.contains("FireMode", Tag.TAG_INT)) || (tag.getInt("FireMode")<0 || tag.getInt("FireMode")>2))
+        	return getDefaultFireMode(gunStack);
+        
+        if (modifiedGun.getFireModes().usesFireModes())
+        {
+        	return tag.getInt("FireMode");
+        }
+        else
+        {
+        	if (modifiedGun.getGeneral().hasBurstFire())
+        		return 2;
+        	else
+            if (modifiedGun.getGeneral().isAuto())
+            	return 1;
+            else
+            	return 0;
+        }
+    }
+
+    public static boolean isAuto(ItemStack gunStack)
+    {
+        Gun modifiedGun = ((GunItem) gunStack.getItem()).getModifiedGun(gunStack);
+        return (modifiedGun.getFireModes().usesFireModes() && getFireMode(gunStack)==1) || (!modifiedGun.getFireModes().usesFireModes() && modifiedGun.getGeneral().isAuto());
+    }
+
+    public static boolean hasBurstFire(ItemStack gunStack)
+    {
+        Gun modifiedGun = ((GunItem) gunStack.getItem()).getModifiedGun(gunStack);
+        return (modifiedGun.getFireModes().usesFireModes() && getFireMode(gunStack)==2) || (!modifiedGun.getFireModes().usesFireModes() && modifiedGun.getGeneral().hasBurstFire());
+    }
+
+    public static int getBurstCount(ItemStack gunStack)
+    {
+        Gun modifiedGun = ((GunItem) gunStack.getItem()).getModifiedGun(gunStack);
+        int finalBurstCount = 3;
+        if (modifiedGun.getFireModes().usesFireModes())
+        {
+        	if (modifiedGun.getFireModes().getBurstCount()>1)
+        	finalBurstCount = modifiedGun.getFireModes().getBurstCount();
+        	else
+            if (modifiedGun.getGeneral().getBurstCount()>1)
+        	finalBurstCount = modifiedGun.getGeneral().getBurstCount();
+        }
+        else
+        finalBurstCount = modifiedGun.getGeneral().getBurstCount();
+        
+        return finalBurstCount;
+    }
+
+    public static int getBurstCooldown(ItemStack gunStack)
+    {
+        Gun modifiedGun = ((GunItem) gunStack.getItem()).getModifiedGun(gunStack);
+        int finalBurstCooldown = (hasAutoBurst(gunStack) ? 3 : 1 );
+        
+        if (modifiedGun.getGeneral().getBurstCooldown()>=0)
+        finalBurstCooldown = modifiedGun.getGeneral().getBurstCooldown();
+        
+        return finalBurstCooldown;
+    }
+
+    public static boolean hasAutoBurst(ItemStack gunStack)
+    {
+        Gun modifiedGun = ((GunItem) gunStack.getItem()).getModifiedGun(gunStack);
+        if (modifiedGun.getFireModes().usesFireModes())
+        {
+        	if (modifiedGun.getFireModes().hasBurstMode() && modifiedGun.getFireModes().usesAutoBurst())
+            	return true;
+        	else
+            if (!modifiedGun.getFireModes().hasAnyFireMode() && modifiedGun.getGeneral().hasBurstFire() && modifiedGun.getGeneral().isAuto())
+            	return true;
+        }
+        else
+        if (modifiedGun.getGeneral().hasBurstFire() && modifiedGun.getGeneral().isAuto())
+        	return true;
+        
+        return false;
+        //return (modifiedGun.getFireModes().usesFireModes() && modifiedGun.getFireModes().usesAutoBurst()) || (!modifiedGun.getFireModes().hasAnyFireMode() && modifiedGun.getGeneral().isAuto());
+    }
+
+    public static boolean canDoSemiFire(ItemStack gunStack)
+    {
+        Gun modifiedGun = ((GunItem) gunStack.getItem()).getModifiedGun(gunStack);
+        return modifiedGun.getFireModes().hasSemiMode() || (!modifiedGun.getFireModes().hasAnyFireMode());
+    }
+
+    public static boolean canDoAutoFire(ItemStack gunStack)
+    {
+        Gun modifiedGun = ((GunItem) gunStack.getItem()).getModifiedGun(gunStack);
+        return modifiedGun.getFireModes().hasAutoMode() || (!modifiedGun.getFireModes().hasAnyFireMode() && modifiedGun.getGeneral().isAuto() && !modifiedGun.getGeneral().hasBurstFire());
+    }
+
+    public static boolean canDoBurstFire(ItemStack gunStack)
+    {
+        Gun modifiedGun = ((GunItem) gunStack.getItem()).getModifiedGun(gunStack);
+        return modifiedGun.getFireModes().hasBurstMode() || (!modifiedGun.getFireModes().hasAnyFireMode() && modifiedGun.getGeneral().hasBurstFire());
     }
 
     public static float getFovModifier(ItemStack stack, Gun modifiedGun)

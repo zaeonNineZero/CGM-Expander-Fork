@@ -73,7 +73,7 @@ public class BurstTracker
     private int getBurstDelayTicks(Player player)
     {
         //int minTickDelay = GunEnchantmentHelper.getRampUpMaxRate(stack,gun)+1;
-        int minTickDelay = GunCompositeStatHelper.getCompositeRate(stack,gun,player)+gun.getGeneral().getBurstCooldown();
+        int minTickDelay = GunCompositeStatHelper.getCompositeRate(stack,gun,player)+Gun.getBurstCooldown(stack);
         return minTickDelay-1;
     }
 

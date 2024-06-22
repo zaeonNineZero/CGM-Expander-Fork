@@ -741,8 +741,8 @@ public class GunRenderingHandler
         	
             if(Config.CLIENT.display.cooldownIndicator.get())
             {
-            	Gun gun = ((GunItem) heldItem.getItem()).getGun();
-            	if(!gun.getGeneral().isAuto())
+            	//Gun gun = ((GunItem) heldItem.getItem()).getGun();
+            	if(!Gun.isAuto(heldItem) && !Gun.hasBurstFire(heldItem))
             	{
                 	float coolDown = player.getCooldowns().getCooldownPercent(heldItem.getItem(), event.renderTickTime);
                 	if(coolDown > 0.0F)
@@ -798,7 +798,45 @@ public class GunRenderingHandler
 				itemRenderer.renderGuiItem(ammoStack, ammoPosX-17, ammoPosY);
             }
             
+            // PoseStack for text components
             PoseStack poseStack = new PoseStack();
+            
+            // Fire mode display
+            if (gun.getFireModes().usesFireModes())
+            {
+	            int currentFireMode = Gun.getFireMode(heldItem);
+	            String fireModeString = (currentFireMode==0 ? "Semi" : (currentFireMode==1 ? "Auto" : (currentFireMode==2 ? "Burst" : "")));
+	            //GuiComponent.drawString(poseStack, Minecraft.getInstance().font, fireModeDisplay, ammoPosX, ammoPosY+20, 0xFFFFFF);
+	            
+	            MutableComponent fireSwitch = (Component.literal(""));
+	            int fireSwitches = 0;
+	            if (Gun.canDoSemiFire(heldItem))
+	            {
+	            	fireSwitch.append(Component.literal("'").withStyle(currentFireMode==0 ? ChatFormatting.WHITE : ChatFormatting.DARK_GRAY));
+	            	fireSwitches++;
+            	}
+	            if (Gun.canDoAutoFire(heldItem))
+	            {
+	            	fireSwitch.append(Component.literal("'").withStyle(currentFireMode==1 ? ChatFormatting.WHITE : ChatFormatting.DARK_GRAY));
+	            	fireSwitches++;
+            	}
+	            if (Gun.canDoBurstFire(heldItem))
+	            {
+	            	fireSwitch.append(Component.literal("'").withStyle(currentFireMode==2 ? ChatFormatting.WHITE : ChatFormatting.DARK_GRAY));
+	            	fireSwitches++;
+	            }
+	            
+	            MutableComponent fireModeDisplay = (Component.literal(""));
+	            if (fireSwitches>1)
+	            	fireModeDisplay.append(fireSwitch.append(" "));
+	            fireModeDisplay.append(Component.literal(fireModeString).withStyle(ChatFormatting.BOLD));
+	            
+		        GuiComponent.drawString(poseStack, Minecraft.getInstance().font, fireModeDisplay, ammoPosX, ammoPosY+20, 0xFFFFFF);
+		        //GuiComponent.drawCenteredString(poseStack, Minecraft.getInstance().font, fireSwitch, ammoPosX-6, ammoPosY+20, 0x555555);
+	            
+        	}
+            
+            // Ammo counter
             int currentAmmo = tagCompound.getInt("AmmoCount");
             MutableComponent ammoCountValue = (Component.literal(currentAmmo + " / " + GunEnchantmentHelper.getAmmoCapacity(heldItem, gun)).withStyle(ChatFormatting.BOLD));
             if (Gun.hasInfiniteAmmo(heldItem))
@@ -807,6 +845,7 @@ public class GunRenderingHandler
             if (ModSyncedDataKeys.RELOADING.getValue(player))
             	GuiComponent.drawString(poseStack, Minecraft.getInstance().font, "Reloading...", ammoPosX, ammoPosY-10, 0xFFFF55);
             
+            // Reserve ammo counter
             if (!Gun.hasInfiniteAmmo(heldItem))
             {
             	if (this.doUpdateAmmo)
@@ -815,8 +854,8 @@ public class GunRenderingHandler
             		this.doUpdateAmmo = false;
             	}
             	String displayReserveAmmo = (!Gun.hasUnlimitedReloads(heldItem) ? "" + reserveAmmo: "∞");
-	            MutableComponent reserveAmmoValue = (Component.literal(" " + displayReserveAmmo));
-	            GuiComponent.drawString(poseStack, Minecraft.getInstance().font, reserveAmmoValue, ammoPosX, ammoPosY+10, (reserveAmmo<=0 && !Gun.hasUnlimitedReloads(heldItem) ? 0x555555 : 0xAAAAAA));
+	            MutableComponent reserveAmmoValue = (Component.literal(displayReserveAmmo));
+	            GuiComponent.drawString(poseStack, Minecraft.getInstance().font, reserveAmmoValue, ammoPosX+5, ammoPosY+10, (reserveAmmo<=0 && !Gun.hasUnlimitedReloads(heldItem) ? 0x555555 : 0xAAAAAA));
             }
 
             RenderSystem.disableBlend();

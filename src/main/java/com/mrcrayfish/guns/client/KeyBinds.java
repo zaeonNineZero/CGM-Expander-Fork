@@ -14,12 +14,14 @@ public class KeyBinds
     public static final KeyMapping KEY_RELOAD = new KeyMapping("key.cgm.reload", GLFW.GLFW_KEY_R, "key.categories.cgm");
     public static final KeyMapping KEY_UNLOAD = new KeyMapping("key.cgm.unload", GLFW.GLFW_KEY_U, "key.categories.cgm");
     public static final KeyMapping KEY_ATTACHMENTS = new KeyMapping("key.cgm.attachments", GLFW.GLFW_KEY_Z, "key.categories.cgm");
+    public static final KeyMapping KEY_FIRE_MODE = new KeyMapping("key.cgm.fire_mode", GLFW.GLFW_KEY_V, "key.categories.cgm");
 
     public static void registerKeyMappings(RegisterKeyMappingsEvent event)
     {
         event.register(KEY_RELOAD);
         event.register(KEY_UNLOAD);
         event.register(KEY_ATTACHMENTS);
+        event.register(KEY_FIRE_MODE);
     }
 
     public static KeyMapping getAimMapping()
