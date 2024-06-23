@@ -527,7 +527,7 @@ public class GunRenderingHandler
         this.applySprintingTransforms(modifiedGun, hand, poseStack, event.getPartialTick());
         this.applyAnimationTransforms(poseStack, player, heldItem);
         this.applyRecoilTransforms(poseStack, heldItem, modifiedGun);
-        this.applyReloadTransforms(poseStack, heldItem, event.getPartialTick());
+        this.applyReloadTransforms(poseStack, heldItem, modifiedGun, event.getPartialTick());
         this.applyShieldTransforms(poseStack, player, modifiedGun, event.getPartialTick());
 
         /* Determines the lighting for the weapon. Weapon will appear bright from muzzle flash or light sources */
@@ -653,7 +653,7 @@ public class GunRenderingHandler
         poseStack.mulPose(Vector3f.ZP.rotationDegrees((float) rotations.z));
     }
 
-    private void applyReloadTransforms(PoseStack poseStack, ItemStack item, float partialTicks)
+    private void applyReloadTransforms(PoseStack poseStack, ItemStack item, Gun modifiedGun, float partialTicks)
     {
     	float reloadProgress = ReloadHandler.get().getReloadProgress(partialTicks);
     	if(GunReloadAnimationHelper.hasCustomReloadAnimation(item))
@@ -668,9 +668,10 @@ public class GunRenderingHandler
     	}
     	else
     	{
-    		poseStack.translate(0, 0.35 * reloadProgress * Math.min(getReloadDeltaTime(item)*2.2, 1), 0);
-    		poseStack.translate(0, 0, -0.1 * reloadProgress);
-    		poseStack.mulPose(Vector3f.XP.rotationDegrees(45F * reloadProgress * (float) Math.min(getReloadDeltaTime(item)*2.2, 1)));
+    		double reloadOffset = !modifiedGun.getGeneral().usesMagReload() ? Math.min(getReloadDeltaTime(item)*2.25, 1) : 1;
+    		poseStack.translate(0, 0.35 * reloadProgress * reloadOffset, 0);
+    		poseStack.translate(0, 0, -0.1 * reloadProgress * reloadOffset);
+    		poseStack.mulPose(Vector3f.XP.rotationDegrees(45F * reloadProgress * (float) reloadOffset));
     	}
     }
 
@@ -1149,7 +1150,7 @@ public class GunRenderingHandler
 
         RenderUtil.renderFirstPersonArm(mc.player, hand.getOpposite(), poseStack, buffer, light);
 
-        if(reload < 0.54F && getReloadDeltaTime(stack)<0.5F && item != null)
+        if(reload < 0.54F && getReloadDeltaTime(stack)>=0.5F && item != null)
         {
             poseStack.pushPose();
             poseStack.translate(-side * 5 * 0.0625, 15 * 0.0625, -1 * 0.0625);

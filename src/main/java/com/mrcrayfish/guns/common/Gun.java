@@ -1423,18 +1423,18 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             if(this.reloadEarly != null)
             {
                 tag.putString("ReloadMid", this.reloadEarly.toString());
-                tag.putFloat("ReloadMidThreshold", this.reloadEarlyThreshold);
             }
+            tag.putFloat("ReloadMidThreshold", this.reloadEarlyThreshold);
             if(this.reloadMid != null)
             {
                 tag.putString("ReloadMid", this.reloadMid.toString());
-                tag.putFloat("ReloadMidThreshold", this.reloadMidThreshold);
             }
+            tag.putFloat("ReloadMidThreshold", this.reloadMidThreshold);
             if(this.reloadLate != null)
             {
                 tag.putString("ReloadLate", this.reloadLate.toString());
-                tag.putFloat("ReloadLateThreshold", this.reloadLateThreshold);
             }
+            tag.putFloat("ReloadLateThreshold", this.reloadLateThreshold);
             if(this.reloadEnd != null)
             {
                 tag.putString("ReloadEnd", this.reloadEnd.toString());
@@ -1443,13 +1443,13 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             if(this.reloadClipOut != null)
             {
                 tag.putString("ReloadClipOut", this.reloadClipOut.toString());
-                tag.putFloat("ReloadClipOutThreshold", this.reloadClipOutThreshold);
             }
+            tag.putFloat("ReloadClipOutThreshold", this.reloadClipOutThreshold);
             if(this.reloadClipIn != null)
             {
                 tag.putString("ReloadClipIn", this.reloadClipIn.toString());
-                tag.putFloat("ReloadClipInThreshold", this.reloadClipInThreshold);
             }
+            tag.putFloat("ReloadClipInThreshold", this.reloadClipInThreshold);
             
             if(this.cock != null)
             {
@@ -1529,7 +1529,7 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             }
             if(tag.contains("ReloadClipOutThreshold", Tag.TAG_ANY_NUMERIC))
             {
-                this.reloadLateThreshold = tag.getFloat("ReloadLateThreshold");
+                this.reloadClipOutThreshold = tag.getFloat("ReloadClipOutThreshold");
             }
             if(tag.contains("ReloadClipIn", Tag.TAG_STRING))
             {
@@ -1537,7 +1537,7 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             }
             if(tag.contains("ReloadClipInThreshold", Tag.TAG_ANY_NUMERIC))
             {
-                this.reloadLateThreshold = tag.getFloat("ReloadLateThreshold");
+                this.reloadClipInThreshold = tag.getFloat("ReloadClipInThreshold");
             }
             
             if(tag.contains("Cock", Tag.TAG_STRING))
@@ -1585,18 +1585,18 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             if(this.reloadEarly != null)
             {
                 object.addProperty("reloadEarly", this.reloadEarly.toString());
-                object.addProperty("reloadEarlyThreshold", this.reloadEarlyThreshold);
             }
+            if(this.reloadLateThreshold != 0.25F) object.addProperty("reloadEarlyThreshold", this.reloadEarlyThreshold);
             if(this.reloadMid != null)
             {
                 object.addProperty("reloadMid", this.reloadMid.toString());
-                object.addProperty("reloadMidThreshold", this.reloadMidThreshold);
             }
+            if(this.reloadMidThreshold != 0.5F) object.addProperty("reloadMidThreshold", this.reloadMidThreshold);
             if(this.reloadLate != null)
             {
                 object.addProperty("reloadLate", this.reloadLate.toString());
-                object.addProperty("reloadLateThreshold", this.reloadLateThreshold);
             }
+            if(this.reloadLateThreshold != 0.75F) object.addProperty("reloadLateThreshold", this.reloadLateThreshold);
             if(this.reloadEnd != null)
             {
                 object.addProperty("reloadEnd", this.reloadEnd.toString());
@@ -1605,13 +1605,13 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             if(this.reloadClipOut != null)
             {
                 object.addProperty("reloadClipOut", this.reloadClipOut.toString());
-                object.addProperty("reloadClipOutThreshold", this.reloadClipOutThreshold);
             }
+            if(this.reloadClipOutThreshold != 0.33F) object.addProperty("reloadClipOutThreshold", this.reloadClipOutThreshold);
             if(this.reloadClipIn != null)
             {
                 object.addProperty("reloadClipIn", this.reloadClipIn.toString());
-                object.addProperty("reloadClipInThreshold", this.reloadClipInThreshold);
             }
+            if(this.reloadClipInThreshold != 0.67F) object.addProperty("reloadClipInThreshold", this.reloadClipInThreshold);
             
             if(this.cock != null)
             {
