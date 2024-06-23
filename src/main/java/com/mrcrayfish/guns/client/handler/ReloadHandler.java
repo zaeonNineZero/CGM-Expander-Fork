@@ -143,7 +143,7 @@ public class ReloadHandler
         {
             if(this.startReloadTick == -1)
             {
-                this.startReloadTick = player.tickCount + 5;
+                this.startReloadTick = player.tickCount;
             }
             if(this.reloadTimer < 5)
             {

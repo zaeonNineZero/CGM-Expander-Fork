@@ -384,7 +384,7 @@ public final class PropertyHelper
         	return animScalar.asDouble()*2.0;
 		}
         
-        return 1.6;
+        return 0.8*2.0;
 	}
 	
     private static SightAnimation objectToSightAnimation(DataObject object)

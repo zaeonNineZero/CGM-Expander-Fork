@@ -161,7 +161,7 @@ public final class GunAnimationHelper
 			anim2 = applyHandBoltAnimation(weapon, anim2, isRearHand, progress);
 			
 			Vec3 animation = anim1.add(anim2);
-			return animation.scale(getHandAnimScalar(weapon));
+			return animation.scale(PropertyHelper.getHandPosScalar(weapon));
 		}
 		return Vec3.ZERO;
 	}

@@ -113,20 +113,21 @@ public class TwoHandedShortPose extends WeaponPose
             double yOffset = (posHand != null ? posHand.y : 0);
             double zOffset = (posHand != null ? posHand.z : 0);
         	float reloadProgress = ReloadHandler.get().getReloadProgress(partialTicks);
-        	float reloadCycleProgress = GunRenderingHandler.get().getReloadCycleProgress(player, stack);
-        	Vec3 translations = GunReloadAnimationHelper.getAnimationTrans(stack, reloadCycleProgress, "forwardHand");
-            Vec3 rotations = GunReloadAnimationHelper.getAnimationRot(stack, reloadCycleProgress, "forwardHand");
+        	float reloadCycleProgress = GunRenderingHandler.get().getReloadCycleProgress(stack);
+        	Vec3 reloadTranslations = GunReloadAnimationHelper.getAnimationTrans(stack, reloadCycleProgress, "forwardHand");
+            Vec3 reloadRotations = GunReloadAnimationHelper.getAnimationRot(stack, reloadCycleProgress, "forwardHand");
             if (GunReloadAnimationHelper.hasCustomReloadAnimation(stack))
         	{
-        		translations.multiply(reloadProgress, reloadProgress, reloadProgress);
-        		rotations.multiply(reloadProgress, reloadProgress, reloadProgress);
+            	reloadTranslations.scale(reloadProgress);
+            	reloadRotations.scale(reloadProgress);
         	}
         	else
         	{
         		poseStack.translate(reloadProgress * 0.5, -reloadProgress, -reloadProgress * 0.5);
         	}
             
-        	translations.add(GunAnimationHelper.getHandTranslation(stack, false, cooldown));
+        	Vec3 translations = GunAnimationHelper.getHandTranslation(stack, false, cooldown).add(reloadTranslations);
+        	Vec3 rotations = Vec3.ZERO.add(reloadRotations);
 
             poseStack.scale(0.5F, 0.5F, 0.5F);
             poseStack.translate((1.55 + xOffset + translations.x) * 0.0625 * side, (0.6 + yOffset + translations.y) * 0.0625, (-3.5 - zOffset - translations.z) * 0.0625);
@@ -151,16 +152,17 @@ public class TwoHandedShortPose extends WeaponPose
             double yOffset = (posHand != null ? posHand.y : 0);
             double zOffset = (posHand != null ? posHand.z : 0);
         	float reloadProgress = ReloadHandler.get().getReloadProgress(partialTicks);
-        	float reloadCycleProgress = GunRenderingHandler.get().getReloadCycleProgress(player, stack);
-        	Vec3 translations = GunReloadAnimationHelper.getAnimationTrans(stack, reloadCycleProgress, "forwardHand");
-            Vec3 rotations = GunReloadAnimationHelper.getAnimationRot(stack, reloadCycleProgress, "forwardHand");
-        	if (GunReloadAnimationHelper.hasCustomReloadAnimation(stack))
+        	float reloadCycleProgress = GunRenderingHandler.get().getReloadCycleProgress(stack);
+        	Vec3 reloadTranslations = GunReloadAnimationHelper.getAnimationTrans(stack, reloadCycleProgress, "rearHand");
+            Vec3 reloadRotations = GunReloadAnimationHelper.getAnimationRot(stack, reloadCycleProgress, "rearHand");
+            if (GunReloadAnimationHelper.hasCustomReloadAnimation(stack))
         	{
-        		translations.multiply(reloadProgress, reloadProgress, reloadProgress);
-        		rotations.multiply(reloadProgress, reloadProgress, reloadProgress);
+            	reloadTranslations.scale(reloadProgress);
+            	reloadRotations.scale(reloadProgress);
         	}
             
-        	translations.add(GunAnimationHelper.getHandTranslation(stack, true, cooldown));
+        	Vec3 translations = GunAnimationHelper.getHandTranslation(stack, true, cooldown).add(reloadTranslations);
+        	Vec3 rotations = Vec3.ZERO.add(reloadRotations);
             
             poseStack.translate(0, 0.1, -0.675);
             poseStack.scale(0.5F, 0.5F, 0.5F);

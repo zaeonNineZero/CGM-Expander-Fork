@@ -6,7 +6,7 @@ plugins {
 }
 
 archivesBaseName = "cgm"
-version = "expander-fork-1.19.2"
+version = "expanded-fork-1.19.2"
 group = "com.mrcrayfish"
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)

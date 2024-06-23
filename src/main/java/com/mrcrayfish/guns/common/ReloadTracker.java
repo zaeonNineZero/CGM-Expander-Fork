@@ -40,15 +40,19 @@ public class ReloadTracker
     private final int slot;
     private final ItemStack stack;
     private final Gun gun;
+    private final int reloadStartDelay;
+    private int delayedStartTick;
     private int reserveAmmo = 0;
     private int reloadSoundState = 0;
 
     private ReloadTracker(Player player)
     {
         this.startTick = player.tickCount;
+        this.delayedStartTick = player.tickCount;
         this.slot = player.getInventory().selected;
         this.stack = player.getInventory().getSelected();
         this.gun = ((GunItem) stack.getItem()).getModifiedGun(stack);
+        this.reloadStartDelay = 5;
     }
 
     /**
@@ -78,14 +82,14 @@ public class ReloadTracker
 
     private boolean canReload(Player player)
     {
-        int deltaTicks = player.tickCount - this.startTick;
+        int deltaTicks = player.tickCount - (this.delayedStartTick);
         int interval = GunEnchantmentHelper.getRealReloadSpeed(this.stack);
         return deltaTicks > 0 && deltaTicks % interval == 0;
     }
 
     private float getReloadProgress(Player player)
     {
-        int deltaTicks = player.tickCount - this.startTick;
+        int deltaTicks = player.tickCount - (this.delayedStartTick);
         int interval = GunEnchantmentHelper.getRealReloadSpeed(this.stack);
         return ((float) deltaTicks) / ((float) interval);
     }
@@ -158,7 +162,7 @@ public class ReloadTracker
         }
     }
     
-    public static void attemptReload(Player player)
+    public static void handleReload(Player player)
     {
     	if(ModSyncedDataKeys.RELOADING.getValue(player))
         {
@@ -178,6 +182,12 @@ public class ReloadTracker
                 ModSyncedDataKeys.RELOADING.setValue(player, false);
                 return;
             }
+            if (player.tickCount - (tracker.startTick) < tracker.reloadStartDelay)
+            {
+            	tracker.delayedStartTick = player.tickCount;
+            	return;
+        	}
+            
             if(tracker.canReload(player))
             {
                 tracker.increaseAmmo(player);
@@ -339,7 +349,7 @@ public class ReloadTracker
         {
             Player player = event.player;
             // Reload logic
-            attemptReload(player);
+            handleReload(player);
         }
     }
 

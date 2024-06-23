@@ -643,10 +643,11 @@ public class GunRenderingHandler
     private void applyReloadTransforms(PoseStack poseStack, ItemStack item, float partialTicks)
     {
     	float reloadProgress = ReloadHandler.get().getReloadProgress(partialTicks);
+    	float reloadCycleProgress = getReloadCycleProgress(item);
     	if(GunReloadAnimationHelper.hasCustomReloadAnimation(item))
     	{
-            Vec3 translations = GunReloadAnimationHelper.getAnimationTrans(item, reloadProgress, "viewModel");
-            Vec3 rotations = GunReloadAnimationHelper.getAnimationRot(item, reloadProgress, "viewModel");
+            Vec3 translations = GunReloadAnimationHelper.getAnimationTrans(item, reloadCycleProgress, "viewModel").scale(reloadProgress);
+            Vec3 rotations = GunReloadAnimationHelper.getAnimationRot(item, reloadCycleProgress, "viewModel").scale(reloadProgress);
             poseStack.translate(translations.x * 0.0625, translations.y * 0.0625, translations.z * 0.0625);
             poseStack.mulPose(Vector3f.XP.rotationDegrees((float) rotations.x));
             poseStack.mulPose(Vector3f.YP.rotationDegrees((float) rotations.y));
@@ -1087,7 +1088,7 @@ public class GunRenderingHandler
     private void renderReloadArm(PoseStack poseStack, MultiBufferSource buffer, int light, Gun modifiedGun, ItemStack stack, HumanoidArm hand, float translateX)
     {
         Minecraft mc = Minecraft.getInstance();
-        if(mc.player == null || mc.player.tickCount < ReloadHandler.get().getStartReloadTick() || ReloadHandler.get().getReloadTimer() != 5)
+        if(mc.player == null || mc.player.tickCount < ReloadHandler.get().getStartReloadTick() + 5 || ReloadHandler.get().getReloadTimer() != 5)
             return;
         
         if(GunReloadAnimationHelper.hasCustomReloadAnimation(stack))
@@ -1103,7 +1104,7 @@ public class GunRenderingHandler
         poseStack.translate(translateX * side, 0, 0);
 
         float interval = GunEnchantmentHelper.getRealReloadSpeed(stack);
-        float reload = ((mc.player.tickCount - ReloadHandler.get().getStartReloadTick() + mc.getFrameTime()) % interval) / interval;
+        float reload = ((mc.player.tickCount - (ReloadHandler.get().getStartReloadTick() + 5) + mc.getFrameTime()) % interval) / interval;
         float percent = 1.0F - reload;
         if(percent >= 0.5F)
         {
@@ -1170,16 +1171,15 @@ public class GunRenderingHandler
         poseStack.popPose();
     }
     
-    public float getReloadCycleProgress(Player player, ItemStack stack)
+    public float getReloadCycleProgress(ItemStack stack)
     {
     	Minecraft mc = Minecraft.getInstance();
-        if(player == null)
+        if(mc.player == null)
             return 0;
     	
     	float interval = GunEnchantmentHelper.getRealReloadSpeed(stack);
-        float reload = ((player.tickCount - ReloadHandler.get().getStartReloadTick() + mc.getFrameTime()) % interval) / interval;
-        float percent = 1.0F - reload;
-        return percent;
+        float reload = (mc.player.tickCount - (ReloadHandler.get().getStartReloadTick() + 5) + mc.getFrameTime()) / interval;
+        return reload;
     }
 
     /**
