@@ -3,9 +3,11 @@ package com.mrcrayfish.guns.client.render.pose;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3f;
 import com.mrcrayfish.guns.Config;
+import com.mrcrayfish.guns.client.handler.GunRenderingHandler;
 import com.mrcrayfish.guns.client.handler.ReloadHandler;
 import com.mrcrayfish.guns.client.render.IHeldAnimation;
 import com.mrcrayfish.guns.client.util.GunAnimationHelper;
+import com.mrcrayfish.guns.client.util.GunReloadAnimationHelper;
 import com.mrcrayfish.guns.client.util.PropertyHelper;
 import com.mrcrayfish.guns.client.util.RenderUtil;
 import com.mrcrayfish.guns.common.GripType;
@@ -151,12 +153,23 @@ public class PistolCustomPose extends WeaponPose
             double yOffset = (posHand != null ? posHand.y : 0);
             double zOffset = (posHand != null ? posHand.z : 0);
         	float reloadProgress = ReloadHandler.get().getReloadProgress(partialTicks);
-            poseStack.translate(reloadProgress * 0.5, -reloadProgress, -reloadProgress * 0.5);
+        	float reloadCycleProgress = GunRenderingHandler.get().getReloadCycleProgress(player, stack);
+        	Vec3 translations = GunReloadAnimationHelper.getAnimationTrans(stack, reloadCycleProgress, "forwardHand");
+            Vec3 rotations = GunReloadAnimationHelper.getAnimationRot(stack, reloadCycleProgress, "forwardHand");
+            if (GunReloadAnimationHelper.hasCustomReloadAnimation(stack))
+        	{
+        		translations.multiply(reloadProgress, reloadProgress, reloadProgress);
+        		rotations.multiply(reloadProgress, reloadProgress, reloadProgress);
+        	}
+        	else
+        	{
+        		poseStack.translate(reloadProgress * 0.5, -reloadProgress, -reloadProgress * 0.5);
+        	}
             
-            Vec3 animate = GunAnimationHelper.getHandTranslation(stack, false, cooldown);
+        	translations.add(GunAnimationHelper.getHandTranslation(stack, false, cooldown));
 
             poseStack.scale(0.5F, 0.5F, 0.5F);
-            poseStack.translate((2.9 + xOffset + animate.x) * 0.0625 * side, (2.2 + yOffset + animate.y) * 0.0625, (-11.2 - zOffset - animate.z) * 0.0625);
+            poseStack.translate((2.9 + xOffset + translations.x) * 0.0625 * side, (2.2 + yOffset + translations.y) * 0.0625, (-11.2 - zOffset - translations.z) * 0.0625);
             //poseStack.translate((1.55) * 0.0625 * side, (0.4) * 0.0625, (-3.5) * 0.0625);
             poseStack.translate((armWidth / 2.0) * 0.0625 * side, 0, 0);
             poseStack.translate(-0.3125 * side, -0.1, -0.4375);
@@ -174,14 +187,23 @@ public class PistolCustomPose extends WeaponPose
             double xOffset = (posHand != null ? posHand.x : 0);
             double yOffset = (posHand != null ? posHand.y : 0);
             double zOffset = (posHand != null ? posHand.z : 0);
+        	float reloadProgress = ReloadHandler.get().getReloadProgress(partialTicks);
+        	float reloadCycleProgress = GunRenderingHandler.get().getReloadCycleProgress(player, stack);
+        	Vec3 translations = GunReloadAnimationHelper.getAnimationTrans(stack, reloadCycleProgress, "forwardHand");
+            Vec3 rotations = GunReloadAnimationHelper.getAnimationRot(stack, reloadCycleProgress, "forwardHand");
+        	if (GunReloadAnimationHelper.hasCustomReloadAnimation(stack))
+        	{
+        		translations.multiply(reloadProgress, reloadProgress, reloadProgress);
+        		rotations.multiply(reloadProgress, reloadProgress, reloadProgress);
+        	}
             
-            Vec3 animate = GunAnimationHelper.getHandTranslation(stack, true, cooldown);
+        	translations.add(GunAnimationHelper.getHandTranslation(stack, true, cooldown));
             
         	if (player.getOffhandItem().isEmpty())
             {
             	poseStack.translate(0, 0.1, -0.675);
             	poseStack.scale(0.5F, 0.5F, 0.5F);
-            	poseStack.translate((-1.7 + xOffset + animate.x) * 0.0625 * side, (0 + yOffset + animate.y) * 0.0625, (3.2 - zOffset - animate.z) * 0.0625);
+            	poseStack.translate((-1.7 + xOffset + translations.x) * 0.0625 * side, (0 + yOffset + translations.y) * 0.0625, (3.2 - zOffset - translations.z) * 0.0625);
             	//poseStack.translate((-4.0) * 0.0625 * side, (0) * 0.0625, (0) * 0.0625);
             	poseStack.translate(-(armWidth / 2.0) * 0.0625 * side, 0, 0);
             	poseStack.mulPose(Vector3f.XP.rotationDegrees(80F));

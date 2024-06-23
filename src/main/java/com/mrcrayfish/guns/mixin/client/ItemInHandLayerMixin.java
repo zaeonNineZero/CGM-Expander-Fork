@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3f;
 import com.mrcrayfish.guns.client.handler.AimingHandler;
 import com.mrcrayfish.guns.client.handler.GunRenderingHandler;
+import com.mrcrayfish.guns.client.handler.ReloadHandler;
 import com.mrcrayfish.guns.common.Gun;
 import com.mrcrayfish.guns.item.GunItem;
 import net.minecraft.client.Minecraft;
@@ -47,7 +48,7 @@ public class ItemInHandLayerMixin
                 if(entity.getMainHandItem().getItem() instanceof GunItem gunItem)
                 {
                     Gun modifiedGun = gunItem.getModifiedGun(entity.getMainHandItem());
-                    if(!modifiedGun.getGeneral().getGripType().getHeldAnimation().canRenderOffhandItem())
+                    if(!modifiedGun.getGeneral().getGripType().getHeldAnimation().canRenderOffhandItem() || ReloadHandler.get().getReloadTimer()>0)
                     {
                         ci.cancel();
                         return;

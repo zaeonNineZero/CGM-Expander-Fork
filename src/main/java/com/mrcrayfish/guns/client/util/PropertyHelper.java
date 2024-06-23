@@ -348,7 +348,7 @@ public final class PropertyHelper
     }
     
 	public static Vec3 getHandPosition(ItemStack weapon, Gun modifiedGun, boolean isRearHand) {
-		double scaleFactor = PropertyHelper.getHandAnimScalar(weapon);
+		double scaleFactor = getHandPosScalar(weapon);
 		DataObject handObject = getObjectByPath(weapon, WEAPON_KEY, "hands", isRearHand ? "rear" : "forward");
 		if (handObject.has("offset", DataType.ARRAY))
 		{

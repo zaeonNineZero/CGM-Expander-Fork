@@ -54,6 +54,13 @@ public final class GunReloadAnimationHelper
 		
 		return blendedFrame;
 	}
+    
+	public static int getCurrentFrame(ItemStack weapon, float progress, String type)
+	{
+		int animationFrames = getReloadFrames(weapon);
+		float scaledProgress = progress*(animationFrames-1);
+		return (int) Math.floor(scaledProgress);
+	}
 	
 	
 	
@@ -83,10 +90,10 @@ public final class GunReloadAnimationHelper
 	
 	// Hands
 	private static Vec3 getReloadAnimTrans(ItemStack weapon, String type, int frame) {
-		DataObject handObject = PropertyHelper.getObjectByPath(weapon, WEAPON_KEY, "reloadAnimation", type);
-		if (handObject.has("transFrame" + frame, DataType.ARRAY))
+		DataObject frameObject = PropertyHelper.getObjectByPath(weapon, WEAPON_KEY, "reloadAnimation", type, ""+frame);
+		if (frameObject.has("translate", DataType.ARRAY))
 		{
-			DataArray translationArray = handObject.getDataArray("transFrame" + frame);
+			DataArray translationArray = frameObject.getDataArray("translate" + frame);
 			if (translationArray!=null)
             return PropertyHelper.arrayToVec3(translationArray, Vec3.ZERO);
 		}
@@ -94,12 +101,12 @@ public final class GunReloadAnimationHelper
 		return Vec3.ZERO;
 	}
 	private static Vec3 getReloadAnimRot(ItemStack weapon, String type, int frame) {
-		DataObject handObject = PropertyHelper.getObjectByPath(weapon, WEAPON_KEY, "reloadAnimation", type);
-		if (handObject.has("rotFrame" + frame, DataType.ARRAY))
+		DataObject frameObject = PropertyHelper.getObjectByPath(weapon, WEAPON_KEY, "reloadAnimation", type, ""+frame);
+		if (frameObject.has("rotate" + frame, DataType.ARRAY))
 		{
-			DataArray translationArray = handObject.getDataArray("rotFrame" + frame);
-			if (translationArray!=null)
-            return PropertyHelper.arrayToVec3(translationArray, Vec3.ZERO);
+			DataArray rotationArray = frameObject.getDataArray("rotate" + frame);
+			if (rotationArray!=null)
+            return PropertyHelper.arrayToVec3(rotationArray, Vec3.ZERO);
 		}
 		
 		return Vec3.ZERO;

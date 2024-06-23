@@ -15,6 +15,7 @@ import com.mrcrayfish.guns.client.render.gun.IOverrideModel;
 import com.mrcrayfish.guns.client.render.gun.ModelOverrides;
 import com.mrcrayfish.guns.client.render.pose.OneHandedPose;
 import com.mrcrayfish.guns.client.util.GunAnimationHelper;
+import com.mrcrayfish.guns.client.util.GunReloadAnimationHelper;
 import com.mrcrayfish.guns.client.util.PropertyHelper;
 import com.mrcrayfish.guns.client.util.RenderUtil;
 import com.mrcrayfish.guns.common.GripType;
@@ -513,7 +514,7 @@ public class GunRenderingHandler
         this.applySprintingTransforms(modifiedGun, hand, poseStack, event.getPartialTick());
         this.applyAnimationTransforms(poseStack, player, heldItem);
         this.applyRecoilTransforms(poseStack, heldItem, modifiedGun);
-        this.applyReloadTransforms(poseStack, event.getPartialTick());
+        this.applyReloadTransforms(poseStack, heldItem, event.getPartialTick());
         this.applyShieldTransforms(poseStack, player, modifiedGun, event.getPartialTick());
 
         /* Determines the lighting for the weapon. Weapon will appear bright from muzzle flash or light sources */
@@ -639,12 +640,24 @@ public class GunRenderingHandler
         poseStack.mulPose(Vector3f.ZP.rotationDegrees((float) rotations.z));
     }
 
-    private void applyReloadTransforms(PoseStack poseStack, float partialTicks)
+    private void applyReloadTransforms(PoseStack poseStack, ItemStack item, float partialTicks)
     {
-        float reloadProgress = ReloadHandler.get().getReloadProgress(partialTicks);
-        poseStack.translate(0, 0.35 * reloadProgress, 0);
-        poseStack.translate(0, 0, -0.1 * reloadProgress);
-        poseStack.mulPose(Vector3f.XP.rotationDegrees(45F * reloadProgress));
+    	float reloadProgress = ReloadHandler.get().getReloadProgress(partialTicks);
+    	if(GunReloadAnimationHelper.hasCustomReloadAnimation(item))
+    	{
+            Vec3 translations = GunReloadAnimationHelper.getAnimationTrans(item, reloadProgress, "viewModel");
+            Vec3 rotations = GunReloadAnimationHelper.getAnimationRot(item, reloadProgress, "viewModel");
+            poseStack.translate(translations.x * 0.0625, translations.y * 0.0625, translations.z * 0.0625);
+            poseStack.mulPose(Vector3f.XP.rotationDegrees((float) rotations.x));
+            poseStack.mulPose(Vector3f.YP.rotationDegrees((float) rotations.y));
+            poseStack.mulPose(Vector3f.ZP.rotationDegrees((float) rotations.z));
+    	}
+    	else
+    	{
+    		poseStack.translate(0, 0.35 * reloadProgress, 0);
+    		poseStack.translate(0, 0, -0.1 * reloadProgress);
+    		poseStack.mulPose(Vector3f.XP.rotationDegrees(45F * reloadProgress));
+    	}
     }
 
     private void applyRecoilTransforms(PoseStack poseStack, ItemStack item, Gun gun)
@@ -1076,10 +1089,13 @@ public class GunRenderingHandler
         Minecraft mc = Minecraft.getInstance();
         if(mc.player == null || mc.player.tickCount < ReloadHandler.get().getStartReloadTick() || ReloadHandler.get().getReloadTimer() != 5)
             return;
+        
+        if(GunReloadAnimationHelper.hasCustomReloadAnimation(stack))
+        	return;
 
         Item item = ForgeRegistries.ITEMS.getValue(modifiedGun.getProjectile().getItem());
-        if(item == null)
-            return;
+        //if(item == null)
+        //    return;
 
         poseStack.pushPose();
 
@@ -1107,7 +1123,7 @@ public class GunRenderingHandler
 
         RenderUtil.renderFirstPersonArm(mc.player, hand.getOpposite(), poseStack, buffer, light);
 
-        if(reload < 0.5F)
+        if(reload < 0.5F && item != null)
         {
             poseStack.pushPose();
             poseStack.translate(-side * 5 * 0.0625, 15 * 0.0625, -1 * 0.0625);
@@ -1152,6 +1168,18 @@ public class GunRenderingHandler
             poseStack.popPose();
         }
         poseStack.popPose();
+    }
+    
+    public float getReloadCycleProgress(Player player, ItemStack stack)
+    {
+    	Minecraft mc = Minecraft.getInstance();
+        if(player == null)
+            return 0;
+    	
+    	float interval = GunEnchantmentHelper.getRealReloadSpeed(stack);
+        float reload = ((player.tickCount - ReloadHandler.get().getStartReloadTick() + mc.getFrameTime()) % interval) / interval;
+        float percent = 1.0F - reload;
+        return percent;
     }
 
     /**
