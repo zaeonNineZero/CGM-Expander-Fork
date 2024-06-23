@@ -950,7 +950,7 @@ public class GunRenderingHandler
                         /* Translate to the position this attachment mounts on the weapon */
                         /* Also apply any attachment animations while we're here */
                         Vec3 translation = PropertyHelper.getAttachmentPosition(stack, modifiedGun, type).subtract(gunOrigin);
-                        if (PropertyHelper.hasAttachmentAnimation(stack, type))
+                        if (GunAnimationHelper.hasAttachmentAnimation(stack, type))
                         {
                         	Vec3 animate = Vec3.ZERO;
                         	boolean isPlayer = (entity != null && entity.equals(Minecraft.getInstance().player) ? true : false);
