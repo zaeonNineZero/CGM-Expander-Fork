@@ -39,12 +39,14 @@ public class SwitchGunTracker
     private final int slot;
     private final ItemStack stack;
     private final Gun gun;
+    private boolean playSelectSound;
 
     private SwitchGunTracker(Player player)
     {
         this.slot = player.getInventory().selected;
         this.stack = player.getInventory().getSelected();
         this.gun = ((GunItem) stack.getItem()).getModifiedGun(stack);
+        this.playSelectSound = true;
     }
 
     /**
@@ -69,17 +71,19 @@ public class SwitchGunTracker
         if(event.phase == TickEvent.Phase.START && !event.player.level.isClientSide)
         {
             Player player = event.player;
+            boolean doGunSwitch = false;
+            boolean doGunSelect = false;
             if(!SWITCHGUN_TRACKER_MAP.containsKey(player))
             {
                 if(!(player.getInventory().getSelected().getItem() instanceof GunItem))
                 {
-                	ModSyncedDataKeys.SWITCHTIME.setValue(player, 5);
+                	ModSyncedDataKeys.SWITCHTIME.setValue(player, 1);
                     return;
                 }
                 SWITCHGUN_TRACKER_MAP.put(player, new SwitchGunTracker(player));
+                doGunSelect = true;
             }
             SwitchGunTracker tracker = SWITCHGUN_TRACKER_MAP.get(player);
-            boolean doGunSwitch = false;
             
             //Reload and weapon switch cooldown logic
             if(player.getInventory().getSelected().getItem() instanceof GunItem)
@@ -99,32 +103,35 @@ public class SwitchGunTracker
             }
             else doGunSwitch = true;
             
+            if (doGunSelect && tracker.playSelectSound)
+            {
+            	tracker.playSelectSound=false;
+            	ModSyncedDataKeys.SWITCHTIME.setValue(player, 5);
+            	ResourceLocation selectSound = tracker.gun.getSounds().getWeaponSelect();
+            	playSelectSound(player, selectSound);
+            }
             if (doGunSwitch)
             {
             	ModSyncedDataKeys.SWITCHTIME.setValue(player, 5);
-            	if(player.getInventory().getSelected().getItem() instanceof GunItem)
-            	{
-            		ItemStack newStack = player.getInventory().getSelected();
-            		Gun newGun = ((GunItem) newStack.getItem()).getModifiedGun(newStack);
-            		ResourceLocation selectSound = newGun.getSounds().getWeaponSelect();
-                    if(selectSound != null)
-                	{
-                        double radius = Config.SERVER.reloadMaxDistance.get();
-                        double soundX = player.getX();
-                        double soundY = player.getY() + 1.0;
-                        double soundZ = player.getZ();
-                		S2CMessageGunSound message = new S2CMessageGunSound(selectSound, SoundSource.PLAYERS, (float) soundX, (float) soundY, (float) soundZ, 1.0F, 1.0F, player.getId(), false, true);
-                    	PacketHandler.getPlayChannel().sendToNearbyPlayers(() -> LevelLocation.create(player.level, soundX, soundY, soundZ, radius), message);
-                	
-                	}
-                    //GunRenderingHandler.get().forceSetReserveAmmo(tracker.getInventoryAmmo(player, newGun));
-            	}
             	if(SWITCHGUN_TRACKER_MAP.containsKey(player))
                 {
             		SWITCHGUN_TRACKER_MAP.remove(player);
                 }
             	return;
             }
+        }
+    }
+
+    private static void playSelectSound(Player player, ResourceLocation sound)
+    {
+    	if(sound != null && player.isAlive())
+        {
+            double soundX = player.getX();
+            double soundY = player.getY() + 1.0;
+            double soundZ = player.getZ();
+            double radius = Config.SERVER.reloadMaxDistance.get();
+            S2CMessageGunSound messageSound = new S2CMessageGunSound(sound, SoundSource.PLAYERS, (float) soundX, (float) soundY, (float) soundZ, 1.0F, 1.0F, player.getId(), false, true);
+            PacketHandler.getPlayChannel().sendToNearbyPlayers(() -> LevelLocation.create(player.level, soundX, soundY, soundZ, radius), messageSound);
         }
     }
 
