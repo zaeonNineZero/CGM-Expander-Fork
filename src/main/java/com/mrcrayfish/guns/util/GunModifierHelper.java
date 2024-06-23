@@ -156,7 +156,7 @@ public class GunModifierHelper
             IGunModifier[] modifiers = getModifiers(weapon, IAttachment.Type.values()[i]);
             for(IGunModifier modifier : modifiers)
             {
-                recoilReduction *= Mth.clamp(modifier.recoilModifier(), 0.0F, 1.0F);
+                recoilReduction *= Math.max(modifier.recoilModifier(), 0.0F);
             }
         }
         return 1.0F - recoilReduction;
