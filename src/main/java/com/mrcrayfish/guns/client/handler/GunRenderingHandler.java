@@ -116,6 +116,7 @@ public class GunRenderingHandler
     private boolean hitMarkerCrit = false;
     
     private float lastReloadCycle = 0;
+    private float lastReloadDeltaTime = 0;
     
     private int reserveAmmo = 0;
     private int ammoAutoUpdateTimer = 0;
@@ -655,9 +656,9 @@ public class GunRenderingHandler
     private void applyReloadTransforms(PoseStack poseStack, ItemStack item, float partialTicks)
     {
     	float reloadProgress = ReloadHandler.get().getReloadProgress(partialTicks);
-    	float reloadCycleProgress = getReloadCycleProgress(item);
     	if(GunReloadAnimationHelper.hasCustomReloadAnimation(item))
     	{
+        	float reloadCycleProgress = getReloadCycleProgress(item);
             Vec3 translations = GunReloadAnimationHelper.getAnimationTrans(item, reloadCycleProgress, "viewModel").scale(reloadProgress);
             Vec3 rotations = GunReloadAnimationHelper.getAnimationRot(item, reloadCycleProgress, "viewModel").scale(reloadProgress);
             poseStack.translate(translations.x * 0.0625, translations.y * 0.0625, translations.z * 0.0625);
@@ -667,9 +668,9 @@ public class GunRenderingHandler
     	}
     	else
     	{
-    		poseStack.translate(0, 0.35 * reloadProgress, 0);
+    		poseStack.translate(0, 0.35 * reloadProgress * Math.min(getReloadDeltaTime(item)*2.2, 1), 0);
     		poseStack.translate(0, 0, -0.1 * reloadProgress);
-    		poseStack.mulPose(Vector3f.XP.rotationDegrees(45F * reloadProgress));
+    		poseStack.mulPose(Vector3f.XP.rotationDegrees(45F * reloadProgress * Math.min(getReloadDeltaTime(item)*2.2, 1)));
     	}
     }
 
@@ -1100,7 +1101,7 @@ public class GunRenderingHandler
     private void renderReloadArm(PoseStack poseStack, MultiBufferSource buffer, int light, Gun modifiedGun, ItemStack stack, HumanoidArm hand, float translateX)
     {
         Minecraft mc = Minecraft.getInstance();
-        if(mc.player == null || ReloadHandler.get().getReloadTimer() == 0)
+        if(mc.player == null || ReloadHandler.get().getReloadTimer() == 0 || (!modifiedGun.getGeneral().usesMagReload() && getReloadDeltaTime(stack)<0.5F))
             return;
         
         if(GunReloadAnimationHelper.hasCustomReloadAnimation(stack))
@@ -1119,13 +1120,13 @@ public class GunRenderingHandler
         float reload = baseReload;
         if (!modifiedGun.getGeneral().getUseMagReload())
         {
-        	float progressOffset = 0.3F;
+        	float progressOffset = 0.35F;
         	reload += (baseReload<progressOffset ? 1-progressOffset : -progressOffset);
     	}
         else
         {
-        	reload *= 1.3F;
-            float progressOffset = 0.6F;
+        	reload *= 1.5F;
+            float progressOffset = 0.5F;
         	reload += (baseReload<progressOffset ? 1-progressOffset : -progressOffset);
         }
         
@@ -1148,7 +1149,7 @@ public class GunRenderingHandler
 
         RenderUtil.renderFirstPersonArm(mc.player, hand.getOpposite(), poseStack, buffer, light);
 
-        if(reload < 0.5F && item != null)
+        if(reload < 0.54F && getReloadDeltaTime(stack)<0.5F && item != null)
         {
             poseStack.pushPose();
             poseStack.translate(-side * 5 * 0.0625, 15 * 0.0625, -1 * 0.0625);
@@ -1206,6 +1207,8 @@ public class GunRenderingHandler
 	    	float interval = GunEnchantmentHelper.getRealReloadSpeed(stack);
 	        float reload = ((mc.player.tickCount - (ReloadHandler.get().getStartReloadTick() + 5) + mc.getFrameTime()) % interval) / interval;
 	        this.lastReloadCycle = reload;
+	        float reload2 = (mc.player.tickCount - (ReloadHandler.get().getStartReloadTick() + 5) + mc.getFrameTime()) / interval;
+	        this.lastReloadDeltaTime = reload2;
     	}
     }
     
@@ -1223,6 +1226,24 @@ public class GunRenderingHandler
         {
 	    	float interval = GunEnchantmentHelper.getRealReloadSpeed(stack);
 	        float reload = ((mc.player.tickCount - (ReloadHandler.get().getStartReloadTick() + 5) + mc.getFrameTime()) % interval) / interval;
+	        return reload;
+    	}
+    }
+    
+    public float getReloadDeltaTime(ItemStack stack)
+    {
+    	Minecraft mc = Minecraft.getInstance();
+        if(mc.player == null)
+            return 0;
+    	
+        if(!ModSyncedDataKeys.RELOADING.getValue(mc.player))
+        {
+        	return lastReloadDeltaTime;
+        }
+        else
+        {
+	    	float interval = GunEnchantmentHelper.getRealReloadSpeed(stack);
+	        float reload = (mc.player.tickCount - (ReloadHandler.get().getStartReloadTick() + 5) + mc.getFrameTime()) / interval;
 	        return reload;
     	}
     }
