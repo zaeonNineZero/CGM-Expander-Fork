@@ -89,7 +89,7 @@ public class ReloadHandler
             this.setReloading(false);
             PacketHandler.getPlayChannel().sendToServer(new C2SMessageUnload());
             if(player.getMainHandItem().getItem() instanceof GunItem)
-        	GunRenderingHandler.get().stageReserveAmmoUpdate(1);
+        	GunRenderingHandler.get().stageReserveAmmoUpdate(2);
         }
     }
 

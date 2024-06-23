@@ -89,6 +89,7 @@ public final class GunReloadAnimationHelper
 	}
 	
 	// Base View Model
+	@SuppressWarnings("unused")
 	private static Vec3 getReloadViewModelBaseTrans(ItemStack weapon) {
 		DataObject frameObject = PropertyHelper.getObjectByPath(weapon, WEAPON_KEY, "reloadAnimation", "viewModel");
 		if (frameObject.has("translation", DataType.ARRAY))
@@ -103,6 +104,7 @@ public final class GunReloadAnimationHelper
 		
 		return Vec3.ZERO;
 	}
+	@SuppressWarnings("unused")
 	private static Vec3 getReloadViewModelBaseRot(ItemStack weapon) {
 		DataObject frameObject = PropertyHelper.getObjectByPath(weapon, WEAPON_KEY, "reloadAnimation", "viewModel");
 		if (frameObject.has("rotation", DataType.ARRAY))

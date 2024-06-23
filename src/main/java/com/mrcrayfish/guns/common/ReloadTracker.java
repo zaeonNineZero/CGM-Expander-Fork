@@ -43,7 +43,11 @@ public class ReloadTracker
     private final int reloadStartDelay;
     private int delayedStartTick;
     private int reserveAmmo = 0;
-    private int reloadSoundState = 0;
+    private boolean reloadEarlyState;
+    private boolean reloadMidState;
+    private boolean reloadLateState;
+    private boolean reloadClipOutState;
+    private boolean reloadClipInState;
 
     private ReloadTracker(Player player)
     {
@@ -150,7 +154,7 @@ public class ReloadTracker
         });
 
         ResourceLocation reloadSound = this.gun.getSounds().getReload();
-        this.reloadSoundState=0;
+        resetAnimationSounds();
         if(reloadSound != null && !this.gun.getGeneral().getUseMagReload())
         {
             double radius = Config.SERVER.reloadMaxDistance.get();
@@ -208,7 +212,12 @@ public class ReloadTracker
 	                    });
 	                    }
                     else
-                    playMagReloadEndSound(finalPlayer);
+                    {
+                    	if (gun.getSounds().hasExtraReloadSounds())
+                        playReloadSound(finalPlayer, "end");
+                        else
+                        playReloadSound(player, "cock");
+                    }
                     
                     RELOAD_TRACKER_MAP.remove(player);
                 }
@@ -216,40 +225,44 @@ public class ReloadTracker
             else
             {
                 final Gun gun = tracker.gun;
-                if (gun.getGeneral().getUseMagReload())
-                {
-                	if (tracker.reloadSoundState==0 && tracker.getReloadProgress(player)>=0.25)
+                if (!tracker.reloadEarlyState && tracker.getReloadProgress(player)>=gun.getSounds().getReloadEarlyThreshold())
+            	{
+            		playReloadSound(player, "early");
+            		tracker.reloadEarlyState=true;
+            	}
+            	else
+            	if (!tracker.reloadMidState && tracker.getReloadProgress(player)>=gun.getSounds().getReloadMidThreshold())
+            	{
+            		playReloadSound(player, "mid");
+            		tracker.reloadMidState=true;
+            	}
+            	else
+            	if (!tracker.reloadLateState && tracker.getReloadProgress(player)>=gun.getSounds().getReloadLateThreshold())
+            	{
+            		playReloadSound(player, "late");
+            		tracker.reloadLateState=true;
+            	}
+            	if (!tracker.reloadClipOutState)
+            	{
+                	if (tracker.getReloadProgress(player)>=gun.getSounds().getReloadClipOutThreshold()
+                	|| (gun.getGeneral().usesMagReload() && tracker.getReloadProgress(player)>=0.01F))
                 	{
-                		playMagReloadMidSound1(player);
-                		tracker.reloadSoundState++;
-                	}
-                	else
-                	if (tracker.reloadSoundState==1 && tracker.getReloadProgress(player)>=0.5)
-                	{
-                		playMagReloadMidSound2(player);
-                		tracker.reloadSoundState++;
-                	}
-                	else
-                	if (tracker.reloadSoundState==2 && tracker.getReloadProgress(player)>=0.75)
-                	{
-                		playMagReloadMidSound3(player);
-                		tracker.reloadSoundState++;
-                	}
-                }
-                else
-                {
-                	if (tracker.reloadSoundState==0 && tracker.getReloadProgress(player)>=0.25)
-                	{
-                		playReloadCycleMidSound1(player);
-                		tracker.reloadSoundState++;
-                	}
-                	else
-                	if (tracker.reloadSoundState==1 && tracker.getReloadProgress(player)>=0.5)
-                	{
-                		playReloadCycleMidSound2(player);
-                		tracker.reloadSoundState++;
-                	}
-                }
+                		if (gun.getSounds().hasExtraReloadSounds() || !gun.getGeneral().usesMagReload())
+                    	playReloadSound(player, "clipOut");
+                    	else
+                        playReloadSound(player, "reload");
+                		tracker.reloadClipOutState=true;
+            		}
+            	}
+            	else
+            	if (!tracker.reloadClipInState && tracker.getReloadProgress(player)>=gun.getSounds().getReloadClipInThreshold())
+            	{
+            		if (gun.getSounds().hasExtraReloadSounds() || !gun.getGeneral().usesMagReload())
+            		playReloadSound(player, "clipIn");
+            		else
+                	playReloadSound(player, "reload");
+            		tracker.reloadClipInState=true;
+            	}
             }
         }
         else if(RELOAD_TRACKER_MAP.containsKey(player))
@@ -271,70 +284,52 @@ public class ReloadTracker
         }
     }
     
-    public static void playReloadCycleMidSound1(Player player)
+    public static void playReloadSound(Player player, String soundType)
     {
     	if(!RELOAD_TRACKER_MAP.containsKey(player))
     		return;
     	ReloadTracker tracker = RELOAD_TRACKER_MAP.get(player);
-        ResourceLocation sound = tracker.gun.getSounds().getReloadCycleMiddle1();
-        if (sound != null)
-        playReloadSound(player, sound);
-    }
-    
-    public static void playReloadCycleMidSound2(Player player)
-    {
-    	if(!RELOAD_TRACKER_MAP.containsKey(player))
-    		return;
-    	ReloadTracker tracker = RELOAD_TRACKER_MAP.get(player);
-        ResourceLocation sound = tracker.gun.getSounds().getReloadCycleMiddle2();
-        if (sound != null)
-        playReloadSound(player, sound);
-    }
-    
-    public static void playMagReloadMidSound1(Player player)
-    {
-    	if(!RELOAD_TRACKER_MAP.containsKey(player))
-    		return;
-    	ReloadTracker tracker = RELOAD_TRACKER_MAP.get(player);
-        ResourceLocation sound = tracker.gun.getSounds().getMagReloadMiddle1();
-        if (sound == null)
+        ResourceLocation sound = null;
+
+        if(soundType == "start")
+        sound = tracker.gun.getSounds().getReloadStart();
+        else
+        if(soundType == "early")
+        sound = tracker.gun.getSounds().getReloadEarly();
+        else
+        if(soundType == "mid")
+        sound = tracker.gun.getSounds().getReloadMid();
+        else
+        if(soundType == "late")
+        sound = tracker.gun.getSounds().getReloadLate();
+        else
+        if(soundType == "end")
+        sound = tracker.gun.getSounds().getReloadEnd();
+        else
+        if(soundType == "clipOut")
+        sound = tracker.gun.getSounds().getReloadClipOut();
+        else
+        if(soundType == "clipIn")
+        sound = tracker.gun.getSounds().getReloadClipIn();
+        else
+        if(soundType == "reload")
         sound = tracker.gun.getSounds().getReload();
-        if (sound != null)
-        playReloadSound(player, sound);
-    }
-    
-    public static void playMagReloadMidSound2(Player player)
-    {
-    	if(!RELOAD_TRACKER_MAP.containsKey(player))
-    		return;
-    	ReloadTracker tracker = RELOAD_TRACKER_MAP.get(player);
-        ResourceLocation sound = tracker.gun.getSounds().getMagReloadMiddle2();
-        if (sound != null)
-        playReloadSound(player, sound);
-    }
-    
-    public static void playMagReloadMidSound3(Player player)
-    {
-    	if(!RELOAD_TRACKER_MAP.containsKey(player))
-    		return;
-    	ReloadTracker tracker = RELOAD_TRACKER_MAP.get(player);
-        ResourceLocation sound = tracker.gun.getSounds().getMagReloadMiddle3();
-        if (sound == null)
-        sound = tracker.gun.getSounds().getReload();
-        if (sound != null)
-        playReloadSound(player, sound);
-    }
-    
-    public static void playMagReloadEndSound(Player player)
-    {
-    	if(!RELOAD_TRACKER_MAP.containsKey(player))
-    		return;
-    	ReloadTracker tracker = RELOAD_TRACKER_MAP.get(player);
-        ResourceLocation sound = tracker.gun.getSounds().getMagReloadEnd();
-        if (sound == null)
+        else
+        if(soundType == "cock")
         sound = tracker.gun.getSounds().getCock();
+        
         if (sound != null)
         playReloadSound(player, sound);
+    }
+    
+    private void resetAnimationSounds()
+    {
+
+    	this.reloadEarlyState = false;
+        this.reloadMidState = false;
+        this.reloadLateState = false;
+        this.reloadClipOutState = false;
+        this.reloadClipInState = false;
     }
     
     public int getReserveAmmo()

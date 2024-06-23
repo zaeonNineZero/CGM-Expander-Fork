@@ -258,8 +258,7 @@ public class ServerPlayHandler
             Gun modifiedGun = item.getModifiedGun(heldItem);
             if(modifiedGun != null)
             {
-                ResourceLocation reloadSound = getReloadStartSound(heldItem, modifiedGun);
-            	if(reloadSound != null)
+                ResourceLocation reloadSound = getGunSound(heldItem, modifiedGun, "start");
             	{
             		double posX = player.getX();
             		double posY = player.getY() + 1.0;
@@ -272,12 +271,19 @@ public class ServerPlayHandler
         }
     }
 
-    private static ResourceLocation getReloadStartSound(ItemStack stack, Gun modifiedGun)
+    private static ResourceLocation getGunSound(ItemStack stack, Gun modifiedGun, String soundType)
     {
-        ResourceLocation reloadSound = modifiedGun.getSounds().getReloadStart();
-        if(reloadSound != null)
+    	ResourceLocation sound = null;
+    	
+    	if(soundType == "start")
+    	sound = modifiedGun.getSounds().getReloadStart();
+    	else
+    	if(soundType == "reload")
+    	sound = modifiedGun.getSounds().getReload();
+    	
+        if(sound != null)
         {
-            return modifiedGun.getSounds().getReloadStart();
+            return sound;
         }
         return null;
     }

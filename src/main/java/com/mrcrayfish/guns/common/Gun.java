@@ -561,6 +561,14 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         /**
          * @return Whether to use the new magazine-style reload, where all ammo is loaded at the end of the reload cycle.
          */
+        public boolean usesMagReload()
+        {
+            return this.useMagReload;
+        }
+        /**
+         * @return Whether to use the new magazine-style reload, where all ammo is loaded at the end of the reload cycle.
+         * This is a legacy version of the 'usesMagReload' method with identical functionality.
+         */
         public boolean getUseMagReload()
         {
             return this.useMagReload;
@@ -1339,30 +1347,40 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         @Optional
         @Nullable
         private ResourceLocation reload;
+        
         @Optional
         @Nullable
         private ResourceLocation reloadStart;
         @Optional
         @Nullable
-        private ResourceLocation reloadCycleMiddle1;
+        private ResourceLocation reloadEarly;
+        @Optional
+        private float reloadEarlyThreshold = 0.25F;
         @Optional
         @Nullable
-        private ResourceLocation reloadCycleMiddle2;
+        private ResourceLocation reloadMid;
+        @Optional
+        private float reloadMidThreshold = 0.5F;
+        @Optional
+        @Nullable
+        private ResourceLocation reloadLate;
+        @Optional
+        private float reloadLateThreshold = 0.75F;
         @Optional
         @Nullable
         private ResourceLocation reloadEnd;
+        
         @Optional
         @Nullable
-        private ResourceLocation magReloadMiddle1;
+        private ResourceLocation reloadClipOut;
+        @Optional
+        private float reloadClipOutThreshold = 0.33F;
         @Optional
         @Nullable
-        private ResourceLocation magReloadMiddle2;
+        private ResourceLocation reloadClipIn;
         @Optional
-        @Nullable
-        private ResourceLocation magReloadMiddle3;
-        @Optional
-        @Nullable
-        private ResourceLocation magReloadEnd;
+        private float reloadClipInThreshold = 0.67F;
+        
         @Optional
         @Nullable
         private ResourceLocation cock;
@@ -1402,30 +1420,35 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             {
                 tag.putString("ReloadStart", this.reloadStart.toString());
             }
-            if(this.reloadCycleMiddle1 != null)
+            if(this.reloadEarly != null)
             {
-                tag.putString("ReloadCycleMiddle1", this.reloadCycleMiddle1.toString());
+                tag.putString("ReloadMid", this.reloadEarly.toString());
+                tag.putFloat("ReloadMidThreshold", this.reloadEarlyThreshold);
             }
-            if(this.reloadCycleMiddle2 != null)
+            if(this.reloadMid != null)
             {
-                tag.putString("ReloadCycleMiddle2", this.reloadCycleMiddle2.toString());
+                tag.putString("ReloadMid", this.reloadMid.toString());
+                tag.putFloat("ReloadMidThreshold", this.reloadMidThreshold);
+            }
+            if(this.reloadLate != null)
+            {
+                tag.putString("ReloadLate", this.reloadLate.toString());
+                tag.putFloat("ReloadLateThreshold", this.reloadLateThreshold);
+            }
+            if(this.reloadEnd != null)
+            {
+                tag.putString("ReloadEnd", this.reloadEnd.toString());
             }
             
-            if(this.magReloadMiddle1 != null)
+            if(this.reloadClipOut != null)
             {
-                tag.putString("MagReloadMiddle1", this.magReloadMiddle1.toString());
+                tag.putString("ReloadClipOut", this.reloadClipOut.toString());
+                tag.putFloat("ReloadClipOutThreshold", this.reloadClipOutThreshold);
             }
-            if(this.magReloadMiddle2 != null)
+            if(this.reloadClipIn != null)
             {
-                tag.putString("MagReloadMiddle2", this.magReloadMiddle2.toString());
-            }
-            if(this.magReloadMiddle3 != null)
-            {
-                tag.putString("MagReloadMiddle3", this.magReloadMiddle3.toString());
-            }
-            if(this.magReloadEnd != null)
-            {
-                tag.putString("MagReloadEnd", this.magReloadEnd.toString());
+                tag.putString("ReloadClipIn", this.reloadClipIn.toString());
+                tag.putFloat("ReloadClipInThreshold", this.reloadClipInThreshold);
             }
             
             if(this.cock != null)
@@ -1466,35 +1489,55 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             {
                 this.reload = this.createSound(tag, "Reload");
             }
+            
             if(tag.contains("ReloadStart", Tag.TAG_STRING))
             {
                 this.reloadStart = this.createSound(tag, "ReloadStart");
             }
-
-            if(tag.contains("ReloadCycleMiddle1", Tag.TAG_STRING))
+            if(tag.contains("ReloadEarly", Tag.TAG_STRING))
             {
-                this.reloadCycleMiddle1 = this.createSound(tag, "ReloadCycleMiddle1");
+                this.reloadEarly = this.createSound(tag, "ReloadEarly");
             }
-            if(tag.contains("ReloadCycleMiddle2", Tag.TAG_STRING))
+            if(tag.contains("ReloadEarlyThreshold", Tag.TAG_ANY_NUMERIC))
             {
-                this.reloadCycleMiddle2 = this.createSound(tag, "ReloadCycleMiddle2");
+                this.reloadEarlyThreshold = tag.getFloat("ReloadEarlyThreshold");
+            }
+            if(tag.contains("ReloadMid", Tag.TAG_STRING))
+            {
+                this.reloadMid = this.createSound(tag, "ReloadMid");
+            }
+            if(tag.contains("ReloadMidThreshold", Tag.TAG_ANY_NUMERIC))
+            {
+                this.reloadMidThreshold = tag.getFloat("ReloadMidThreshold");
+            }
+            if(tag.contains("ReloadLate", Tag.TAG_STRING))
+            {
+                this.reloadLate = this.createSound(tag, "ReloadLate");
+            }
+            if(tag.contains("ReloadLateThreshold", Tag.TAG_ANY_NUMERIC))
+            {
+                this.reloadLateThreshold = tag.getFloat("ReloadLateThreshold");
+            }
+            if(tag.contains("ReloadEnd", Tag.TAG_STRING))
+            {
+                this.reloadEnd = this.createSound(tag, "ReloadEnd");
             }
             
-            if(tag.contains("MagReloadMiddle1", Tag.TAG_STRING))
+            if(tag.contains("ReloadClipOut", Tag.TAG_STRING))
             {
-                this.magReloadMiddle1 = this.createSound(tag, "MagReloadMiddle1");
+                this.reloadClipOut = this.createSound(tag, "ReloadClipOut");
             }
-            if(tag.contains("MagReloadMiddle2", Tag.TAG_STRING))
+            if(tag.contains("ReloadClipOutThreshold", Tag.TAG_ANY_NUMERIC))
             {
-                this.magReloadMiddle2 = this.createSound(tag, "MagReloadMiddle2");
+                this.reloadLateThreshold = tag.getFloat("ReloadLateThreshold");
             }
-            if(tag.contains("MagReloadMiddle3", Tag.TAG_STRING))
+            if(tag.contains("ReloadClipIn", Tag.TAG_STRING))
             {
-                this.magReloadMiddle3 = this.createSound(tag, "MagReloadMiddle3");
+                this.reloadClipIn = this.createSound(tag, "ReloadClipIn");
             }
-            if(tag.contains("MagReloadEnd", Tag.TAG_STRING))
+            if(tag.contains("ReloadClipInThreshold", Tag.TAG_ANY_NUMERIC))
             {
-                this.magReloadEnd = this.createSound(tag, "MagReloadEnd");
+                this.reloadLateThreshold = tag.getFloat("ReloadLateThreshold");
             }
             
             if(tag.contains("Cock", Tag.TAG_STRING))
@@ -1534,35 +1577,40 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             {
                 object.addProperty("reload", this.reload.toString());
             }
+            
             if(this.reloadStart != null)
             {
                 object.addProperty("reloadStart", this.reloadStart.toString());
             }
+            if(this.reloadEarly != null)
+            {
+                object.addProperty("reloadEarly", this.reloadEarly.toString());
+                object.addProperty("reloadEarlyThreshold", this.reloadEarlyThreshold);
+            }
+            if(this.reloadMid != null)
+            {
+                object.addProperty("reloadMid", this.reloadMid.toString());
+                object.addProperty("reloadMidThreshold", this.reloadMidThreshold);
+            }
+            if(this.reloadLate != null)
+            {
+                object.addProperty("reloadLate", this.reloadLate.toString());
+                object.addProperty("reloadLateThreshold", this.reloadLateThreshold);
+            }
+            if(this.reloadEnd != null)
+            {
+                object.addProperty("reloadEnd", this.reloadEnd.toString());
+            }
             
-            if(this.reloadCycleMiddle1 != null)
+            if(this.reloadClipOut != null)
             {
-                object.addProperty("reloadCycleMiddle1", this.reloadCycleMiddle1.toString());
+                object.addProperty("reloadClipOut", this.reloadClipOut.toString());
+                object.addProperty("reloadClipOutThreshold", this.reloadClipOutThreshold);
             }
-            if(this.reloadCycleMiddle2 != null)
+            if(this.reloadClipIn != null)
             {
-                object.addProperty("reloadCycleMiddle2", this.reloadCycleMiddle2.toString());
-            }
-            
-            if(this.magReloadMiddle1 != null)
-            {
-                object.addProperty("magReloadMiddle1", this.magReloadMiddle1.toString());
-            }
-            if(this.magReloadMiddle2 != null)
-            {
-                object.addProperty("magReloadMiddle2", this.magReloadMiddle2.toString());
-            }
-            if(this.magReloadMiddle3 != null)
-            {
-                object.addProperty("magReloadMiddle3", this.magReloadMiddle3.toString());
-            }
-            if(this.magReloadEnd != null)
-            {
-                object.addProperty("magReloadEnd", this.magReloadEnd.toString());
+                object.addProperty("reloadClipIn", this.reloadClipIn.toString());
+                object.addProperty("reloadClipInThreshold", this.reloadClipInThreshold);
             }
             
             if(this.cock != null)
@@ -1598,12 +1646,12 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             sounds.fire = this.fire;
             sounds.reload = this.reload;
             sounds.reloadStart = this.reloadStart;
-            sounds.reloadCycleMiddle1 = this.reloadCycleMiddle1;
-            sounds.reloadCycleMiddle2 = this.reloadCycleMiddle2;
-            sounds.magReloadMiddle1 = this.magReloadMiddle1;
-            sounds.magReloadMiddle2 = this.magReloadMiddle2;
-            sounds.magReloadMiddle3 = this.magReloadMiddle3;
-            sounds.magReloadEnd = this.magReloadEnd;
+            sounds.reloadEarly = this.reloadEarly;
+            sounds.reloadMid = this.reloadMid;
+            sounds.reloadLate = this.reloadLate;
+            sounds.reloadEnd = this.reloadEnd;
+            sounds.reloadClipOut = this.reloadClipOut;
+            sounds.reloadClipIn = this.reloadClipIn;
             sounds.cock = this.cock;
             sounds.silencedFire = this.silencedFire;
             sounds.enchantedFire = this.enchantedFire;
@@ -1631,11 +1679,29 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
 
         /**
          * @return The registry id of the sound event when reloading this weapon
+         * This is a general sound event that won't be used when the other reload sound
+         * events are defined.
          */
         @Nullable
         public ResourceLocation getReload()
         {
             return this.reload;
+        }
+
+        /**
+         * @return The registry id of the sound event when reloading this weapon
+         * This is a general sound event that won't be used when the other reload sound
+         * events are defined.
+         */
+        public Boolean hasExtraReloadSounds()
+        {
+            return
+            this.reloadEarly!=null ||
+            this.reloadMid!=null ||
+            this.reloadLate!=null ||
+            this.reloadEnd!=null ||
+            this.reloadClipOut!=null ||
+            this.reloadClipIn!=null;
         }
 
         /**
@@ -1648,68 +1714,122 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         }
 
         /**
-         * @return The registry id of the first sound event when reloading a weapon with cyclic reloads
-         * This plays at 25% of the mag reload time by default.
+         * @return The registry id of a custom sound event when reloading a weapon.
+         * This plays when reloadEarlyThreshold is reached. For best results, set the
+         * sound to play before the mid and late reload sounds.
          */
         @Nullable
-        public ResourceLocation getReloadCycleMiddle1()
+        public ResourceLocation getReloadEarly()
         {
-            return this.reloadCycleMiddle1;
+            return this.reloadEarly;
+        }
+        /**
+         * @return The threshold of the reload cycle at which the reloadEarly sound plays.
+         * This can range from 0 to 1.
+         */
+        @Nullable
+        public float getReloadEarlyThreshold()
+        {
+            return this.reloadEarlyThreshold;
         }
 
         /**
-         * @return The registry id of the second sound event when reloading a weapon with cyclic reloads
-         * This plays at 50% of the mag reload time by default.
+         * @return The registry id of a custom sound event when reloading a weapon.
+         * This plays when reloadMidThreshold is reached. For best results, set the
+         * sound to play after the early reload sound and before the late reload sound.
          */
         @Nullable
-        public ResourceLocation getReloadCycleMiddle2()
+        public ResourceLocation getReloadMid()
         {
-            return this.reloadCycleMiddle2;
+            return this.reloadMid;
+        }
+        /**
+         * @return The threshold of the reload cycle at which the reloadMid sound plays.
+         * This can range from 0 to 1.
+         */
+        @Nullable
+        public float getReloadMidThreshold()
+        {
+            return this.reloadMidThreshold;
         }
 
         /**
-         * @return The registry id of the first sound event when reloading a weapon with mag reloads
-         * This plays at 25% of the mag reload time by default.
+         * @return The registry id of a custom sound event when reloading a weapon.
+         * This plays when reloadLateThreshold is reached. For best results, set the
+         * sound to play after the early and mid reload sounds.
          */
         @Nullable
-        public ResourceLocation getMagReloadMiddle1()
+        public ResourceLocation getReloadLate()
         {
-            return this.magReloadMiddle1;
+            return this.reloadLate;
+        }
+        /**
+         * @return The threshold of the reload cycle at which the reloadLate sound plays.
+         * This can range from 0 to 1.
+         */
+        @Nullable
+        public float getReloadLateThreshold()
+        {
+            return this.reloadLateThreshold;
         }
 
         /**
-         * @return The registry id of the second sound event when reloading a weapon with mag reloads
-         * This plays at 50% of the mag reload time by default.
+         * @return The registry id of the sound event when finishing reloading a weapon.
+         * This does not trigger when a reload is interrupted.
          */
         @Nullable
-        public ResourceLocation getMagReloadMiddle2()
+        public ResourceLocation getReloadEnd()
         {
-            return this.magReloadMiddle2;
+            return this.reloadEnd;
         }
 
         /**
-         * @return The registry id of the third sound event when reloading a weapon with mag reloads
-         * This plays at 75% of the mag reload time by default.
+         * @return The registry id of a custom sound event when reloading a weapon.
+         * This sound event is intended to be used for magazine-style reloads, but
+         * can be used with either reload type.
+         * This plays when reloadClipOutThreshold is reached.
          */
         @Nullable
-        public ResourceLocation getMagReloadMiddle3()
+        public ResourceLocation getReloadClipOut()
         {
-            return this.magReloadMiddle3;
+            return this.reloadClipOut;
+        }
+        /**
+         * @return The threshold of the reload cycle at which the reloadClipOut sound plays.
+         * This can range from 0 to 1.
+         */
+        @Nullable
+        public float getReloadClipOutThreshold()
+        {
+            return this.reloadClipOutThreshold;
         }
 
         /**
-         * @return The registry id of the sound event when finishing reloading a weapon with mag reloads
+         * @return The registry id of a custom sound event when reloading a weapon.
+         * This sound event is intended to be used for magazine-style reloads, but
+         * can be used with either reload type.
+         * This plays when reloadClipInThreshold is reached.
          */
         @Nullable
-        public ResourceLocation getMagReloadEnd()
+        public ResourceLocation getReloadClipIn()
         {
-            return this.magReloadEnd;
+            return this.reloadClipIn;
+        }
+        /**
+         * @return The threshold of the reload cycle at which the reloadClipIn sound plays.
+         * This can range from 0 to 1.
+         */
+        @Nullable
+        public float getReloadClipInThreshold()
+        {
+            return this.reloadClipInThreshold;
         }
 
         /**
          * @return The registry id of the sound event when cocking/chambering this weapon
-         * This normally plays when finishing reloading a weapon without mag reloads, but can also be called
-         * as a fallback for the mag reload end and weapon draw sound.
+         * This normally plays when finishing reloading a weapon without mag reloads, but may also be called
+         * as a fallback for the mag reload end sound in the event that no custom sounds are loaded.
+         * It also can be called after a weapon fires, for cycling bolts or slides.
          */
         @Nullable
         public ResourceLocation getCock()
