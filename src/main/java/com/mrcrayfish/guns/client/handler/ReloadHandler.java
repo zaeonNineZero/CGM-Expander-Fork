@@ -82,14 +82,14 @@ public class ReloadHandler
             this.setReloading(!ModSyncedDataKeys.RELOADING.getValue(player));
             KeyBinds.KEY_RELOAD.setDown(false);
             if(player.getMainHandItem().getItem() instanceof GunItem)
-        	GunRenderingHandler.get().updateReserveAmmo(player);
+            GunRenderingHandler.get().updateReserveAmmo(player);
         }
         if(KeyBinds.KEY_UNLOAD.consumeClick() && event.getAction() == GLFW.GLFW_PRESS)
         {
             this.setReloading(false);
             PacketHandler.getPlayChannel().sendToServer(new C2SMessageUnload());
             if(player.getMainHandItem().getItem() instanceof GunItem)
-        	GunRenderingHandler.get().updateReserveAmmo(player);
+        	GunRenderingHandler.get().stageReserveAmmoUpdate(1);
         }
     }
 

@@ -115,8 +115,11 @@ public class GunRenderingHandler
     private int hitMarkerMaxTime = 2;
     private boolean hitMarkerCrit = false;
     
+    private float lastReloadCycle = 0;
+    
     private int reserveAmmo = 0;
     private int ammoAutoUpdateTimer = 0;
+    private int ammoAutoUpdateRate = 20;
     private boolean doUpdateAmmo = false;
 
     private float offhandTranslate;
@@ -184,7 +187,7 @@ public class GunRenderingHandler
         this.updateImmersiveCamera();
         
         ammoAutoUpdateTimer++;
-        if (ammoAutoUpdateTimer>=20)
+        if (ammoAutoUpdateTimer>=ammoAutoUpdateRate)
         {
         	doUpdateAmmo = true;
         	ammoAutoUpdateTimer=0;
@@ -246,7 +249,13 @@ public class GunRenderingHandler
     
     public void stageReserveAmmoUpdate()
     {
-    	this.ammoAutoUpdateTimer=9001;
+    	this.ammoAutoUpdateTimer=this.ammoAutoUpdateRate;
+    }
+    
+    public void stageReserveAmmoUpdate(int i)
+    {
+    	int newUpdateTimer = this.ammoAutoUpdateRate-i;
+    	this.ammoAutoUpdateTimer = Mth.clamp(newUpdateTimer, 0, ammoAutoUpdateRate);
     }
     
     public void forceSetReserveAmmo(int ammoCount)
@@ -500,6 +509,9 @@ public class GunRenderingHandler
         //poseStack.translate(0, equipProgress * -0.6F, 0);
         poseStack.mulPose(Vector3f.XP.rotationDegrees(equipProgress * -50F));
 
+        /* Update the current reload cycle, when applicable */
+        this.updateReloadCycleProgress(heldItem);
+        
         /* Renders the reload arm. Will only render if actually reloading. This is applied before
          * any recoil or reload rotations as the animations would be borked if applied after. */
         this.renderReloadArm(poseStack, event.getMultiBufferSource(), event.getPackedLight(), modifiedGun, heldItem, hand, translateX);
@@ -1088,7 +1100,7 @@ public class GunRenderingHandler
     private void renderReloadArm(PoseStack poseStack, MultiBufferSource buffer, int light, Gun modifiedGun, ItemStack stack, HumanoidArm hand, float translateX)
     {
         Minecraft mc = Minecraft.getInstance();
-        if(mc.player == null || mc.player.tickCount < ReloadHandler.get().getStartReloadTick() + 5 || ReloadHandler.get().getReloadTimer() != 5)
+        if(mc.player == null || ReloadHandler.get().getReloadTimer() == 0)
             return;
         
         if(GunReloadAnimationHelper.hasCustomReloadAnimation(stack))
@@ -1103,8 +1115,8 @@ public class GunRenderingHandler
         int side = hand.getOpposite() == HumanoidArm.RIGHT ? 1 : -1;
         poseStack.translate(translateX * side, 0, 0);
 
-        float interval = GunEnchantmentHelper.getRealReloadSpeed(stack);
-        float reload = ((mc.player.tickCount - (ReloadHandler.get().getStartReloadTick() + 5) + mc.getFrameTime()) % interval) / interval;
+        float baseReload = getReloadCycleProgress(stack);
+        float reload = baseReload + (baseReload<0.7F ? 0.3F : -0.7F);
         float percent = 1.0F - reload;
         if(percent >= 0.5F)
         {
@@ -1113,7 +1125,7 @@ public class GunRenderingHandler
         percent *= 2F;
         percent = percent < 0.5 ? 2 * percent * percent : -1 + (4 - 2 * percent) * percent;
 
-        poseStack.translate(3.5 * side * 0.0625, -0.5625, -0.5625);
+        poseStack.translate(3.5 * side * 0.0625, -0.5625 -( (1-ReloadHandler.get().getReloadProgress(mc.getFrameTime())) * 0.25), -0.5625);
         poseStack.mulPose(Vector3f.YP.rotationDegrees(180F));
         poseStack.translate(0, -0.35 * (1.0 - percent), 0);
         poseStack.translate(side * 0.0625, 0, 0);
@@ -1171,15 +1183,36 @@ public class GunRenderingHandler
         poseStack.popPose();
     }
     
+    public void updateReloadCycleProgress(ItemStack stack)
+    {
+    	Minecraft mc = Minecraft.getInstance();
+        if(mc.player == null)
+            return;
+    	
+        if(ModSyncedDataKeys.RELOADING.getValue(mc.player))
+        {
+	    	float interval = GunEnchantmentHelper.getRealReloadSpeed(stack);
+	        float reload = ((mc.player.tickCount - (ReloadHandler.get().getStartReloadTick() + 5) + mc.getFrameTime()) % interval) / interval;
+	        this.lastReloadCycle = reload;
+    	}
+    }
+    
     public float getReloadCycleProgress(ItemStack stack)
     {
     	Minecraft mc = Minecraft.getInstance();
         if(mc.player == null)
             return 0;
     	
-    	float interval = GunEnchantmentHelper.getRealReloadSpeed(stack);
-        float reload = (mc.player.tickCount - (ReloadHandler.get().getStartReloadTick() + 5) + mc.getFrameTime()) / interval;
-        return reload;
+        if(!ModSyncedDataKeys.RELOADING.getValue(mc.player))
+        {
+        	return lastReloadCycle;
+        }
+        else
+        {
+	    	float interval = GunEnchantmentHelper.getRealReloadSpeed(stack);
+	        float reload = ((mc.player.tickCount - (ReloadHandler.get().getStartReloadTick() + 5) + mc.getFrameTime()) % interval) / interval;
+	        return reload;
+    	}
     }
 
     /**

@@ -152,22 +152,15 @@ public class PistolCustomPose extends WeaponPose
             double xOffset = (posHand != null ? posHand.x : 0);
             double yOffset = (posHand != null ? posHand.y : 0);
             double zOffset = (posHand != null ? posHand.z : 0);
-        	float reloadProgress = ReloadHandler.get().getReloadProgress(partialTicks);
+            float reloadProgress = ReloadHandler.get().getReloadProgress(partialTicks);
         	float reloadCycleProgress = GunRenderingHandler.get().getReloadCycleProgress(stack);
-        	Vec3 reloadtranslations = GunReloadAnimationHelper.getAnimationTrans(stack, reloadCycleProgress, "forwardHand");
-            Vec3 reloadrotations = GunReloadAnimationHelper.getAnimationRot(stack, reloadCycleProgress, "forwardHand");
-            if (GunReloadAnimationHelper.hasCustomReloadAnimation(stack))
-        	{
-            	reloadtranslations.scale(reloadProgress);
-        		reloadrotations.scale(reloadProgress);
-        	}
-        	else
-        	{
-        		poseStack.translate(reloadProgress * 0.5, -reloadProgress, -reloadProgress * 0.5);
-        	}
+        	Vec3 reloadTranslations = GunReloadAnimationHelper.getAnimationTrans(stack, reloadCycleProgress, "forwardHand").scale(reloadProgress);
+            Vec3 reloadRotations = GunReloadAnimationHelper.getAnimationRot(stack, reloadCycleProgress, "forwardHand").scale(reloadProgress);
+            if (!GunReloadAnimationHelper.hasCustomReloadAnimation(stack))
+        	poseStack.translate(reloadProgress * 0.5, -reloadProgress, -reloadProgress * 0.5);
             
-        	Vec3 translations = GunAnimationHelper.getHandTranslation(stack, false, cooldown).add(reloadtranslations);
-        	Vec3 rotations = Vec3.ZERO.add(reloadrotations);
+        	Vec3 translations = GunAnimationHelper.getHandTranslation(stack, false, cooldown).add(reloadTranslations);
+        	Vec3 rotations = Vec3.ZERO.add(reloadRotations);
 
             poseStack.scale(0.5F, 0.5F, 0.5F);
             poseStack.translate((2.9 + xOffset + translations.x) * 0.0625 * side, (2.2 + yOffset + translations.y) * 0.0625, (-11.2 - zOffset - translations.z) * 0.0625);
@@ -190,16 +183,11 @@ public class PistolCustomPose extends WeaponPose
             double zOffset = (posHand != null ? posHand.z : 0);
         	float reloadProgress = ReloadHandler.get().getReloadProgress(partialTicks);
         	float reloadCycleProgress = GunRenderingHandler.get().getReloadCycleProgress(stack);
-        	Vec3 reloadtranslations = GunReloadAnimationHelper.getAnimationTrans(stack, reloadCycleProgress, "forwardHand");
-            Vec3 reloadrotations = GunReloadAnimationHelper.getAnimationRot(stack, reloadCycleProgress, "forwardHand");
-            if (GunReloadAnimationHelper.hasCustomReloadAnimation(stack))
-        	{
-            	reloadtranslations.scale(reloadProgress);
-        		reloadrotations.scale(reloadProgress);
-        	}
+        	Vec3 reloadTranslations = GunReloadAnimationHelper.getAnimationTrans(stack, reloadCycleProgress, "rearHand").scale(reloadProgress);
+            Vec3 reloadRotations = GunReloadAnimationHelper.getAnimationRot(stack, reloadCycleProgress, "rearHand").scale(reloadProgress);
             
-        	Vec3 translations = GunAnimationHelper.getHandTranslation(stack, true, cooldown).add(reloadtranslations);
-        	Vec3 rotations = Vec3.ZERO.add(reloadrotations);
+        	Vec3 translations = GunAnimationHelper.getHandTranslation(stack, true, cooldown).add(reloadTranslations);
+        	Vec3 rotations = Vec3.ZERO.add(reloadRotations);
             
         	if (player.getOffhandItem().isEmpty())
             {
