@@ -1689,9 +1689,7 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         }
 
         /**
-         * @return The registry id of the sound event when reloading this weapon
-         * This is a general sound event that won't be used when the other reload sound
-         * events are defined.
+         * @return Whether the gun has any extra reload sounds defined.
          */
         public Boolean hasExtraReloadSounds()
         {

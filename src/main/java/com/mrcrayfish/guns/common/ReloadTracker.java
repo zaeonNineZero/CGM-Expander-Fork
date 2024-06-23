@@ -245,7 +245,7 @@ public class ReloadTracker
             	if (!tracker.reloadClipOutState)
             	{
                 	if (tracker.getReloadProgress(player)>=gun.getSounds().getReloadClipOutThreshold()
-                	|| (gun.getGeneral().usesMagReload() && tracker.getReloadProgress(player)>=0.01F))
+                	|| (gun.getGeneral().usesMagReload() && !gun.getSounds().hasExtraReloadSounds() && tracker.getReloadProgress(player)>=0.01F))
                 	{
                 		if (gun.getSounds().hasExtraReloadSounds() || !gun.getGeneral().usesMagReload())
                     	playReloadSound(player, "clipOut");
