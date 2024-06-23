@@ -1741,8 +1741,6 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         @Nullable
         public ResourceLocation getWeaponSelect()
         {
-            if (this.weaponSelect==null)
-            	return getCock();
         	return this.weaponSelect;
         }
 

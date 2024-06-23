@@ -41,7 +41,6 @@
     "info.cgm.recoil": "Recoil: %s",
     "info.cgm.spread": "Spread: %s",
     "info.cgm.ads_spread": "ADS Spread: %s",
-    "info.cgm.no_spread_ads": "No Spread when Aiming",
     "info.cgm.ignore_ammo": "Infinite Ammo",
     "info.cgm.ammo": "Ammo: %s",
     "info.cgm.ammo_type": "Ammo Type: %s",
