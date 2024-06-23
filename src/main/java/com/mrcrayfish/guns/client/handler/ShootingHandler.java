@@ -146,8 +146,8 @@ public class ShootingHandler
             ItemStack heldItem = player.getMainHandItem();
             if(heldItem.getItem() instanceof GunItem && !isEmpty(player, heldItem) && !PlayerReviveHelper.isBleeding(player))
             {
-                Gun gun = ((GunItem) heldItem.getItem()).getModifiedGun(heldItem);
-                boolean shooting = (KeyBinds.getShootMapping().isDown() && !ModSyncedDataKeys.ONBURSTCOOLDOWN.getValue(player)) || (ModSyncedDataKeys.BURSTCOUNT.getValue(player)>0 && gun.getGeneral().hasBurstFire());
+                //Gun gun = ((GunItem) heldItem.getItem()).getModifiedGun(heldItem);
+                boolean shooting = (KeyBinds.getShootMapping().isDown() && !ModSyncedDataKeys.ONBURSTCOOLDOWN.getValue(player)) || (ModSyncedDataKeys.BURSTCOUNT.getValue(player)>0 && Gun.hasBurstFire(heldItem));
                 if(GunMod.controllableLoaded)
                 {
                     shooting |= ControllerHandler.isShooting();
@@ -260,7 +260,7 @@ public class ShootingHandler
                         {
                         	PacketHandler.getPlayChannel().sendToServer(new C2SMessageFireSwitch(newFireMode));
                         	//tag.putInt("FireMode", newFireMode);
-                        	Minecraft.getInstance().getSoundManager().play(new SimpleSoundInstance(gunItem.getModifiedGun(heldItem).getSounds().getEmptyClick(), SoundSource.PLAYERS, 0.8F, 1.0F, Minecraft.getInstance().level.getRandom(), false, 0, SoundInstance.Attenuation.NONE, 0, 0, 0, true));
+                        	Minecraft.getInstance().getSoundManager().play(new SimpleSoundInstance(gunItem.getModifiedGun(heldItem).getSounds().getFireSwitch(), SoundSource.PLAYERS, 0.8F, 1.0F, Minecraft.getInstance().level.getRandom(), false, 0, SoundInstance.Attenuation.NONE, 0, 0, 0, true));
                         }
                 	}
                 }

@@ -1344,7 +1344,31 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         private ResourceLocation reloadStart;
         @Optional
         @Nullable
+        private ResourceLocation reloadCycleMiddle1;
+        @Optional
+        @Nullable
+        private ResourceLocation reloadCycleMiddle2;
+        @Optional
+        @Nullable
+        private ResourceLocation reloadEnd;
+        @Optional
+        @Nullable
+        private ResourceLocation magReloadMiddle1;
+        @Optional
+        @Nullable
+        private ResourceLocation magReloadMiddle2;
+        @Optional
+        @Nullable
+        private ResourceLocation magReloadMiddle3;
+        @Optional
+        @Nullable
+        private ResourceLocation magReloadEnd;
+        @Optional
+        @Nullable
         private ResourceLocation cock;
+        @Optional
+        @Nullable
+        private ResourceLocation drawGun;
         @Optional
         @Nullable
         private ResourceLocation silencedFire;
@@ -1353,7 +1377,13 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         private ResourceLocation enchantedFire;
         @Optional
         @Nullable
+        private ResourceLocation weaponSelect;
+        @Optional
+        @Nullable
         private ResourceLocation emptyClick;
+        @Optional
+        @Nullable
+        private ResourceLocation fireSwitch;
 
         @Override
         public CompoundTag serializeNBT()
@@ -1367,10 +1397,37 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             {
                 tag.putString("Reload", this.reload.toString());
             }
+            
             if(this.reloadStart != null)
             {
                 tag.putString("ReloadStart", this.reloadStart.toString());
             }
+            if(this.reloadCycleMiddle1 != null)
+            {
+                tag.putString("ReloadCycleMiddle1", this.reloadCycleMiddle1.toString());
+            }
+            if(this.reloadCycleMiddle2 != null)
+            {
+                tag.putString("ReloadCycleMiddle2", this.reloadCycleMiddle2.toString());
+            }
+            
+            if(this.magReloadMiddle1 != null)
+            {
+                tag.putString("MagReloadMiddle1", this.magReloadMiddle1.toString());
+            }
+            if(this.magReloadMiddle2 != null)
+            {
+                tag.putString("MagReloadMiddle2", this.magReloadMiddle2.toString());
+            }
+            if(this.magReloadMiddle3 != null)
+            {
+                tag.putString("MagReloadMiddle3", this.magReloadMiddle3.toString());
+            }
+            if(this.magReloadEnd != null)
+            {
+                tag.putString("MagReloadEnd", this.magReloadEnd.toString());
+            }
+            
             if(this.cock != null)
             {
                 tag.putString("Cock", this.cock.toString());
@@ -1383,9 +1440,17 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             {
                 tag.putString("EnchantedFire", this.enchantedFire.toString());
             }
+            if(this.weaponSelect != null)
+            {
+                tag.putString("WeaponSelect", this.weaponSelect.toString());
+            }
             if(this.emptyClick != null)
             {
                 tag.putString("EmptyClick", this.emptyClick.toString());
+            }
+            if(this.fireSwitch != null)
+            {
+                tag.putString("FireSwitch", this.fireSwitch.toString());
             }
             return tag;
         }
@@ -1405,6 +1470,33 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             {
                 this.reloadStart = this.createSound(tag, "ReloadStart");
             }
+
+            if(tag.contains("ReloadCycleMiddle1", Tag.TAG_STRING))
+            {
+                this.reloadCycleMiddle1 = this.createSound(tag, "ReloadCycleMiddle1");
+            }
+            if(tag.contains("ReloadCycleMiddle2", Tag.TAG_STRING))
+            {
+                this.reloadCycleMiddle2 = this.createSound(tag, "ReloadCycleMiddle2");
+            }
+            
+            if(tag.contains("MagReloadMiddle1", Tag.TAG_STRING))
+            {
+                this.magReloadMiddle1 = this.createSound(tag, "MagReloadMiddle1");
+            }
+            if(tag.contains("MagReloadMiddle2", Tag.TAG_STRING))
+            {
+                this.magReloadMiddle2 = this.createSound(tag, "MagReloadMiddle2");
+            }
+            if(tag.contains("MagReloadMiddle3", Tag.TAG_STRING))
+            {
+                this.magReloadMiddle3 = this.createSound(tag, "MagReloadMiddle3");
+            }
+            if(tag.contains("MagReloadEnd", Tag.TAG_STRING))
+            {
+                this.magReloadEnd = this.createSound(tag, "MagReloadEnd");
+            }
+            
             if(tag.contains("Cock", Tag.TAG_STRING))
             {
                 this.cock = this.createSound(tag, "Cock");
@@ -1417,9 +1509,17 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             {
                 this.enchantedFire = this.createSound(tag, "EnchantedFire");
             }
+            if(tag.contains("WeaponSelect", Tag.TAG_STRING))
+            {
+                this.weaponSelect = this.createSound(tag, "WeaponSelect");
+            }
             if(tag.contains("EmptyClick", Tag.TAG_STRING))
             {
                 this.emptyClick = this.createSound(tag, "EmptyClick");
+            }
+            if(tag.contains("FireSwitch", Tag.TAG_STRING))
+            {
+                this.fireSwitch = this.createSound(tag, "FireSwitch");
             }
         }
 
@@ -1434,10 +1534,37 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             {
                 object.addProperty("reload", this.reload.toString());
             }
-            if(this.reload != null)
+            if(this.reloadStart != null)
             {
                 object.addProperty("reloadStart", this.reloadStart.toString());
             }
+            
+            if(this.reloadCycleMiddle1 != null)
+            {
+                object.addProperty("reloadCycleMiddle1", this.reloadCycleMiddle1.toString());
+            }
+            if(this.reloadCycleMiddle2 != null)
+            {
+                object.addProperty("reloadCycleMiddle2", this.reloadCycleMiddle2.toString());
+            }
+            
+            if(this.magReloadMiddle1 != null)
+            {
+                object.addProperty("magReloadMiddle1", this.magReloadMiddle1.toString());
+            }
+            if(this.magReloadMiddle2 != null)
+            {
+                object.addProperty("magReloadMiddle2", this.magReloadMiddle2.toString());
+            }
+            if(this.magReloadMiddle3 != null)
+            {
+                object.addProperty("magReloadMiddle3", this.magReloadMiddle3.toString());
+            }
+            if(this.magReloadEnd != null)
+            {
+                object.addProperty("magReloadEnd", this.magReloadEnd.toString());
+            }
+            
             if(this.cock != null)
             {
                 object.addProperty("cock", this.cock.toString());
@@ -1450,9 +1577,17 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             {
                 object.addProperty("enchantedFire", this.enchantedFire.toString());
             }
+            if(this.weaponSelect != null)
+            {
+                object.addProperty("weaponSelect", this.weaponSelect.toString());
+            }
             if(this.emptyClick != null)
             {
                 object.addProperty("emptyClick", this.emptyClick.toString());
+            }
+            if(this.fireSwitch != null)
+            {
+                object.addProperty("fireSwitch", this.fireSwitch.toString());
             }
             return object;
         }
@@ -1463,10 +1598,18 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             sounds.fire = this.fire;
             sounds.reload = this.reload;
             sounds.reloadStart = this.reloadStart;
+            sounds.reloadCycleMiddle1 = this.reloadCycleMiddle1;
+            sounds.reloadCycleMiddle2 = this.reloadCycleMiddle2;
+            sounds.magReloadMiddle1 = this.magReloadMiddle1;
+            sounds.magReloadMiddle2 = this.magReloadMiddle2;
+            sounds.magReloadMiddle3 = this.magReloadMiddle3;
+            sounds.magReloadEnd = this.magReloadEnd;
             sounds.cock = this.cock;
             sounds.silencedFire = this.silencedFire;
             sounds.enchantedFire = this.enchantedFire;
+            sounds.weaponSelect = this.weaponSelect;
             sounds.emptyClick = this.emptyClick;
+            sounds.fireSwitch = this.fireSwitch;
             return sounds;
         }
 
@@ -1505,7 +1648,68 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         }
 
         /**
+         * @return The registry id of the first sound event when reloading a weapon with cyclic reloads
+         * This plays at 25% of the mag reload time by default.
+         */
+        @Nullable
+        public ResourceLocation getReloadCycleMiddle1()
+        {
+            return this.reloadCycleMiddle1;
+        }
+
+        /**
+         * @return The registry id of the second sound event when reloading a weapon with cyclic reloads
+         * This plays at 50% of the mag reload time by default.
+         */
+        @Nullable
+        public ResourceLocation getReloadCycleMiddle2()
+        {
+            return this.reloadCycleMiddle2;
+        }
+
+        /**
+         * @return The registry id of the first sound event when reloading a weapon with mag reloads
+         * This plays at 25% of the mag reload time by default.
+         */
+        @Nullable
+        public ResourceLocation getMagReloadMiddle1()
+        {
+            return this.magReloadMiddle1;
+        }
+
+        /**
+         * @return The registry id of the second sound event when reloading a weapon with mag reloads
+         * This plays at 50% of the mag reload time by default.
+         */
+        @Nullable
+        public ResourceLocation getMagReloadMiddle2()
+        {
+            return this.magReloadMiddle2;
+        }
+
+        /**
+         * @return The registry id of the third sound event when reloading a weapon with mag reloads
+         * This plays at 75% of the mag reload time by default.
+         */
+        @Nullable
+        public ResourceLocation getMagReloadMiddle3()
+        {
+            return this.magReloadMiddle3;
+        }
+
+        /**
+         * @return The registry id of the sound event when finishing reloading a weapon with mag reloads
+         */
+        @Nullable
+        public ResourceLocation getMagReloadEnd()
+        {
+            return this.magReloadEnd;
+        }
+
+        /**
          * @return The registry id of the sound event when cocking/chambering this weapon
+         * This normally plays when finishing reloading a weapon without mag reloads, but can also be called
+         * as a fallback for the mag reload end and weapon draw sound.
          */
         @Nullable
         public ResourceLocation getCock()
@@ -1532,7 +1736,18 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         }
 
         /**
-         * @return The registry id of the sound event when attempting to shoot while the gun is empty.
+         * @return The registry id of the sound event when selecting this weapon.
+         */
+        @Nullable
+        public ResourceLocation getWeaponSelect()
+        {
+            if (this.weaponSelect==null)
+            	return getCock();
+        	return this.weaponSelect;
+        }
+
+        /**
+         * @return The registry id of the sound event when attempting to shoot while the weapon is empty or out of energy.
          */
         @Nullable
         public ResourceLocation getEmptyClick()
@@ -1540,6 +1755,17 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             if (this.emptyClick==null)
             	return new ResourceLocation(Reference.MOD_ID, "item.empty_click");
         	return this.emptyClick;
+        }
+
+        /**
+         * @return The registry id of the sound event when switching the weapon's fire mode.
+         */
+        @Nullable
+        public ResourceLocation getFireSwitch()
+        {
+            if (this.fireSwitch==null)
+            	return getEmptyClick();
+        	return this.fireSwitch;
         }
     }
 
