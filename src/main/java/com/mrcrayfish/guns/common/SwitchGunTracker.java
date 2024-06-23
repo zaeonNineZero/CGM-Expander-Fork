@@ -102,22 +102,23 @@ public class SwitchGunTracker
             if (doGunSwitch)
             {
             	ModSyncedDataKeys.SWITCHTIME.setValue(player, 5);
-            	ResourceLocation selectSound = tracker.gun.getSounds().getReload();
-                if(selectSound != null)
-            	{
-                    double radius = Config.SERVER.reloadMaxDistance.get();
-                    double soundX = player.getX();
-                    double soundY = player.getY() + 1.0;
-                    double soundZ = player.getZ();
-            		S2CMessageGunSound message = new S2CMessageGunSound(selectSound, SoundSource.PLAYERS, (float) soundX, (float) soundY, (float) soundZ, 1.0F, 1.0F, player.getId(), false, true);
-                	PacketHandler.getPlayChannel().sendToNearbyPlayers(() -> LevelLocation.create(player.level, soundX, soundY, soundZ, radius), message);
-            	}
-            	/*if(player.getInventory().getSelected().getItem() instanceof GunItem)
+            	if(player.getInventory().getSelected().getItem() instanceof GunItem)
             	{
             		ItemStack newStack = player.getInventory().getSelected();
             		Gun newGun = ((GunItem) newStack.getItem()).getModifiedGun(newStack);
-                	GunRenderingHandler.get().forceSetReserveAmmo(tracker.getInventoryAmmo(player, newGun));
-            	}*/
+            		ResourceLocation selectSound = newGun.getSounds().getWeaponSelect();
+                    if(selectSound != null)
+                	{
+                        double radius = Config.SERVER.reloadMaxDistance.get();
+                        double soundX = player.getX();
+                        double soundY = player.getY() + 1.0;
+                        double soundZ = player.getZ();
+                		S2CMessageGunSound message = new S2CMessageGunSound(selectSound, SoundSource.PLAYERS, (float) soundX, (float) soundY, (float) soundZ, 1.0F, 1.0F, player.getId(), false, true);
+                    	PacketHandler.getPlayChannel().sendToNearbyPlayers(() -> LevelLocation.create(player.level, soundX, soundY, soundZ, radius), message);
+                	
+                	}
+                    //GunRenderingHandler.get().forceSetReserveAmmo(tracker.getInventoryAmmo(player, newGun));
+            	}
             	if(SWITCHGUN_TRACKER_MAP.containsKey(player))
                 {
             		SWITCHGUN_TRACKER_MAP.remove(player);
