@@ -670,7 +670,7 @@ public class GunRenderingHandler
     	{
     		poseStack.translate(0, 0.35 * reloadProgress * Math.min(getReloadDeltaTime(item)*2.2, 1), 0);
     		poseStack.translate(0, 0, -0.1 * reloadProgress);
-    		poseStack.mulPose(Vector3f.XP.rotationDegrees(45F * reloadProgress * Math.min(getReloadDeltaTime(item)*2.2, 1)));
+    		poseStack.mulPose(Vector3f.XP.rotationDegrees(45F * reloadProgress * (float) Math.min(getReloadDeltaTime(item)*2.2, 1)));
     	}
     }
 
