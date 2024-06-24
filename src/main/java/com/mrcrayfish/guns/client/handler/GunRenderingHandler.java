@@ -1127,7 +1127,7 @@ public class GunRenderingHandler
         else
         {
         	reload *= 1.5F;
-            float progressOffset = 0.5F;
+            float progressOffset = (float) 1/3;
         	reload += (baseReload<progressOffset ? 1-progressOffset : -progressOffset);
         }
         

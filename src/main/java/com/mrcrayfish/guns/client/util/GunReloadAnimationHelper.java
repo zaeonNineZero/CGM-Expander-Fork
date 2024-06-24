@@ -45,7 +45,7 @@ public final class GunReloadAnimationHelper
 	{
 		Vec3 blendedFrame = Vec3.ZERO;
 		int animationFrames = getReloadFrames(weapon);
-		float scaledProgress = progress*(animationFrames);
+		float scaledProgress = progress*(animationFrames)+0.05F;
 		int currentFrame = (int) Math.floor(scaledProgress);
 		
 		Vec3 priorFrame = getReloadAnimRot(weapon, type, currentFrame);
@@ -119,7 +119,7 @@ public final class GunReloadAnimationHelper
 	
 	// Frames
 	private static Vec3 getReloadAnimTrans(ItemStack weapon, String type, int frame) {
-		DataObject frameObject = PropertyHelper.getObjectByPath(weapon, WEAPON_KEY, "reloadAnimation", type, "frame"+frame);
+		DataObject frameObject = PropertyHelper.getObjectByPath(weapon, WEAPON_KEY, "reloadAnimation", type, ""+frame);
 		if (frameObject.has("translation", DataType.ARRAY))
 		{
 			DataArray translationArray = frameObject.getDataArray("translation");
@@ -135,7 +135,7 @@ public final class GunReloadAnimationHelper
 		return Vec3.ZERO;
 	}
 	private static Vec3 getReloadAnimRot(ItemStack weapon, String type, int frame) {
-		DataObject frameObject = PropertyHelper.getObjectByPath(weapon, WEAPON_KEY, "reloadAnimation", type, "frame"+frame);
+		DataObject frameObject = PropertyHelper.getObjectByPath(weapon, WEAPON_KEY, "reloadAnimation", type, ""+frame);
 		if (frameObject.has("rotation", DataType.ARRAY))
 		{
 			DataArray rotationArray = frameObject.getDataArray("rotation");

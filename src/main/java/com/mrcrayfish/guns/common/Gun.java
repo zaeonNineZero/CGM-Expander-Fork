@@ -1647,11 +1647,16 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             sounds.reload = this.reload;
             sounds.reloadStart = this.reloadStart;
             sounds.reloadEarly = this.reloadEarly;
+            sounds.reloadEarlyThreshold = this.reloadEarlyThreshold;
             sounds.reloadMid = this.reloadMid;
+            sounds.reloadMidThreshold = this.reloadMidThreshold;
             sounds.reloadLate = this.reloadLate;
+            sounds.reloadLateThreshold = this.reloadLateThreshold;
             sounds.reloadEnd = this.reloadEnd;
             sounds.reloadClipOut = this.reloadClipOut;
+            sounds.reloadClipOutThreshold = this.reloadClipOutThreshold;
             sounds.reloadClipIn = this.reloadClipIn;
+            sounds.reloadClipInThreshold = this.reloadClipInThreshold;
             sounds.cock = this.cock;
             sounds.silencedFire = this.silencedFire;
             sounds.enchantedFire = this.enchantedFire;
