@@ -31,7 +31,7 @@ public final class GunReloadAnimationHelper
 	{
 		Vec3 blendedFrame = Vec3.ZERO;
 		int animationFrames = getReloadFrames(weapon);
-		float scaledProgress = progress*(animationFrames);
+		float scaledProgress = progress*(animationFrames)+0.05F;
 		int currentFrame = (int) Math.floor(scaledProgress);
 		
 		Vec3 priorFrame = getReloadAnimTrans(weapon, type, currentFrame);
