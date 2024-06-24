@@ -244,8 +244,8 @@ public class ReloadTracker
             	}
             	if (!tracker.reloadClipOutState)
             	{
-                	if (tracker.getReloadProgress(player)>=gun.getSounds().getReloadClipOutThreshold()
-                	|| (gun.getGeneral().usesMagReload() && !gun.getSounds().hasExtraReloadSounds() && tracker.getReloadProgress(player)>=0.01F))
+                	if (gun.getSounds().hasExtraReloadSounds() && tracker.getReloadProgress(player)>=gun.getSounds().getReloadClipOutThreshold()
+                	|| (!gun.getSounds().hasExtraReloadSounds() && gun.getGeneral().usesMagReload() && tracker.getReloadProgress(player)>=0.25F))
                 	{
                 		if (gun.getSounds().hasExtraReloadSounds() || !gun.getGeneral().usesMagReload())
                     	playReloadSound(player, "clipOut");
@@ -255,13 +255,17 @@ public class ReloadTracker
             		}
             	}
             	else
-            	if (!tracker.reloadClipInState && tracker.getReloadProgress(player)>=gun.getSounds().getReloadClipInThreshold())
+            	if (!tracker.reloadClipInState)
             	{
-            		if (gun.getSounds().hasExtraReloadSounds() || !gun.getGeneral().usesMagReload())
-            		playReloadSound(player, "clipIn");
-            		else
-                	playReloadSound(player, "reload");
-            		tracker.reloadClipInState=true;
+                	if (gun.getSounds().hasExtraReloadSounds() && tracker.getReloadProgress(player)>=gun.getSounds().getReloadClipInThreshold()
+                	|| (!gun.getSounds().hasExtraReloadSounds() && gun.getGeneral().usesMagReload() && tracker.getReloadProgress(player)>=0.75F))
+                	{
+                		if (gun.getSounds().hasExtraReloadSounds() || !gun.getGeneral().usesMagReload())
+                    	playReloadSound(player, "clipIn");
+                    	else
+                        playReloadSound(player, "reload");
+                    	tracker.reloadClipInState=true;
+            		}
             	}
             }
         }

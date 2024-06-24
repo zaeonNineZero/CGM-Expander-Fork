@@ -17,6 +17,7 @@ import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
@@ -37,8 +38,8 @@ public class SwitchGunTracker
     private static final Map<Player, SwitchGunTracker> SWITCHGUN_TRACKER_MAP = new WeakHashMap<>();
 
     private final int slot;
-    private final ItemStack stack;
-    private final Gun gun;
+    private ItemStack stack;
+    private Gun gun;
     private boolean playSelectSound;
 
     private SwitchGunTracker(Player player)
@@ -110,14 +111,23 @@ public class SwitchGunTracker
             	ResourceLocation selectSound = tracker.gun.getSounds().getWeaponSelect();
             	playSelectSound(player, selectSound);
             }
-            if (doGunSwitch)
+			if (doGunSwitch)
             {
-            	ModSyncedDataKeys.SWITCHTIME.setValue(player, 5);
-            	if(SWITCHGUN_TRACKER_MAP.containsKey(player))
-                {
-            		SWITCHGUN_TRACKER_MAP.remove(player);
-                }
-            	return;
+				if( !(player.getInventory().getSelected().getItem() instanceof GunItem) ||
+				(Item.getId(player.getInventory().getSelected().getItem())!=Item.getId(tracker.stack.getItem()) || player.getInventory().selected != tracker.slot))
+				{
+	            	ModSyncedDataKeys.SWITCHTIME.setValue(player, 5);
+	            	if(SWITCHGUN_TRACKER_MAP.containsKey(player))
+	                {
+	            		SWITCHGUN_TRACKER_MAP.remove(player);
+	                }
+	            	return;
+				}
+				else
+				{
+			        tracker.stack = player.getInventory().getSelected();
+			        tracker.gun = ((GunItem) tracker.stack.getItem()).getModifiedGun(tracker.stack);
+				}
             }
         }
     }

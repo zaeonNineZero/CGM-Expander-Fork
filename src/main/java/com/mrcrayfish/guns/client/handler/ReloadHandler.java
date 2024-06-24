@@ -136,10 +136,18 @@ public class ReloadHandler
             }
         }
     }
+    
+    public boolean getReloading(Player player)
+    {
+        if(ModSyncedDataKeys.RELOADING.getValue(player))
+        return true;
+        else
+        return false;
+    }
 
     private void updateReloadTimer(Player player)
     {
-        if(ModSyncedDataKeys.RELOADING.getValue(player))
+        if(getReloading(player))
         {
             if(this.startReloadTick == -1)
             {

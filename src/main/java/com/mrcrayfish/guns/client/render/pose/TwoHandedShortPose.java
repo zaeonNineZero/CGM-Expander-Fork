@@ -5,6 +5,7 @@ import com.mojang.math.Vector3f;
 import com.mrcrayfish.guns.Config;
 import com.mrcrayfish.guns.client.handler.GunRenderingHandler;
 import com.mrcrayfish.guns.client.handler.ReloadHandler;
+import com.mrcrayfish.guns.client.util.Easings;
 import com.mrcrayfish.guns.client.util.GunAnimationHelper;
 import com.mrcrayfish.guns.client.util.GunReloadAnimationHelper;
 import com.mrcrayfish.guns.client.util.PropertyHelper;
@@ -12,6 +13,7 @@ import com.mrcrayfish.guns.client.util.RenderUtil;
 import com.mrcrayfish.guns.common.GripType;
 import com.mrcrayfish.guns.common.Gun;
 import com.mrcrayfish.guns.common.Gun.Display.*;
+import com.mrcrayfish.guns.init.ModSyncedDataKeys;
 import com.mrcrayfish.guns.item.GunItem;
 
 import net.minecraft.client.Minecraft;
@@ -109,11 +111,14 @@ public class TwoHandedShortPose extends WeaponPose
         poseStack.pushPose();
         {
         	Vec3 posHand = PropertyHelper.getHandPosition(stack, gun, false);
-            double xOffset = (posHand != null ? posHand.x : 0);
-            double yOffset = (posHand != null ? posHand.y : 0);
-            double zOffset = (posHand != null ? posHand.z : 0);
             float reloadProgress = ReloadHandler.get().getReloadProgress(partialTicks);
         	float reloadCycleProgress = GunRenderingHandler.get().getReloadCycleProgress(stack);
+    		Easings easing = GunReloadAnimationHelper.getReloadStartEasing(stack, "forwardHand");
+    		boolean reloading = ReloadHandler.get().getReloading(player);
+    		if(!reloading)
+    		easing = GunReloadAnimationHelper.getReloadEndEasing(stack, "forwardHand");
+    		reloadProgress = (float) (reloading ? GunReloadAnimationHelper.getEaseFactor(easing, reloadProgress) : GunReloadAnimationHelper.getReversedEaseFactor(easing, reloadProgress));
+    		
         	Vec3 reloadTranslations = GunReloadAnimationHelper.getAnimationTrans(stack, reloadCycleProgress, "forwardHand").scale(reloadProgress);
             Vec3 reloadRotations = GunReloadAnimationHelper.getAnimationRot(stack, reloadCycleProgress, "forwardHand").scale(reloadProgress);
             if (!GunReloadAnimationHelper.hasCustomReloadAnimation(stack))
@@ -123,7 +128,7 @@ public class TwoHandedShortPose extends WeaponPose
         	Vec3 rotations = Vec3.ZERO.add(reloadRotations);
 
             poseStack.scale(0.5F, 0.5F, 0.5F);
-            poseStack.translate((1.55 + xOffset + translations.x) * 0.0625 * side, (0.6 + yOffset + translations.y) * 0.0625, (-3.5 - zOffset - translations.z) * 0.0625);
+            poseStack.translate((1.55 + posHand.x + translations.x) * 0.0625 * side, (0.6 + posHand.y + translations.y) * 0.0625, (-3.5 - posHand.z - translations.z) * 0.0625);
             //poseStack.translate((1.55) * 0.0625 * side, (0.4) * 0.0625, (-3.5) * 0.0625);
             poseStack.translate((armWidth / 2.0) * 0.0625 * side, 0, 0);
             poseStack.translate(-0.3125 * side, -0.1, -0.4375);
@@ -141,11 +146,14 @@ public class TwoHandedShortPose extends WeaponPose
         poseStack.pushPose();
         {
         	Vec3 posHand = PropertyHelper.getHandPosition(stack, gun, true);
-            double xOffset = (posHand != null ? posHand.x : 0);
-            double yOffset = (posHand != null ? posHand.y : 0);
-            double zOffset = (posHand != null ? posHand.z : 0);
         	float reloadProgress = ReloadHandler.get().getReloadProgress(partialTicks);
         	float reloadCycleProgress = GunRenderingHandler.get().getReloadCycleProgress(stack);
+    		Easings easing = GunReloadAnimationHelper.getReloadStartEasing(stack, "rearHand");
+    		boolean reloading = ReloadHandler.get().getReloading(player);
+    		if(!reloading)
+    		easing = GunReloadAnimationHelper.getReloadEndEasing(stack, "rearHand");
+    		reloadProgress = (float) (reloading ? GunReloadAnimationHelper.getEaseFactor(easing, reloadProgress) : GunReloadAnimationHelper.getReversedEaseFactor(easing, reloadProgress));
+    		
         	Vec3 reloadTranslations = GunReloadAnimationHelper.getAnimationTrans(stack, reloadCycleProgress, "rearHand").scale(reloadProgress);
             Vec3 reloadRotations = GunReloadAnimationHelper.getAnimationRot(stack, reloadCycleProgress, "rearHand").scale(reloadProgress);
             
@@ -154,7 +162,7 @@ public class TwoHandedShortPose extends WeaponPose
             
             poseStack.translate(0, 0.1, -0.675);
             poseStack.scale(0.5F, 0.5F, 0.5F);
-            poseStack.translate((-4.0 + xOffset + translations.x) * 0.0625 * side, (0 + yOffset + translations.y) * 0.0625, (0 - zOffset - translations.z) * 0.0625);
+            poseStack.translate((-4.0 + posHand.x + translations.x) * 0.0625 * side, (0 + posHand.y + translations.y) * 0.0625, (0 - posHand.z - translations.z) * 0.0625);
             //poseStack.translate((-4.0) * 0.0625 * side, (0) * 0.0625, (0) * 0.0625);
             poseStack.translate(-(armWidth / 2.0) * 0.0625 * side, 0, 0);
             poseStack.mulPose(Vector3f.XP.rotationDegrees(80F));
