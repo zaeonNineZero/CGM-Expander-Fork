@@ -1742,7 +1742,7 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         @Nullable
         public float getReloadEarlyThreshold()
         {
-            return this.reloadEarlyThreshold*reloadFrames;
+            return this.reloadEarlyThreshold/reloadFrames;
         }
 
         /**
@@ -1762,7 +1762,7 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         @Nullable
         public float getReloadMidThreshold()
         {
-            return this.reloadMidThreshold*reloadFrames;
+            return this.reloadMidThreshold/reloadFrames;
         }
 
         /**
@@ -1782,7 +1782,7 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         @Nullable
         public float getReloadLateThreshold()
         {
-            return this.reloadLateThreshold*reloadFrames;
+            return this.reloadLateThreshold/reloadFrames;
         }
 
         /**
