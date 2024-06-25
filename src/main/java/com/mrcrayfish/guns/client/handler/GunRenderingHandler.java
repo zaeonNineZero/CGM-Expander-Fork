@@ -676,10 +676,10 @@ public class GunRenderingHandler
     	}
     	else
     	{
-    		double reloadOffset = !modifiedGun.getGeneral().usesMagReload() ? Math.min(getReloadDeltaTime(item)+0.5, 1) : 1;
-    		poseStack.translate(0, 0.35 * (reloadProgress * reloadOffset), 0);
-    		poseStack.translate(0, 0, -0.1 * (reloadProgress * reloadOffset));
-    		poseStack.mulPose(Vector3f.XP.rotationDegrees(45F * (reloadProgress * (float) reloadOffset)));
+    		double reloadOffset = Math.max(!modifiedGun.getGeneral().usesMagReload() ? Math.min(getReloadDeltaTime(item)*3, 1) : 1, 0);
+    		poseStack.translate(0, 0.35 * (reloadOffset * reloadProgress), 0);
+    		poseStack.translate(0, 0, -0.1 * (reloadOffset * reloadProgress));
+    		poseStack.mulPose(Vector3f.XP.rotationDegrees(45F * ((float) reloadOffset) * reloadProgress));
     	}
     }
 

@@ -6,6 +6,7 @@ import com.mrcrayfish.framework.api.serialize.DataObject;
 import com.mrcrayfish.framework.api.serialize.DataString;
 import com.mrcrayfish.framework.api.serialize.DataType;
 import com.mrcrayfish.guns.cache.ObjectCache;
+import com.mrcrayfish.guns.client.handler.GunRenderingHandler;
 import com.mrcrayfish.guns.item.attachment.IAttachment;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
@@ -31,16 +32,22 @@ public final class GunReloadAnimationHelper
 	public static Vec3 getAnimationTrans(ItemStack weapon, float progress, String type)
 	{
 		Vec3 blendedTransforms = Vec3.ZERO;
-		int animationFrames = getReloadFrames(weapon);
-		float scaledProgress = Mth.clamp(progress*(animationFrames)+0.12F, 0,animationFrames);
-		int currentFrame = getCurrentFrame(weapon, progress);
-		int nextFrame = (int) Mth.clamp(currentFrame+1, 0,animationFrames);
+		float delta = GunRenderingHandler.get().getReloadDeltaTime(weapon);
+		float scaledProgress = getScaledProgress(weapon, progress);
+		int currentFrame = getCurrentFrame(weapon, scaledProgress);
+		int priorFrame = findPriorFrame(weapon, type, currentFrame, "translation");
+		int nextFrame = findNextFrame(weapon, type, currentFrame+1, "translation");
+		int frameDiv = Math.max(Math.abs(nextFrame-priorFrame),1);
+		float frameProgress = Math.max(scaledProgress - ((float) priorFrame), 0);
 		
-		Vec3 priorTransforms = getReloadAnimTrans(weapon, type, currentFrame);
+		if (priorFrame==0 && delta>0.9F)
+		priorFrame = getReloadFrames(weapon);
+		
+		Vec3 priorTransforms = getReloadAnimTrans(weapon, type, priorFrame);
 		Vec3 nextTransforms = getReloadAnimTrans(weapon, type, nextFrame);
-		Easings easing = getReloadAnimEasing(weapon, type, nextFrame, false);
-		double easeFactor = getEaseFactor(easing, scaledProgress % 1);
-		blendedTransforms = priorTransforms.lerp(nextTransforms, Math.min(easeFactor,1));
+		Easings easing = getReloadAnimEasing(weapon, type, findPriorFrame(weapon, type, nextFrame, "translation"), false);
+		double easeFactor = getEaseFactor(easing, frameProgress/frameDiv);
+		blendedTransforms = priorTransforms.lerp(nextTransforms, Mth.clamp(easeFactor, 0F,1F));
 		
 		return blendedTransforms;
 	}
@@ -48,16 +55,22 @@ public final class GunReloadAnimationHelper
 	public static Vec3 getAnimationRot(ItemStack weapon, float progress, String type)
 	{
 		Vec3 blendedTransforms = Vec3.ZERO;
-		int animationFrames = getReloadFrames(weapon);
-		float scaledProgress = Mth.clamp(progress*(animationFrames)+0.12F, 0,animationFrames);
-		int currentFrame = (int) Math.min(Math.floor(scaledProgress), animationFrames);
-		int nextFrame = (int) Mth.clamp(currentFrame+1, 0,animationFrames);
+		float delta = GunRenderingHandler.get().getReloadDeltaTime(weapon);
+		float scaledProgress = getScaledProgress(weapon, progress);
+		int currentFrame = getCurrentFrame(weapon, scaledProgress);
+		int priorFrame = findPriorFrame(weapon, type, currentFrame, "rotation");
+		int nextFrame = findNextFrame(weapon, type, currentFrame+1, "rotation");
+		int frameDiv = Math.max(Math.abs(nextFrame-priorFrame),1);
+		float frameProgress = Math.max(scaledProgress - ((float) priorFrame), 0);
 		
-		Vec3 priorTransforms = getReloadAnimRot(weapon, type, Mth.clamp(currentFrame, 0,animationFrames));
-		Vec3 nextTransforms = getReloadAnimRot(weapon, type, Mth.clamp(nextFrame, 0,animationFrames));
-		Easings easing = getReloadAnimEasing(weapon, type, nextFrame, true);
-		double easeFactor = getEaseFactor(easing, scaledProgress % 1);
-		blendedTransforms = priorTransforms.lerp(nextTransforms, Math.min(easeFactor,1));
+		if (priorFrame==0 && delta>0.9F)
+		priorFrame = getReloadFrames(weapon);
+		
+		Vec3 priorTransforms = getReloadAnimRot(weapon, type, priorFrame);
+		Vec3 nextTransforms = getReloadAnimRot(weapon, type, nextFrame);
+		Easings easing = getReloadAnimEasing(weapon, type, findPriorFrame(weapon, type, nextFrame, "rotation"), true);
+		double easeFactor = getEaseFactor(easing, frameProgress/frameDiv);
+		blendedTransforms = priorTransforms.lerp(nextTransforms, Mth.clamp(easeFactor, 0F,1F));
 		
 		return blendedTransforms;
 	}
@@ -66,23 +79,15 @@ public final class GunReloadAnimationHelper
     
 	/* Reload animation calculators for more advanced control */
     // Frames
-	public static int getCurrentFrame(ItemStack weapon, float progress)
+	public static float getScaledProgress(ItemStack weapon, float progress)
 	{
 		int animationFrames = getReloadFrames(weapon);
-		float scaledProgress = Mth.clamp(progress*(animationFrames)+0.12F, 0,animationFrames);
-		return (int) Math.min(Math.floor(scaledProgress), animationFrames);
+		return Mth.clamp(progress*(animationFrames)+0.14F, 0,animationFrames);
 	}
 	
-	public static int getNextFrame(ItemStack weapon, float progress)
+	public static int getCurrentFrame(ItemStack weapon, float scaledProgress)
 	{
-		int animationFrames = getReloadFrames(weapon);
-		int currentFrame = getCurrentFrame(weapon, progress);
-		return (int) Mth.clamp(currentFrame+1, 0,animationFrames);
-	}
-	public static int getNextFrame(ItemStack weapon, int currentFrame)
-	{
-		int animationFrames = getReloadFrames(weapon);
-		return (int) Mth.clamp(currentFrame+1, 0,animationFrames);
+		return (int) Math.floor(scaledProgress);
 	}
 	
 	//Easing
@@ -98,6 +103,7 @@ public final class GunReloadAnimationHelper
 		
 		return Mth.clamp(easeFactor,0,1);
 	}
+	
 	
 	
 	
@@ -156,14 +162,11 @@ public final class GunReloadAnimationHelper
 	// Objects
 	public static Easings getReloadStartEasing(ItemStack weapon, String type) {
 		DataObject frameObject = PropertyHelper.getObjectByPath(weapon, WEAPON_KEY, "reloadAnimation", type);
-		if (frameObject!=null)
+		if (frameObject.has("startEasing", DataType.STRING))
 		{
-			if (frameObject.has("startEasing", DataType.STRING))
-			{
-				DataString easing = frameObject.getDataString("startEasing");
-				if (easing!=null)
-					return (Easings.byName(easing.asString()));
-			}
+			DataString easing = frameObject.getDataString("startEasing");
+			if (easing!=null)
+				return (Easings.byName(easing.asString()));
 		}
 		else
 		frameObject = PropertyHelper.getObjectByPath(weapon, WEAPON_KEY, "reloadAnimation", type, "0");
@@ -178,34 +181,29 @@ public final class GunReloadAnimationHelper
 	}
 	public static Easings getReloadStartEasing(ItemStack weapon, String type, boolean easeRotationInstead) {
 		DataObject frameObject = PropertyHelper.getObjectByPath(weapon, WEAPON_KEY, "reloadAnimation", type);
-		if (frameObject!=null)
+		if (frameObject!=null && frameObject.has("startEasing", DataType.STRING))
 		{
-			if (frameObject.has("startEasing", DataType.STRING))
+			DataString easing = frameObject.getDataString("startEasing");
+			if (easing!=null)
+				return (Easings.byName(easing.asString()));
+		}
+		else
+			if (frameObject.has("startTransEasing", DataType.STRING) && !easeRotationInstead)
 			{
-				DataString easing = frameObject.getDataString("startEasing");
+				DataString easing = frameObject.getDataString("startTransEasing");
 				if (easing!=null)
 					return (Easings.byName(easing.asString()));
 			}
 			else
+			if (frameObject.has("startRotEasing", DataType.STRING) && easeRotationInstead)
 			{
-				if (frameObject.has("startTransEasing", DataType.STRING) && !easeRotationInstead)
-				{
-					DataString easing = frameObject.getDataString("startTransEasing");
-					if (easing!=null)
-						return (Easings.byName(easing.asString()));
-				}
-				else
-				if (frameObject.has("startRotEasing", DataType.STRING) && easeRotationInstead)
-				{
-					DataString easing = frameObject.getDataString("startRotEasing");
-					if (easing!=null)
-						return (Easings.byName(easing.asString()));
-				}
+				DataString easing = frameObject.getDataString("startRotEasing");
+				if (easing!=null)
+					return (Easings.byName(easing.asString()));
 			}
-		}
 		else
 		frameObject = PropertyHelper.getObjectByPath(weapon, WEAPON_KEY, "reloadAnimation", type, "0");
-		if (frameObject.has("easing", DataType.STRING))
+		if (frameObject!=null && frameObject.has("easing", DataType.STRING))
 		{
 			DataString easing = frameObject.getDataString("easing");
 			if (easing!=null)
@@ -233,7 +231,7 @@ public final class GunReloadAnimationHelper
 	
 	public static Easings getReloadEndEasing(ItemStack weapon, String type) {
 		DataObject frameObject = PropertyHelper.getObjectByPath(weapon, WEAPON_KEY, "reloadAnimation", type);
-		if (frameObject.has("endEasing", DataType.STRING))
+		if (frameObject!=null && frameObject.has("endEasing", DataType.STRING))
 		{
 			DataString easing = frameObject.getDataString("endEasing");
 			if (easing!=null)
@@ -244,7 +242,7 @@ public final class GunReloadAnimationHelper
 	}
 	public static Easings getReloadEndEasing(ItemStack weapon, String type, boolean easeRotationInstead) {
 		DataObject frameObject = PropertyHelper.getObjectByPath(weapon, WEAPON_KEY, "reloadAnimation", type);
-		if (frameObject.has("endEasing", DataType.STRING))
+		if (frameObject!=null && frameObject.has("endEasing", DataType.STRING))
 		{
 			DataString easing = frameObject.getDataString("endEasing");
 			if (easing!=null)
@@ -270,7 +268,72 @@ public final class GunReloadAnimationHelper
 		return Easings.EASE_OUT_QUAD;
 	}
 	
+	
 	// Frames
+	private static int findPriorFrame(ItemStack weapon, String type, int frame, String transform) {
+		int returnFrame=-1;
+		for (int i=frame; returnFrame==-1 && i>=0; i--)
+		{
+			DataObject frameObject = PropertyHelper.getObjectByPath(weapon, WEAPON_KEY, "reloadAnimation", type, ""+i);
+			if (frameObject!=null)
+			{
+				if (frameObject.has(transform, DataType.ARRAY))
+					returnFrame = i;
+				//return frame;
+				/*else
+				if (transform.equals("easing") && frameObject.has(transform, DataType.STRING))
+					return frame;
+				else
+				if (transform.equals("transEasing") || transform.equals("rotEasing"))
+				{
+					if (frameObject.has(transform, DataType.STRING))
+						return frame;
+					else
+					if (frameObject.has("easing", DataType.STRING))
+						return frame;
+				}*/
+			}
+		}
+		
+		if (returnFrame!=-1)
+		return returnFrame;
+		else
+		return 0;
+	}
+	
+	private static int findNextFrame(ItemStack weapon, String type, int frame, String transform) {
+		int returnFrame=-1;
+		for (int i=frame; returnFrame==-1 && i<=getReloadFrames(weapon); i++)
+		{
+			DataObject frameObject = PropertyHelper.getObjectByPath(weapon, WEAPON_KEY, "reloadAnimation", type, ""+i);
+			if (frameObject!=null)
+			{
+				if (frameObject.has(transform, DataType.ARRAY))
+					returnFrame = i;
+					//return frame;
+				/*else
+				if (transform.equals("easing") && frameObject.has(transform, DataType.STRING))
+					return frame;
+				else
+				if (transform.equals("transEasing") || transform.equals("rotEasing"))
+				{
+					if (frameObject.has(transform, DataType.STRING))
+						return frame;
+					else
+					if (frameObject.has("easing", DataType.STRING))
+						return frame;
+				}*/
+			}
+		}
+		
+		if (returnFrame!=-1)
+		return returnFrame;
+		else
+		return findPriorFrame(weapon, type, frame, transform);
+	}
+	
+	
+	// Animation Values
 	private static Vec3 getReloadAnimTrans(ItemStack weapon, String type, int frame) {
 		DataObject frameObject = PropertyHelper.getObjectByPath(weapon, WEAPON_KEY, "reloadAnimation", type, ""+frame);
 		if (frameObject.has("translation", DataType.ARRAY))
