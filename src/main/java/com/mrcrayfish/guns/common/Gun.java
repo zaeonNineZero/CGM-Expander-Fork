@@ -1813,7 +1813,7 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         @Nullable
         public float getReloadClipOutThreshold()
         {
-            return this.reloadClipOutThreshold*reloadFrames;
+            return this.reloadClipOutThreshold/reloadFrames;
         }
 
         /**
@@ -1834,7 +1834,7 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         @Nullable
         public float getReloadClipInThreshold()
         {
-            return this.reloadClipInThreshold*reloadFrames;
+            return this.reloadClipInThreshold/reloadFrames;
         }
 
         /**
