@@ -676,7 +676,7 @@ public class GunRenderingHandler
     	}
     	else
     	{
-    		double reloadOffset = Math.max(!modifiedGun.getGeneral().usesMagReload() ? Math.min(getReloadDeltaTime(item)*3, 1) : 1, 0);
+    		double reloadOffset = Math.max(!modifiedGun.getGeneral().usesMagReload() ? Math.min(getReloadDeltaTime(item)*2.1 + 0.5, 1) : 1, 0);
     		poseStack.translate(0, 0.35 * (reloadOffset * reloadProgress), 0);
     		poseStack.translate(0, 0, -0.1 * (reloadOffset * reloadProgress));
     		poseStack.mulPose(Vector3f.XP.rotationDegrees(45F * ((float) reloadOffset) * reloadProgress));
@@ -1143,7 +1143,7 @@ public class GunRenderingHandler
         percent *= 2F;
         percent = percent < 0.5 ? 2 * percent * percent : -1 + (4 - 2 * percent) * percent;
 
-        poseStack.translate(3.5 * side * 0.0625, -0.5625 -( (1-ReloadHandler.get().getReloadProgress(mc.getFrameTime())) * 0.5), -0.5625);
+        poseStack.translate(3.5 * side * 0.0625, -0.5625 -( (1-ReloadHandler.get().getReloadProgress(mc.getFrameTime())) * 0.7), -0.5625);
         poseStack.mulPose(Vector3f.YP.rotationDegrees(180F));
         poseStack.translate(0, -0.35 * (1.0 - percent), 0);
         poseStack.translate(side * 0.0625, 0, 0);
