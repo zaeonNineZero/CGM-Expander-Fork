@@ -168,23 +168,23 @@ public class TwoHandedPose extends WeaponPose
         	if(!GunAnimationHelper.hasAnimation("reload", stack) && ReloadHandler.get().getReloadProgress(partialTicks) > 0)
         	{
         		float reloadProg = ReloadHandler.get().getReloadProgress(partialTicks);
-                poseStack.translate(0, (-32 * reloadProg) * 0.0625, (-1 * reloadProg) * 0.0625);
+                poseStack.translate(0, (-24 * reloadProg) * 0.0625, (-6 * reloadProg) * 0.0625);
         	}
             
             poseStack.scale(0.5F, 0.5F, 0.5F);
             poseStack.translate((4.0 + posHand.x) * 0.0625 * side, (0 + posHand.y) * 0.0625, (0 - posHand.z) * 0.0625);
             //poseStack.translate(4.0 * 0.0625 * side, 0, 0;
+
+            String animType = GunAnimationHelper.getSmartAnimationType(stack, player, partialTicks);
+            poseStack.translate(translations.x * side * 0.0625, translations.y * 0.0625, -translations.z * 0.0625);
+            GunAnimationHelper.rotateAroundOffset(poseStack, rotations, animType, stack, "forwardHand");
+            
             poseStack.translate((armWidth / 2.0) * 0.0625 * side, 0, 0);
             poseStack.translate(-0.3125 * side, -0.1, -0.4375);
-            
             poseStack.mulPose(Vector3f.XP.rotationDegrees(80F));
             poseStack.mulPose(Vector3f.YP.rotationDegrees(15F * -side));
             poseStack.mulPose(Vector3f.ZP.rotationDegrees(15F * -side));
             poseStack.mulPose(Vector3f.XP.rotationDegrees(-35F));
-
-            String animType = GunAnimationHelper.getSmartAnimationType(stack, player, partialTicks);
-            poseStack.translate(translations.x * side, translations.y, translations.z);
-            GunAnimationHelper.rotateAroundOffset(poseStack, rotations, animType, stack, "forwardHand");
 
         	if(GunAnimationHelper.hasAnimation("reload", stack) || ReloadHandler.get().getReloadProgress(partialTicks) < 1)
             RenderUtil.renderFirstPersonArm((LocalPlayer) player, hand.getOpposite(), poseStack, buffer, light);
@@ -200,19 +200,20 @@ public class TwoHandedPose extends WeaponPose
             Vec3 rotations = GunAnimationHelper.getSmartAnimationRot(stack, player, partialTicks, "rearHand");
         	if(!GunAnimationHelper.hasAnimation("fire", stack) && ReloadHandler.get().getReloadProgress(partialTicks) <= 0)
         	{
-        		translations = GunLegacyAnimationHelper.getHandTranslation(stack, true, cooldown);
+        		translations = GunLegacyAnimationHelper.getHandTranslation(stack, true, cooldown).scale(0.0625);
         	}
             
             poseStack.translate(0, 0.1, -0.675);
             poseStack.scale(0.5F, 0.5F, 0.5F);
             poseStack.translate((-4.0 + posHand.x) * 0.0625 * side, (0 + posHand.y) * 0.0625, (0 - posHand.z) * 0.0625);
             //poseStack.translate(-4.0 * 0.0625 * side, 0, 0);
-            poseStack.translate(-(armWidth / 2.0) * 0.0625 * side, 0, 0);
-            poseStack.mulPose(Vector3f.XP.rotationDegrees(80F));
 
             String animType = GunAnimationHelper.getSmartAnimationType(stack, player, partialTicks);
-            poseStack.translate(translations.x * side, translations.y, translations.z);
+            poseStack.translate(translations.x * side * 0.0625, translations.y * 0.0625, -translations.z * 0.0625);
             GunAnimationHelper.rotateAroundOffset(poseStack, rotations, animType, stack, "rearHand");
+            
+            poseStack.translate(-(armWidth / 2.0) * 0.0625 * side, 0, 0);
+            poseStack.mulPose(Vector3f.XP.rotationDegrees(80F));
 
             RenderUtil.renderFirstPersonArm((LocalPlayer) player, hand, poseStack, buffer, light);
         }

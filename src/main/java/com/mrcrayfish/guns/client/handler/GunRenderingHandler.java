@@ -645,11 +645,12 @@ public class GunRenderingHandler
 
     private void applyAnimationTransforms(PoseStack poseStack, LocalPlayer player, ItemStack item, Gun modifiedGun, float partialTicks)
     {
+    	Minecraft mc = Minecraft.getInstance();
     	Vec3 translations = GunAnimationHelper.getSmartAnimationTrans(item, player, partialTicks, "viewModel");
         Vec3 rotations = GunAnimationHelper.getSmartAnimationRot(item, player, partialTicks, "viewModel");
     	if(!GunAnimationHelper.hasAnimation("fire", item) && ReloadHandler.get().getReloadProgress(partialTicks) <= 0)
     	{
-    		ItemCooldowns tracker = Minecraft.getInstance().player.getCooldowns();
+    		ItemCooldowns tracker = mc.player.getCooldowns();
             float cooldown = tracker.getCooldownPercent(item.getItem(), Minecraft.getInstance().getFrameTime());
     		translations = GunLegacyAnimationHelper.getViewModelTranslation(item, cooldown);
     		rotations = GunLegacyAnimationHelper.getViewModelRotation(item, cooldown);
@@ -657,30 +658,12 @@ public class GunRenderingHandler
         
         poseStack.translate(translations.x * 0.0625, translations.y * 0.0625, translations.z * 0.0625);
         GunAnimationHelper.rotateAroundOffset(poseStack, rotations, GunAnimationHelper.getSmartAnimationType(item, player, partialTicks), item, "viewModel");
-        poseStack.mulPose(Vector3f.XP.rotationDegrees((float) rotations.x));
-        poseStack.mulPose(Vector3f.YP.rotationDegrees((float) rotations.y));
-        poseStack.mulPose(Vector3f.ZP.rotationDegrees((float) rotations.z));
     }
 
     private void applyReloadTransforms(PoseStack poseStack, ItemStack item, Gun modifiedGun, float partialTicks)
     {
-    	Minecraft mc = Minecraft.getInstance();
     	float reloadProgress = ReloadHandler.get().getReloadProgress(partialTicks);
-    	if(GunAnimationHelper.hasAnimation("reload", item))
-    	{
-        	float reloadCycleProgress = getReloadCycleProgress(item);
-    		Easings easing = GunReloadAnimationHelper.getReloadStartEasing(GunAnimationHelper.getItemLocationKey(item), "viewModel");
-    		boolean reloading = ReloadHandler.get().getReloading(mc.player);
-    		if(!reloading)
-    		easing = GunReloadAnimationHelper.getReloadEndEasing(GunAnimationHelper.getItemLocationKey(item), "viewModel");
-    		reloadProgress = (float) (reloading ? GunAnimationHelper.getEaseFactor(easing, reloadProgress) : GunAnimationHelper.getReversedEaseFactor(easing, reloadProgress));
-    		
-            Vec3 translations = GunAnimationHelper.getAnimationTrans("reload", item, reloadCycleProgress, "viewModel").scale(reloadProgress);
-            Vec3 rotations = GunAnimationHelper.getAnimationRot("reload", item, reloadCycleProgress, "viewModel").scale(reloadProgress);
-            poseStack.translate(translations.x * 0.0625, translations.y * 0.0625, translations.z * 0.0625);
-            GunAnimationHelper.rotateAroundOffset(poseStack, rotations, "reload", item, "viewModel");
-    	}
-    	else
+    	if(!GunAnimationHelper.hasAnimation("reload", item))
     	{
     		double reloadOffset = Math.max(!modifiedGun.getGeneral().usesMagReload() ? Math.min(getReloadDeltaTime(item)*2.1 + 0.8, 1) : 1, 0);
     		poseStack.translate(0, 0.35 * (reloadOffset * reloadProgress), 0);

@@ -8,6 +8,7 @@ import com.mrcrayfish.framework.api.serialize.DataNumber;
 import com.mrcrayfish.framework.api.serialize.DataObject;
 import com.mrcrayfish.framework.api.serialize.DataString;
 import com.mrcrayfish.framework.api.serialize.DataType;
+import com.mrcrayfish.guns.GunMod;
 import com.mrcrayfish.guns.cache.ObjectCache;
 import com.mrcrayfish.guns.client.AnimationMetaLoader;
 import com.mrcrayfish.guns.client.MetaLoader;
@@ -34,6 +35,10 @@ import net.minecraft.world.phys.Vec3;
 public final class GunAnimationHelper
 {
 	public static final String ANIMATION_KEY = "cgm:animations";
+	static boolean doMetaLoadMessage=false;
+	static boolean doHasAnimationMessage=false;
+	static boolean doTryingMetaLoadMessage=false;
+
 
 	
     
@@ -74,79 +79,73 @@ public final class GunAnimationHelper
     	
     	return "none";
     }
+    
     public static Vec3 getSmartAnimationTrans(ItemStack weapon, Player player, float partialTicks, String component)
     {
-    	if (ReloadHandler.get().getReloadProgress(partialTicks) > 0) 
+    	String animType = getSmartAnimationType(weapon, player, partialTicks);
+    	if (animType.equals("reloadStart"))
     	{
     		float reloadTransitionProgress = ReloadHandler.get().getReloadProgress(partialTicks);
-    		if (reloadTransitionProgress>0 && hasAnimation("reload", weapon))
-    		{
-    			if (reloadTransitionProgress<1)
-    			{
-    				float delta = GunRenderingHandler.get().getReloadDeltaTime(weapon);
-		    		if (hasAnimation("reloadStart", weapon) && ReloadHandler.get().doReloadStartAnimation() && delta <= 0.5)
-		    		{
-		    			return getAnimationTrans("reloadStart", weapon, reloadTransitionProgress, component);
-		    		}
-		    		else
-		        	if (hasAnimation("reloadEnd", weapon) && ReloadHandler.get().doReloadFinishAnimation())
-		        	{
-		        		return getAnimationTrans("reloadEnd", weapon, 1-reloadTransitionProgress, component);
-		        	}
-	    		}
-        	    float progress = GunRenderingHandler.get().getReloadCycleProgress(weapon);
-        	    return getAnimationTrans("reload", weapon, progress, component);
-    		}
-    		else
-    		if (hasAnimation("fire", weapon))
-    		{
-    			ItemCooldowns tracker = Minecraft.getInstance().player.getCooldowns();
-                float cooldown = tracker.getCooldownPercent(weapon.getItem(), Minecraft.getInstance().getFrameTime());
-                if (cooldown>0);
-                {
-                	float progress = 1-cooldown;
-                	return getAnimationTrans("fire", weapon, progress, component);
-                }
-    		} 
+    		float delta = GunRenderingHandler.get().getReloadDeltaTime(weapon);
+    		return getAnimationTrans("reloadStart", weapon, reloadTransitionProgress, component);
+    	}
+    	if (animType.equals("reloadEnd"))
+    	{
+    		float reloadTransitionProgress = ReloadHandler.get().getReloadProgress(partialTicks);
+    		float delta = GunRenderingHandler.get().getReloadDeltaTime(weapon);
+    		return getAnimationTrans("reloadEnd", weapon, 1-reloadTransitionProgress, component);
+    		
+    	}
+    	if (animType.equals("reload"))
+    	{
+    		float reloadTransitionProgress = ReloadHandler.get().getReloadProgress(partialTicks);
+    	    float progress = GunRenderingHandler.get().getReloadCycleProgress(weapon);
+    	    return getAnimationTrans("reload", weapon, progress, component).scale(reloadTransitionProgress);
+    	}
+    	if (animType.equals("fire"))
+    	{
+    		ItemCooldowns tracker = Minecraft.getInstance().player.getCooldowns();
+            float cooldown = tracker.getCooldownPercent(weapon.getItem(), Minecraft.getInstance().getFrameTime());
+            if (cooldown>0);
+            {
+            	float progress = 1-cooldown;
+            	return getAnimationTrans("fire", weapon, progress, component);
+            }
     	}
     	
     	return Vec3.ZERO;
     }
-
     public static Vec3 getSmartAnimationRot(ItemStack weapon, Player player, float partialTicks, String component)
     {
-    	if (ReloadHandler.get().getReloadProgress(partialTicks) > 0) 
+    	String animType = getSmartAnimationType(weapon, player, partialTicks);
+    	if (animType.equals("reloadStart"))
     	{
     		float reloadTransitionProgress = ReloadHandler.get().getReloadProgress(partialTicks);
-    		if (reloadTransitionProgress>0 && hasAnimation("reload", weapon))
-    		{
-    			if (reloadTransitionProgress<1)
-    			{
-    				float delta = GunRenderingHandler.get().getReloadDeltaTime(weapon);
-		    		if (hasAnimation("reloadStart", weapon) && ReloadHandler.get().doReloadStartAnimation() && delta <= 0.5)
-		    		{
-		    			return getAnimationRot("reloadStart", weapon, reloadTransitionProgress, component);
-		    		}
-		    		else
-		        	if (hasAnimation("reloadEnd", weapon) && ReloadHandler.get().doReloadFinishAnimation())
-		        	{
-		        		return getAnimationRot("reloadEnd", weapon, 1-reloadTransitionProgress, component);
-		        	}
-	    		}
-        	    float progress = GunRenderingHandler.get().getReloadCycleProgress(weapon);
-        	    return getAnimationRot("reload", weapon, progress, component).scale(reloadTransitionProgress);
-    		}
-    		else
-    		if (hasAnimation("fire", weapon))
-    		{
-    			ItemCooldowns tracker = Minecraft.getInstance().player.getCooldowns();
-                float cooldown = tracker.getCooldownPercent(weapon.getItem(), Minecraft.getInstance().getFrameTime());
-                if (cooldown>0);
-                {
-                	float progress = 1-cooldown;
-                	return getAnimationRot("fire", weapon, progress, component);
-                }
-    		} 
+    		float delta = GunRenderingHandler.get().getReloadDeltaTime(weapon);
+			return getAnimationRot("reloadStart", weapon, reloadTransitionProgress, component);
+    	}
+    	if (animType.equals("reloadEnd"))
+    	{
+    		float reloadTransitionProgress = ReloadHandler.get().getReloadProgress(partialTicks);
+    		float delta = GunRenderingHandler.get().getReloadDeltaTime(weapon);
+    		return getAnimationRot("reloadEnd", weapon, 1-reloadTransitionProgress, component);
+    		
+    	}
+    	if (animType.equals("reload"))
+    	{
+    		float reloadTransitionProgress = ReloadHandler.get().getReloadProgress(partialTicks);
+    	    float progress = GunRenderingHandler.get().getReloadCycleProgress(weapon);
+    	    return getAnimationTrans("reload", weapon, progress, component).scale(reloadTransitionProgress);
+    	}
+    	if (animType.equals("fire"))
+    	{
+    		ItemCooldowns tracker = Minecraft.getInstance().player.getCooldowns();
+            float cooldown = tracker.getCooldownPercent(weapon.getItem(), Minecraft.getInstance().getFrameTime());
+            if (cooldown>0);
+            {
+            	float progress = 1-cooldown;
+            	return getAnimationRot("fire", weapon, progress, component);
+            }
     	}
     	
     	return Vec3.ZERO;
@@ -269,7 +268,14 @@ public final class GunAnimationHelper
 	public static boolean hasAnimation(String animationType, ResourceLocation weapKey) {
 		DataObject animObject = getObjectByPath(weapKey, ANIMATION_KEY, animationType);
 		if (animObject.has("frames", DataType.NUMBER))
-		return true;
+		{
+	        if (doHasAnimationMessage)
+	        {
+	        	GunMod.LOGGER.info("Animation System: Successfully detected a valid animation!");
+	        	doHasAnimationMessage=false;
+	    	}
+			return true;
+		}
 		
 		return false;
 	}
@@ -310,34 +316,6 @@ public final class GunAnimationHelper
 		}
 		
 		return 1;
-	}
-	
-	
-	// Base Transformations
-	public static Vec3 getBaseTranslate(String animationType, ResourceLocation weapKey, String component) {
-		DataObject frameObject = getObjectByPath(weapKey, ANIMATION_KEY, animationType, component);
-		if (frameObject.has("translation", DataType.ARRAY))
-		{
-			DataArray translationArray = frameObject.getDataArray("translation");
-			if (translationArray!=null)
-			{
-				Vec3 translations = PropertyHelper.arrayToVec3(translationArray, Vec3.ZERO);
-				return translations;
-			}
-		}
-		
-		return Vec3.ZERO;
-	}
-	public static Vec3 getBaseRotation(String animationType, ResourceLocation weapKey, String component) {
-		DataObject frameObject = getObjectByPath(weapKey, ANIMATION_KEY, animationType, component);
-		if (frameObject.has("rotation", DataType.ARRAY))
-		{
-			DataArray rotationArray = frameObject.getDataArray("rotation");
-			if (rotationArray!=null)
-            return PropertyHelper.arrayToVec3(rotationArray, Vec3.ZERO);
-		}
-		
-		return Vec3.ZERO;
 	}
 	
 	
@@ -492,8 +470,12 @@ public final class GunAnimationHelper
 	// Copies of methods from PropertyHelper, reworked to support animations.
 	static DataObject getObjectByPath(ResourceLocation locationKey, String ... path)
     {
-		ResourceLocation location = new ResourceLocation(locationKey.getNamespace(), "animations/" + locationKey.getPath() + ".cgmanim");
-        DataObject result = getCustomData(location);
+		DataObject result = getCustomData(locationKey);
+        if (!result.isEmpty() && doMetaLoadMessage)
+        {
+        	GunMod.LOGGER.info("Animation System: Successfully retrieved a data object from animation meta loader!");
+        	doMetaLoadMessage=false;
+    	}
         for(String key : path)
         {
             if(result.has(key, DataType.OBJECT))
@@ -507,6 +489,11 @@ public final class GunAnimationHelper
     }
     private static DataObject getCustomData(ResourceLocation location)
     {
+        if (doTryingMetaLoadMessage)
+        {
+        	GunMod.LOGGER.info("Animation System: Attempting to load animation data with resource key: " + location);
+        	doTryingMetaLoadMessage=false;
+    	}
         return AnimationMetaLoader.getInstance().getData(location);
     }
 }

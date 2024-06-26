@@ -3,6 +3,7 @@ package com.mrcrayfish.guns.client;
 import com.mrcrayfish.framework.api.serialize.DataObject;
 import com.mrcrayfish.framework.client.resources.IDataLoader;
 import com.mrcrayfish.framework.client.resources.IResourceSupplier;
+import com.mrcrayfish.guns.GunMod;
 import com.mrcrayfish.guns.item.IMeta;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenCustomHashMap;
@@ -54,6 +55,7 @@ public final class AnimationMetaLoader implements IDataLoader<AnimationMetaLoade
             ResourceLocation key = item.builtInRegistryHolder().key().location();
             ResourceLocation location = new ResourceLocation(key.getNamespace(), "animations/" + key.getPath() + ".cgmanim");
             resources.add(new AnimResource(key, location));
+            //GunMod.LOGGER.info("Added new animation resource " + key + " with the following resource location: " + location );
         });
         return resources;
     }
@@ -68,7 +70,9 @@ public final class AnimationMetaLoader implements IDataLoader<AnimationMetaLoade
             if(!object.isEmpty())
             {
             	AnimResource resource = pair.getLeft();
-                this.resourceToData.put(resource.key(), object);
+                this.resourceToData.put(resource.key(), object); 
+                GunMod.LOGGER.info("Loaded animation " + resource.key() + " at file location " + resource.location());
+                //GunMod.LOGGER.info("Successfully paired data for animation resource " + resource.key());
             }
         });
     }
