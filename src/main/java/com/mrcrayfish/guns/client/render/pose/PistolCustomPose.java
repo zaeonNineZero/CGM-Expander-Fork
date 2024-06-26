@@ -192,7 +192,7 @@ public class PistolCustomPose extends WeaponPose
             Vec3 rotations = GunAnimationHelper.getSmartAnimationRot(stack, player, partialTicks, "rearHand");
         	if(!GunAnimationHelper.hasAnimation("fire", stack) && ReloadHandler.get().getReloadProgress(partialTicks) <= 0)
         	{
-        		translations = GunLegacyAnimationHelper.getHandTranslation(stack, true, cooldown).scale(0.0625);
+        		translations = GunLegacyAnimationHelper.getHandTranslation(stack, true, cooldown);
         	}
             
         	if (player.getOffhandItem().isEmpty())

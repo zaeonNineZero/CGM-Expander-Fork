@@ -1420,6 +1420,8 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         @Nullable
         private ResourceLocation reloadStart;
         @Optional
+        private int reloadStartDelay = 0;
+        @Optional
         @Nullable
         private ResourceLocation reloadEarly;
         @Optional
@@ -1437,6 +1439,8 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         @Optional
         @Nullable
         private ResourceLocation reloadEnd;
+        @Optional
+        private int reloadEndDelay = 0;
         
         @Optional
         @Nullable
@@ -1489,6 +1493,7 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             {
                 tag.putString("ReloadStart", this.reloadStart.toString());
             }
+            tag.putInt("ReloadStartDelay", this.reloadStartDelay);
             if(this.reloadEarly != null)
             {
                 tag.putString("ReloadMid", this.reloadEarly.toString());
@@ -1508,6 +1513,7 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             {
                 tag.putString("ReloadEnd", this.reloadEnd.toString());
             }
+            tag.putInt("ReloadEndDelay", this.reloadEndDelay);
             
             if(this.reloadClipOut != null)
             {
@@ -1567,6 +1573,10 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             {
                 this.reloadStart = this.createSound(tag, "ReloadStart");
             }
+            if(tag.contains("ReloadStartDelay", Tag.TAG_ANY_NUMERIC))
+            {
+                this.reloadStartDelay = tag.getInt("ReloadStartDelay");
+            }
             if(tag.contains("ReloadEarly", Tag.TAG_STRING))
             {
                 this.reloadEarly = this.createSound(tag, "ReloadEarly");
@@ -1594,6 +1604,10 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             if(tag.contains("ReloadEnd", Tag.TAG_STRING))
             {
                 this.reloadEnd = this.createSound(tag, "ReloadEnd");
+            }
+            if(tag.contains("ReloadEndDelay", Tag.TAG_STRING))
+            {
+                this.reloadEndDelay = tag.getInt("ReloadEndDelay");
             }
             
             if(tag.contains("ReloadClipOut", Tag.TAG_STRING))
@@ -1656,6 +1670,7 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             {
                 object.addProperty("reloadStart", this.reloadStart.toString());
             }
+            if(this.reloadStartDelay != 0) object.addProperty("reloadStartDelay", this.reloadStartDelay);
             if(this.reloadEarly != null)
             {
                 object.addProperty("reloadEarly", this.reloadEarly.toString());
@@ -1675,6 +1690,7 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             {
                 object.addProperty("reloadEnd", this.reloadEnd.toString());
             }
+            if(this.reloadEndDelay != 0) object.addProperty("reloadEndDelay", this.reloadEndDelay);
             
             if(this.reloadClipOut != null)
             {
@@ -1721,6 +1737,7 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             sounds.reload = this.reload;
             sounds.reloadFrames = this.reloadFrames;
             sounds.reloadStart = this.reloadStart;
+            sounds.reloadStartDelay = this.reloadStartDelay;
             sounds.reloadEarly = this.reloadEarly;
             sounds.reloadEarlyThreshold = this.reloadEarlyThreshold;
             sounds.reloadMid = this.reloadMid;
@@ -1728,6 +1745,7 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             sounds.reloadLate = this.reloadLate;
             sounds.reloadLateThreshold = this.reloadLateThreshold;
             sounds.reloadEnd = this.reloadEnd;
+            sounds.reloadEndDelay = this.reloadEndDelay;
             sounds.reloadClipOut = this.reloadClipOut;
             sounds.reloadClipOutThreshold = this.reloadClipOutThreshold;
             sounds.reloadClipIn = this.reloadClipIn;
@@ -1789,6 +1807,15 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         public ResourceLocation getReloadStart()
         {
             return this.reloadStart;
+        }
+        /**
+         * @return The delay after a reload starts before the reloadStart sound plays.
+         * Setting this to zero (the default) will play the sound immediately.
+         */
+        @Nullable
+        public int getReloadStartDelay()
+        {
+            return this.reloadStartDelay;
         }
 
         /**
@@ -1859,6 +1886,15 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         public ResourceLocation getReloadEnd()
         {
             return this.reloadEnd;
+        }
+        /**
+         * @return The delay after a reload ends before the reloadEnd sound plays.
+         * Setting this to zero (the default) will play the sound immediately.
+         */
+        @Nullable
+        public int getReloadEndDelay()
+        {
+            return this.reloadEndDelay;
         }
 
         /**

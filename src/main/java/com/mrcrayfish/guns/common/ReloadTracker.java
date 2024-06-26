@@ -214,10 +214,20 @@ public class ReloadTracker
 	                    }
                     else
                     {
+                    	String soundType = "cock";
                     	if (gun.getSounds().hasExtraReloadSounds())
-                        playReloadSound(finalPlayer, "end");
-                        else
-                        playReloadSound(player, "cock");
+                    	soundType = "end";
+                    	final String finalSound = "cock";
+                    	
+                    	if (gun.getSounds().getReloadEndDelay()>0)
+	                    {
+	                    	DelayedTask.runAfter(gun.getSounds().getReloadEndDelay(), () ->
+		                    {
+		                        playReloadSound(finalPlayer, finalSound);
+		                    });
+	                    }
+                    	else
+                        playReloadSound(finalPlayer, soundType);
                     }
                     
                     RELOAD_TRACKER_MAP.remove(player);

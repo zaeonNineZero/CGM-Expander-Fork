@@ -100,7 +100,15 @@ public final class GunAnimationHelper
     	{
     		float reloadTransitionProgress = ReloadHandler.get().getReloadProgress(partialTicks);
     	    float progress = GunRenderingHandler.get().getReloadCycleProgress(weapon);
-    	    return getAnimationTrans("reload", weapon, progress, component).scale(reloadTransitionProgress);
+    	    Vec3 transforms = getAnimationTrans("reload", weapon, progress, component).scale(reloadTransitionProgress);
+    	    
+    		Easings easing = GunReloadAnimationHelper.getReloadStartEasing(lookForParentAnimation("reload", getItemLocationKey(weapon)), component);
+    		{
+    			if (!ReloadHandler.get().getReloading(player))
+    			easing = GunReloadAnimationHelper.getReloadEndEasing(lookForParentAnimation("reload", getItemLocationKey(weapon)), component);
+    		}
+    	    float finalReloadTransition = (float) getEaseFactor(easing, reloadTransitionProgress);
+    	    return transforms.scale(finalReloadTransition);
     	}
     	if (animType.equals("fire"))
     	{
@@ -135,7 +143,15 @@ public final class GunAnimationHelper
     	{
     		float reloadTransitionProgress = ReloadHandler.get().getReloadProgress(partialTicks);
     	    float progress = GunRenderingHandler.get().getReloadCycleProgress(weapon);
-    	    return getAnimationRot("reload", weapon, progress, component).scale(reloadTransitionProgress);
+    	    Vec3 transforms = getAnimationRot("reload", weapon, progress, component).scale(reloadTransitionProgress);
+    	    
+    	    Easings easing = GunReloadAnimationHelper.getReloadStartEasing(lookForParentAnimation("reload", getItemLocationKey(weapon)), animType);
+    		{
+    			if (!ReloadHandler.get().getReloading(player))
+    			easing = GunReloadAnimationHelper.getReloadEndEasing(lookForParentAnimation("reload", getItemLocationKey(weapon)), animType);
+    		}
+    	    float finalReloadTransition = (float) getEaseFactor(easing, reloadTransitionProgress);
+    	    return transforms.scale(finalReloadTransition);
     	}
     	if (animType.equals("fire"))
     	{

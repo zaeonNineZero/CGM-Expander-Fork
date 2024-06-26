@@ -4,6 +4,7 @@ import com.mrcrayfish.framework.api.network.LevelLocation;
 import com.mrcrayfish.guns.Config;
 import com.mrcrayfish.guns.GunMod;
 import com.mrcrayfish.guns.blockentity.WorkbenchBlockEntity;
+import com.mrcrayfish.guns.common.DelayedTask;
 import com.mrcrayfish.guns.common.Gun;
 import com.mrcrayfish.guns.common.ProjectileManager;
 import com.mrcrayfish.guns.common.ShootTracker;
@@ -258,19 +259,25 @@ public class ServerPlayHandler
             Gun modifiedGun = item.getModifiedGun(heldItem);
             if(modifiedGun != null)
             {
-                ResourceLocation reloadSound = getGunSound(heldItem, modifiedGun, "start");
-            	{
-            		double posX = player.getX();
-            		double posY = player.getY() + 1.0;
-            		double posZ = player.getZ();
-            		double radius = Config.SERVER.reloadMaxDistance.get();
-            		S2CMessageGunSound messageSound = new S2CMessageGunSound(reloadSound, SoundSource.PLAYERS, (float) posX, (float) posY, (float) posZ, 1.0F, 1.0F, player.getId(), false, true);
-            		PacketHandler.getPlayChannel().sendToNearbyPlayers(() -> LevelLocation.create(player.level, posX, posY, posZ, radius), messageSound);
-            	}
+
+            	String soundType = "cock";
+            	if (modifiedGun.getSounds().hasExtraReloadSounds())
+            	soundType = "end";
+            	final ResourceLocation finalSound = getGunSound(heldItem, modifiedGun, soundType);
+            	
+            	if (modifiedGun.getSounds().getReloadEndDelay()>0)
+                {
+            		Player finalPlayer = player;
+                	DelayedTask.runAfter(modifiedGun.getSounds().getReloadEndDelay(), () ->
+                    {
+                        playReloadStartSound(finalPlayer, finalSound);
+                    });
+                }
+            	else
+            	playReloadStartSound(player, finalSound);
             }
         }
     }
-
     private static ResourceLocation getGunSound(ItemStack stack, Gun modifiedGun, String soundType)
     {
     	ResourceLocation sound = null;
@@ -286,6 +293,15 @@ public class ServerPlayHandler
             return sound;
         }
         return null;
+    }
+    public static void playReloadStartSound(Player player, ResourceLocation sound)
+    {
+    	double posX = player.getX();
+		double posY = player.getY() + 1.0;
+		double posZ = player.getZ();
+		double radius = Config.SERVER.reloadMaxDistance.get();
+		S2CMessageGunSound messageSound = new S2CMessageGunSound(sound, SoundSource.PLAYERS, (float) posX, (float) posY, (float) posZ, 1.0F, 1.0F, player.getId(), false, true);
+		PacketHandler.getPlayChannel().sendToNearbyPlayers(() -> LevelLocation.create(player.level, posX, posY, posZ, radius), messageSound);
     }
 
     /**
