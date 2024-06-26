@@ -135,7 +135,7 @@ public final class GunAnimationHelper
     	{
     		float reloadTransitionProgress = ReloadHandler.get().getReloadProgress(partialTicks);
     	    float progress = GunRenderingHandler.get().getReloadCycleProgress(weapon);
-    	    return getAnimationTrans("reload", weapon, progress, component).scale(reloadTransitionProgress);
+    	    return getAnimationRot("reload", weapon, progress, component).scale(reloadTransitionProgress);
     	}
     	if (animType.equals("fire"))
     	{
