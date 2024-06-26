@@ -13,6 +13,7 @@ import com.mrcrayfish.guns.util.GunEnchantmentHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemCooldowns;
 import net.minecraft.world.item.ItemStack;
@@ -39,9 +40,11 @@ public class ReloadHandler
     }
 
     private int startReloadTick;
-    private int reloadTimer;
-    private int prevReloadTimer;
+    private double reloadTimer;
+    private double prevReloadTimer;
+    private int storedReloadDelay;
     private int reloadingSlot;
+    private boolean reloadStart;
     private boolean reloadFinish;
 
     private ReloadHandler()
@@ -59,11 +62,12 @@ public class ReloadHandler
         Player player = Minecraft.getInstance().player;
         if(player != null)
         {
+            this.updateReloadDelay(player);
             if(ModSyncedDataKeys.RELOADING.getValue(player))
             {
                 if(this.reloadingSlot != player.getInventory().selected)
                 {
-                    this.setReloading(false);
+                    this.setReloading(false, false);
                 }
             }
 
@@ -80,6 +84,7 @@ public class ReloadHandler
 
         if(KeyBinds.KEY_RELOAD.isDown() && event.getAction() == GLFW.GLFW_PRESS)
         {
+        	if (reloadTimer<=0 || reloadTimer>=1)
             this.setReloading(!ModSyncedDataKeys.RELOADING.getValue(player));
             KeyBinds.KEY_RELOAD.setDown(false);
             if(player.getMainHandItem().getItem() instanceof GunItem)
@@ -95,6 +100,11 @@ public class ReloadHandler
     }
 
     public void setReloading(boolean reloading)
+    {
+    	setReloading(reloading, true);
+    }
+    
+    public void setReloading(boolean reloading, boolean fromInput)
     {
         Player player = Minecraft.getInstance().player;
         if(player != null)
@@ -125,14 +135,20 @@ public class ReloadHandler
                         this.reloadingSlot = player.getInventory().selected;
                         MinecraftForge.EVENT_BUS.post(new GunReloadEvent.Post(player, stack));
                         GunRenderingHandler.get().updateReserveAmmo(player, gun);
+                    	reloadFinish = true;
+                    	reloadStart = true;
                     }
                 }
             }
             else
             {
-            	reloadFinish = false;
+            	if (fromInput)
+            	{
+            		reloadFinish = false;
+            		reloadStart = false;
+            	}
                 ModSyncedDataKeys.RELOADING.setValue(player, false);
-                ModSyncedDataKeys.SWITCHTIME.setValue(player, 6);
+                ModSyncedDataKeys.SWITCHTIME.setValue(player, storedReloadDelay+1);
                 PacketHandler.getPlayChannel().sendToServer(new C2SMessageReload(false));
                 this.reloadingSlot = -1;
             }
@@ -147,17 +163,34 @@ public class ReloadHandler
         return false;
     }
 
+    private void updateReloadDelay(Player player)
+    {
+    	int reloadStartDelay = 5;
+    	int reloadInterruptDelay = 5;
+    	int reloadEndDelay = 5;
+    	ItemStack stack = player.getMainHandItem();
+    	if(player.getMainHandItem().getItem() instanceof GunItem gun)
+    	{
+    		reloadStartDelay = Math.max(gun.getModifiedGun(stack).getGeneral().getReloadStartDelay(),1);
+    		reloadInterruptDelay = Math.max(gun.getModifiedGun(stack).getGeneral().getReloadInterruptDelay(),5);
+    		reloadEndDelay = Math.max(gun.getModifiedGun(stack).getGeneral().getReloadEndDelay(),1);
+    	}
+    	storedReloadDelay = (reloadFinish && !getReloading(player)) ? reloadEndDelay : ((reloadStart && getReloading(player)) ? reloadStartDelay : reloadInterruptDelay);
+    }
+
     private void updateReloadTimer(Player player)
     {
+    	double reloadDelay = storedReloadDelay;
+    	
         if(getReloading(player))
         {
             if(this.startReloadTick == -1)
             {
                 this.startReloadTick = player.tickCount;
             }
-            if(this.reloadTimer < 5)
+            if(this.reloadTimer < 1)
             {
-                this.reloadTimer++;
+                this.reloadTimer+=1/reloadDelay;
             }
         }
         else
@@ -168,9 +201,10 @@ public class ReloadHandler
             }
             if(this.reloadTimer > 0)
             {
-                this.reloadTimer--;
+                this.reloadTimer-=1/reloadDelay;
             }
         }
+        reloadTimer=Mth.clamp(reloadTimer ,0,1);
     }
 
     public int getStartReloadTick()
@@ -178,14 +212,20 @@ public class ReloadHandler
         return this.startReloadTick;
     }
 
-    public int getReloadTimer()
+    public double getReloadTimer()
     {
         return this.reloadTimer;
     }
 
     public float getReloadProgress(float partialTicks)
     {
-        return (this.prevReloadTimer + (this.reloadTimer - this.prevReloadTimer) * partialTicks) / 5F;
+        return (float) Mth.lerp(partialTicks, this.prevReloadTimer, this.reloadTimer);
+        //return (this.prevReloadTimer + (this.reloadTimer - this.prevReloadTimer) * partialTicks) / 5;
+    }
+
+    public boolean doReloadStartAnimation()
+    {
+        return reloadStart;
     }
 
     public boolean doReloadFinishAnimation()

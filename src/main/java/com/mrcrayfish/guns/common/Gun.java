@@ -134,6 +134,12 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         @Optional
         private int reloadRate = 10;
         @Optional
+        private int reloadStartDelay = 5;
+        @Optional
+        private int reloadInterruptDelay = 5;
+        @Optional
+        private int reloadEndDelay = -1;
+        @Optional
         private boolean useMagReload = false;
         @Optional
         private int magReloadTime = 20;
@@ -183,10 +189,13 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             tag.putInt("MaxAmmo", this.maxAmmo);
             tag.putInt("OverCapacityAmmo", this.overCapacityAmmo);
             tag.putBoolean("InfiniteAmmo", this.infiniteAmmo);
-            tag.putInt("ReloadSpeed", this.reloadAmount);
+            tag.putInt("ReloadAmount", this.reloadAmount);
             tag.putInt("ItemsPerAmmo", this.itemsPerAmmo);
             tag.putInt("AmmoPerItem", this.ammoPerItem);
             tag.putInt("ReloadRate", this.reloadRate);
+            tag.putInt("ReloadStartDelay", this.reloadStartDelay);
+            tag.putInt("ReloadInterruptDelay", this.reloadInterruptDelay);
+            tag.putInt("ReloadEndDelay", this.reloadEndDelay);
             tag.putBoolean("UseMagReload", this.useMagReload);
             tag.putInt("MagReloadTime", this.magReloadTime);
             tag.putFloat("ReloadAllowedCooldown", this.reloadAllowedCooldown);
@@ -247,10 +256,17 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             {
                 this.infiniteAmmo = tag.getBoolean("InfiniteAmmo");
             }
-            if(tag.contains("ReloadSpeed", Tag.TAG_ANY_NUMERIC))
+            
+            if(tag.contains("ReloadAmount", Tag.TAG_ANY_NUMERIC))
             {
-                this.reloadAmount = tag.getInt("ReloadSpeed");
+                this.reloadAmount = tag.getInt("ReloadAmount");
             }
+            else
+          	if(tag.contains("ReloadSpeed", Tag.TAG_ANY_NUMERIC))
+          	{
+            	this.reloadAmount = tag.getInt("ReloadSpeed");
+         	}
+            
             if(tag.contains("ItemsPerAmmo", Tag.TAG_ANY_NUMERIC))
             {
                 this.itemsPerAmmo = tag.getInt("ItemsPerAmmo");
@@ -262,6 +278,18 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             if(tag.contains("ReloadRate", Tag.TAG_ANY_NUMERIC))
             {
                 this.reloadRate = tag.getInt("ReloadRate");
+            }
+            if(tag.contains("ReloadStartDelay", Tag.TAG_ANY_NUMERIC))
+            {
+                this.reloadStartDelay = tag.getInt("ReloadStartDelay");
+            }
+            if(tag.contains("ReloadInterruptDelay", Tag.TAG_ANY_NUMERIC))
+            {
+                this.reloadInterruptDelay = tag.getInt("ReloadInterruptDelay");
+            }
+            if(tag.contains("ReloadEndDelay", Tag.TAG_ANY_NUMERIC))
+            {
+                this.reloadEndDelay = tag.getInt("ReloadEndDelay");
             }
             if(tag.contains("UseMagReload", Tag.TAG_ANY_NUMERIC))
             {
@@ -378,6 +406,9 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             if(this.itemsPerAmmo != 1) object.addProperty("itemsPerAmmo", this.itemsPerAmmo);
             if(this.ammoPerItem != 1) object.addProperty("ammoPerItem", this.ammoPerItem);
             if(this.reloadRate != 10) object.addProperty("reloadRate", this.reloadRate);
+            if(this.reloadStartDelay != 5) object.addProperty("reloadStartDelay", this.reloadStartDelay);
+            if(this.reloadInterruptDelay != 5) object.addProperty("reloadInterruptDelay", this.reloadInterruptDelay);
+            if(this.reloadEndDelay != -1) object.addProperty("reloadEndDelay", this.reloadEndDelay);
             if(this.useMagReload != false) object.addProperty("useMagReload", this.useMagReload);
             if(this.magReloadTime != 20) object.addProperty("magReloadTime", this.magReloadTime);
             if(this.reloadAllowedCooldown != 1) object.addProperty("reloadAllowedCooldown", this.reloadAllowedCooldown);
@@ -416,6 +447,9 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             general.ammoPerItem = this.ammoPerItem;
             general.reloadAmount = this.reloadAmount;
             general.reloadRate = this.reloadRate;
+            general.reloadStartDelay = this.reloadStartDelay;
+            general.reloadInterruptDelay = this.reloadInterruptDelay;
+            general.reloadEndDelay = this.reloadEndDelay;
             general.useMagReload = this.useMagReload;
             general.magReloadTime = this.magReloadTime;
             general.energyCapacity = this.energyCapacity;
@@ -556,6 +590,38 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         public int getReloadRate()
         {
             return this.reloadRate;
+        }
+
+        /**
+         * @return The delay (in ticks) before the main reload cycle starts.
+         * This is also used as a fallback for the Interrupt Delay.
+         */
+        public int getReloadStartDelay()
+        {
+            return this.reloadStartDelay;
+        }
+
+        /**
+         * @return The delay (in ticks) that occurs after a reload is interrupted.
+         */
+        public int getReloadInterruptDelay()
+        {
+        	if (this.reloadInterruptDelay<0)
+                return getReloadEndDelay();
+        	
+        	return this.reloadInterruptDelay;
+        }
+
+        /**
+         * @return The delay (in ticks) that occurs after a complete reload.
+         * This is not used when a reload ends via interruption.
+         */
+        public int getReloadEndDelay()
+        {
+            if (this.reloadEndDelay<0)
+                return this.reloadStartDelay;
+        	
+        	return this.reloadEndDelay;
         }
 
         /**

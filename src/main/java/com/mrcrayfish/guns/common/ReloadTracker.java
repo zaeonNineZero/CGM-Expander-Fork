@@ -41,6 +41,7 @@ public class ReloadTracker
     private final ItemStack stack;
     private final Gun gun;
     private final int reloadStartDelay;
+    private final int reloadEndDelay;
     private int delayedStartTick;
     private int reserveAmmo = 0;
     private boolean reloadEarlyState;
@@ -56,7 +57,8 @@ public class ReloadTracker
         this.slot = player.getInventory().selected;
         this.stack = player.getInventory().getSelected();
         this.gun = ((GunItem) stack.getItem()).getModifiedGun(stack);
-        this.reloadStartDelay = 5;
+        this.reloadStartDelay = Math.max(gun.getGeneral().getReloadStartDelay()+1,0);
+        this.reloadEndDelay = Math.max(gun.getGeneral().getReloadEndDelay(),1);
     }
 
     /**
@@ -200,8 +202,7 @@ public class ReloadTracker
                 {
                     final Player finalPlayer = player;
                     ModSyncedDataKeys.RELOADING.setValue(finalPlayer, false);
-                    //ModSyncedDataKeys.SWITCHTIME.setValue(player, gun.getGeneral().getPostReloadCooldown());
-                    ModSyncedDataKeys.SWITCHTIME.setValue(finalPlayer, 8);
+                    ModSyncedDataKeys.SWITCHTIME.setValue(player, tracker.reloadEndDelay);
                     if (!gun.getGeneral().getUseMagReload())
                     {
 	                    DelayedTask.runAfter(4, () ->

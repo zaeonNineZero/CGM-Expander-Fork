@@ -186,7 +186,7 @@ public class ControllerHandler
 
         if(this.reloadCounter > 40)
         {
-            ReloadHandler.get().setReloading(false);
+            ReloadHandler.get().setReloading(false, false);
             PacketHandler.getPlayChannel().sendToServer(new C2SMessageUnload());
             this.reloadCounter = -1;
         }

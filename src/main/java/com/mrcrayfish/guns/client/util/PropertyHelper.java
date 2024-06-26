@@ -29,7 +29,6 @@ import java.util.Optional;
 /**
  * Author: MrCrayfish
  */
-@SuppressWarnings("ConstantConditions")
 public final class PropertyHelper
 {
     public static final String CACHE_KEY = "properties";

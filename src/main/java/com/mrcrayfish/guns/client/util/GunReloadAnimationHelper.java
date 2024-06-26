@@ -82,7 +82,8 @@ public final class GunReloadAnimationHelper
 	public static float getScaledProgress(ItemStack weapon, float progress)
 	{
 		int animationFrames = getReloadFrames(weapon);
-		return Mth.clamp(progress*(animationFrames)+0.14F, 0,animationFrames);
+		return Mth.clamp(progress*(animationFrames)-0.05F, 0,animationFrames);
+		//return Mth.clamp(progress*(animationFrames)+0.14F, 0,animationFrames);
 	}
 	
 	public static int getCurrentFrame(ItemStack weapon, float scaledProgress)
