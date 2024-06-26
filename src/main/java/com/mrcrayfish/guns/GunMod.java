@@ -2,6 +2,7 @@ package com.mrcrayfish.guns;
 
 import com.mrcrayfish.framework.api.FrameworkAPI;
 import com.mrcrayfish.framework.api.client.FrameworkClientAPI;
+import com.mrcrayfish.guns.client.AnimationMetaLoader;
 import com.mrcrayfish.guns.client.ClientHandler;
 import com.mrcrayfish.guns.client.CustomGunManager;
 import com.mrcrayfish.guns.client.KeyBinds;
@@ -94,6 +95,7 @@ public class GunMod
         bus.addListener(this::onGatherData);
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
             FrameworkClientAPI.registerDataLoader(MetaLoader.getInstance());
+            FrameworkClientAPI.registerDataLoader(AnimationMetaLoader.getInstance());
             bus.addListener(KeyBinds::registerKeyMappings);
             bus.addListener(CrosshairHandler::onConfigReload);
             bus.addListener(ClientHandler::onRegisterReloadListener);

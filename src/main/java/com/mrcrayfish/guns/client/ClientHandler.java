@@ -8,7 +8,7 @@ import com.mrcrayfish.guns.client.render.gun.ModelOverrides;
 import com.mrcrayfish.guns.client.render.gun.model.*;
 import com.mrcrayfish.guns.client.screen.AttachmentScreen;
 import com.mrcrayfish.guns.client.screen.WorkbenchScreen;
-import com.mrcrayfish.guns.client.util.PropertyHelper;
+import com.mrcrayfish.guns.client.util.*;
 import com.mrcrayfish.guns.common.Gun;
 import com.mrcrayfish.guns.debug.IEditorMenu;
 import com.mrcrayfish.guns.debug.client.screen.EditorScreen;
