@@ -145,10 +145,10 @@ public final class GunAnimationHelper
     	    float progress = GunRenderingHandler.get().getReloadCycleProgress(weapon);
     	    Vec3 transforms = getAnimationRot("reload", weapon, progress, component).scale(reloadTransitionProgress);
     	    
-    	    Easings easing = GunReloadAnimationHelper.getReloadStartEasing(lookForParentAnimation("reload", getItemLocationKey(weapon)), animType);
+    	    Easings easing = GunReloadAnimationHelper.getReloadStartEasing(lookForParentAnimation("reload", getItemLocationKey(weapon)), component);
     		{
     			if (!ReloadHandler.get().getReloading(player))
-    			easing = GunReloadAnimationHelper.getReloadEndEasing(lookForParentAnimation("reload", getItemLocationKey(weapon)), animType);
+    			easing = GunReloadAnimationHelper.getReloadEndEasing(lookForParentAnimation("reload", getItemLocationKey(weapon)), component);
     		}
     	    float finalReloadTransition = (float) getEaseFactor(easing, reloadTransitionProgress);
     	    return transforms.scale(finalReloadTransition);
