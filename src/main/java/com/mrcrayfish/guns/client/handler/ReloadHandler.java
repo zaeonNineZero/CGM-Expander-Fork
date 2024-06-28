@@ -222,6 +222,11 @@ public class ReloadHandler
             {
                 this.reloadTimer+=1/reloadDelay;
             }
+            else
+            {
+            	if (reloadStart)
+            	reloadStart = false;
+            }
         }
         else
         {
