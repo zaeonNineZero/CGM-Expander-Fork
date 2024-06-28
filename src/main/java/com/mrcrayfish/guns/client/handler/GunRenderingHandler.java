@@ -648,6 +648,7 @@ public class GunRenderingHandler
     	Minecraft mc = Minecraft.getInstance();
     	Vec3 translations = GunAnimationHelper.getSmartAnimationTrans(item, player, partialTicks, "viewModel");
         Vec3 rotations = GunAnimationHelper.getSmartAnimationRot(item, player, partialTicks, "viewModel");
+        Vec3 offsets = GunAnimationHelper.getSmartAnimationRotOffset(item, player, partialTicks, "viewModel");
     	if(!GunAnimationHelper.hasAnimation("fire", item) && GunAnimationHelper.getSmartAnimationType(item, player, partialTicks)=="fire")
     	{
     		ItemCooldowns tracker = mc.player.getCooldowns();
@@ -657,7 +658,7 @@ public class GunRenderingHandler
     	}
         
         poseStack.translate(translations.x * 0.0625, translations.y * 0.0625, translations.z * 0.0625);
-        GunAnimationHelper.rotateAroundOffset(poseStack, rotations, GunAnimationHelper.getSmartAnimationType(item, player, partialTicks), item, "viewModel");
+        GunAnimationHelper.rotateAroundOffset(poseStack, rotations, offsets);
     }
 
     private void applyReloadTransforms(PoseStack poseStack, ItemStack item, Gun modifiedGun, float partialTicks)
@@ -1210,11 +1211,11 @@ public class GunRenderingHandler
         poseStack.popPose();
     }
     
-    public void updateReloadProgress(ItemStack stack, boolean updateReloadCycle, boolean updateReloadDelta)
+    public float updateReloadProgress(ItemStack stack, boolean updateReloadCycle, boolean updateReloadDelta)
     {
     	Minecraft mc = Minecraft.getInstance();
         if(mc.player == null)
-            return;
+            return 0;
     	
         if(ReloadHandler.get().getReloading(mc.player))
         {
@@ -1230,14 +1231,20 @@ public class GunRenderingHandler
 	    	{
 	    		float reload = ((mc.player.tickCount - (ReloadHandler.get().getStartReloadTick() + reloadStartDelay) + mc.getFrameTime()) % interval) / interval;
 	    		this.lastReloadCycle = reload;
+	    		if (!updateReloadDelta)
+			    	return reload;
         	}
 
 	    	if (updateReloadDelta)
 	    	{
 	    		float reloadDelta = (mc.player.tickCount - (ReloadHandler.get().getStartReloadTick() + reloadStartDelay) + mc.getFrameTime()) / interval;
 	    		this.lastReloadDeltaTime = reloadDelta;
+	    		if (!updateReloadCycle)
+	    			return reloadDelta;
 	    	}
     	}
+        
+        return 0;
     }
     
     public float getReloadCycleProgress(ItemStack stack)

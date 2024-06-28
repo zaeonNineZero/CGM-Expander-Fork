@@ -154,7 +154,6 @@ public class ReloadHandler
                 this.reloadingSlot = -1;
                 
                 // Debug
-                if (false)
                 {
                 	ItemStack stack = player.getMainHandItem();
                     if(stack.getItem() instanceof GunItem gunItem)
