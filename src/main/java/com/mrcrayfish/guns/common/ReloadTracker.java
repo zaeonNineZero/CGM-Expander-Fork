@@ -221,7 +221,7 @@ public class ReloadTracker
                     	
                     	if (gun.getSounds().getReloadEndDelay()>0)
 	                    {
-	                    	DelayedTask.runAfter(gun.getSounds().getReloadEndDelay(), () ->
+	                    	DelayedTask.runAfter(gun.getSounds().getReloadEndDelay()*(GunEnchantmentHelper.getReloadInterval(tracker.stack)/10), () ->
 		                    {
 		                        playReloadSound(finalPlayer, finalSound);
 		                    });

@@ -202,7 +202,7 @@ public class GunRenderingHandler
     	this.prevSprintTransition = this.sprintTransition;
 
         Minecraft mc = Minecraft.getInstance();
-        if(mc.player != null && mc.player.isSprinting() && !ModSyncedDataKeys.SHOOTING.getValue(mc.player) && !ModSyncedDataKeys.RELOADING.getValue(mc.player) && !AimingHandler.get().isAiming() && this.sprintCooldown == 0)
+        if(mc.player != null && mc.player.isSprinting() && !ModSyncedDataKeys.SHOOTING.getValue(mc.player) && (!ModSyncedDataKeys.RELOADING.getValue(mc.player) && ReloadHandler.get().getReloadTimer()==0) && !AimingHandler.get().isAiming() && this.sprintCooldown == 0)
         {
             if(this.sprintTransition < 5)
             {
@@ -652,7 +652,7 @@ public class GunRenderingHandler
     	{
     		ItemCooldowns tracker = mc.player.getCooldowns();
             float cooldown = tracker.getCooldownPercent(item.getItem(), Minecraft.getInstance().getFrameTime());
-    		translations = GunLegacyAnimationHelper.getViewModelTranslation(item, cooldown);
+    		translations.add(GunLegacyAnimationHelper.getViewModelTranslation(item, cooldown));
     		rotations = GunLegacyAnimationHelper.getViewModelRotation(item, cooldown);
     	}
         
@@ -964,6 +964,29 @@ public class GunRenderingHandler
                     {
                         poseStack.pushPose();
 
+                        /* Gather some animation-related values before we continue */
+                        Vec3 animTrans = Vec3.ZERO;
+                        Vec3 animRot = Vec3.ZERO;
+                        String animType = "";
+                        boolean animateableContext = (transformType.firstPerson() || transformType == ItemTransforms.TransformType.THIRD_PERSON_RIGHT_HAND || transformType == ItemTransforms.TransformType.THIRD_PERSON_LEFT_HAND);
+                        if (entity != null && entity.equals(Minecraft.getInstance().player))
+                        {
+                        	Player player = Minecraft.getInstance().player;
+                        	animTrans = GunAnimationHelper.getSmartAnimationTrans(stack, player, partialTicks, type.getSerializeKey());
+                        	animRot = GunAnimationHelper.getSmartAnimationRot(stack, player, partialTicks, type.getSerializeKey());
+                	        animType = GunAnimationHelper.getSmartAnimationType(stack, player, partialTicks);
+                	        if(!GunAnimationHelper.hasAnimation("fire", stack) && GunAnimationHelper.getSmartAnimationType(stack, player, partialTicks)=="fire")
+	                        {
+		                        if (GunLegacyAnimationHelper.hasAttachmentAnimation(stack, type))
+		                        {
+		                        	float cooldown = 0F;
+		                        	ItemCooldowns tracker = Minecraft.getInstance().player.getCooldowns();
+		                            cooldown = tracker.getCooldownPercent(stack.getItem(), Minecraft.getInstance().getFrameTime());
+		                        	animTrans = (GunLegacyAnimationHelper.getAttachmentTranslation(stack, type, cooldown));
+		                        }
+	                    	}
+                        }
+
                         /* Translates the attachment to a standard position by removing the origin */
                         Vec3 origin = PropertyHelper.getModelOrigin(attachmentStack, PropertyHelper.ATTACHMENT_DEFAULT_ORIGIN);
                         poseStack.translate(-origin.x * 0.0625, -origin.y * 0.0625, -origin.z * 0.0625);
@@ -972,25 +995,15 @@ public class GunRenderingHandler
                         Vec3 gunOrigin = PropertyHelper.getModelOrigin(stack, PropertyHelper.GUN_DEFAULT_ORIGIN);
                         poseStack.translate(gunOrigin.x * 0.0625, gunOrigin.y * 0.0625, gunOrigin.z * 0.0625);
 
-                        /* Translate to the position this attachment mounts on the weapon */
-                        /* Also apply any attachment animations while we're here */
                         Vec3 translation = PropertyHelper.getAttachmentPosition(stack, modifiedGun, type).subtract(gunOrigin);
-                        if (GunLegacyAnimationHelper.hasAttachmentAnimation(stack, type))
-                        {
-                        	Vec3 animate = Vec3.ZERO;
-                        	boolean isPlayer = (entity != null && entity.equals(Minecraft.getInstance().player) ? true : false);
-                        	boolean correctContext = (transformType == ItemTransforms.TransformType.FIRST_PERSON_RIGHT_HAND || transformType == ItemTransforms.TransformType.THIRD_PERSON_RIGHT_HAND || transformType == ItemTransforms.TransformType.FIRST_PERSON_LEFT_HAND || transformType == ItemTransforms.TransformType.THIRD_PERSON_LEFT_HAND);
-                        	float cooldown = 0F;
-                        	if (isPlayer && correctContext)
-                        	{
-                            	ItemCooldowns tracker = Minecraft.getInstance().player.getCooldowns();
-                                cooldown = tracker.getCooldownPercent(stack.getItem(), Minecraft.getInstance().getFrameTime());
-                        	}
-                        	animate = GunLegacyAnimationHelper.getAttachmentTranslation(stack, type, cooldown);
-                        	poseStack.translate((translation.x + animate.x) * 0.0625, (translation.y + animate.y) * 0.0625, (translation.z + animate.z) * 0.0625);
-                    	}
-                        else
+                        /* Translate to the position this attachment mounts on the weapon */
                         poseStack.translate((translation.x) * 0.0625, (translation.y) * 0.0625, (translation.z) * 0.0625);
+                        
+                        /* Apply attachment animation translations */
+                        if (animateableContext)
+                        {
+                        	poseStack.translate((animTrans.x) * 0.0625, (animTrans.y) * 0.0625, (animTrans.z) * 0.0625);
+                    	}
 
                         /* Scales the attachment. Also translates the delta of the attachment origin to (8, 8, 8) since this is the centered origin for scaling */
                         Vec3 scale = PropertyHelper.getAttachmentScale(stack, modifiedGun, type);
@@ -998,6 +1011,13 @@ public class GunRenderingHandler
                         poseStack.translate(center.x, center.y, center.z);
                         poseStack.scale((float) scale.x, (float) scale.y, (float) scale.z);
                         poseStack.translate(-center.x, -center.y, -center.z);
+                        
+                        /* Lastly, rotate the attachment */
+                        if (animateableContext)
+                        {
+                        	Vec3 rotations = PropertyHelper.getAttachmentPosition(stack, modifiedGun, type).subtract(gunOrigin);
+                        	GunAnimationHelper.rotateAroundOffset(poseStack, animRot, animType, stack, "forwardHand");
+                    	}
 
                         IOverrideModel model = ModelOverrides.getModel(attachmentStack);
                         if(model != null)

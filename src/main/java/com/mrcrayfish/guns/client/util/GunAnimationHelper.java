@@ -14,6 +14,7 @@ import com.mrcrayfish.guns.client.AnimationMetaLoader;
 import com.mrcrayfish.guns.client.MetaLoader;
 import com.mrcrayfish.guns.client.handler.GunRenderingHandler;
 import com.mrcrayfish.guns.client.handler.ReloadHandler;
+import com.mrcrayfish.guns.item.GunItem;
 import com.mrcrayfish.guns.item.IMeta;
 import com.mrcrayfish.guns.item.attachment.IAttachment;
 import com.mrcrayfish.guns.item.attachment.IAttachment.Type;
@@ -40,42 +41,40 @@ public final class GunAnimationHelper
 	static boolean doTryingMetaLoadMessage=false;
 
 
-	
     
 	/* Smart animation methods for selecting animations based on given parameters */
     public static String getSmartAnimationType(ItemStack weapon, Player player, float partialTicks)
     {
-    	if (ReloadHandler.get().getReloadProgress(partialTicks) > 0) 
-    	{
-    		float reloadTransitionProgress = ReloadHandler.get().getReloadProgress(partialTicks);
-    		if (reloadTransitionProgress>0 && hasAnimation("reload", weapon))
-    		{
-    			if (reloadTransitionProgress<1)
-    			{
-    				float delta = GunRenderingHandler.get().getReloadDeltaTime(weapon);
-		    		if (hasAnimation("reloadStart", weapon) && ReloadHandler.get().doReloadStartAnimation() && delta <= 0.5)
-		    		{
-		    			return "reloadStart";
-		    		}
-		    		else
-		        	if (hasAnimation("reloadEnd", weapon) && ReloadHandler.get().doReloadFinishAnimation())
-		        	{
-		        		return "reloadEnd";
-		        	}
+    	double reloadTransitionProgress = ReloadHandler.get().getReloadProgress(partialTicks);
+    	if (reloadTransitionProgress>0.0 && hasAnimation("reload", weapon))
+		{
+			if (reloadTransitionProgress<1.0)
+			{
+				float delta = GunRenderingHandler.get().getReloadDeltaTime(weapon);
+	    		if (hasAnimation("reloadStart", weapon) && ReloadHandler.get().doReloadStartAnimation() && delta <= 0.8)
+	    		{
+	    			return "reloadStart";
 	    		}
-        	    return "reload";
+	    		else
+	        	if (hasAnimation("reloadEnd", weapon) && ReloadHandler.get().doReloadFinishAnimation())
+	        	{
+	        		return "reloadEnd";
+	        	}
+	        	else
+	        	return "reload";
     		}
-    		else
-    		if (hasAnimation("fire", weapon))
-    		{
-    			ItemCooldowns tracker = Minecraft.getInstance().player.getCooldowns();
-                float cooldown = tracker.getCooldownPercent(weapon.getItem(), Minecraft.getInstance().getFrameTime());
-                if (cooldown>0);
-                {
-                	return "fire";
-                }
-    		} 
-    	}
+			else
+    	    return "reload";
+		}
+		else
+		{
+			ItemCooldowns tracker = Minecraft.getInstance().player.getCooldowns();
+            float cooldown = tracker.getCooldownPercent(weapon.getItem(), Minecraft.getInstance().getFrameTime());
+            if (cooldown>0)
+            {
+            	return "fire";
+            }
+		}
     	
     	return "none";
     }
@@ -83,34 +82,33 @@ public final class GunAnimationHelper
     public static Vec3 getSmartAnimationTrans(ItemStack weapon, Player player, float partialTicks, String component)
     {
     	String animType = getSmartAnimationType(weapon, player, partialTicks);
+    	//ResourceLocation weapKey = lookForParentAnimation(animType, getItemLocationKey(weapon));
     	if (animType.equals("reloadStart"))
     	{
     		float reloadTransitionProgress = ReloadHandler.get().getReloadProgress(partialTicks);
-    		float delta = GunRenderingHandler.get().getReloadDeltaTime(weapon);
     		return getAnimationTrans("reloadStart", weapon, reloadTransitionProgress, component);
     	}
     	if (animType.equals("reloadEnd"))
     	{
     		float reloadTransitionProgress = ReloadHandler.get().getReloadProgress(partialTicks);
-    		float delta = GunRenderingHandler.get().getReloadDeltaTime(weapon);
     		return getAnimationTrans("reloadEnd", weapon, 1-reloadTransitionProgress, component);
-    		
     	}
-    	if (animType.equals("reload"))
+    	if (animType.equals("reload") && hasAnimation("reload", weapon))
     	{
     		float reloadTransitionProgress = ReloadHandler.get().getReloadProgress(partialTicks);
-    	    float progress = GunRenderingHandler.get().getReloadCycleProgress(weapon);
+    	    float progress = ((GunItem) (weapon.getItem())).getModifiedGun(weapon).getGeneral().usesMagReload() ? GunRenderingHandler.get().getReloadDeltaTime(weapon) : GunRenderingHandler.get().getReloadCycleProgress(weapon);
     	    Vec3 transforms = getAnimationTrans("reload", weapon, progress, component).scale(reloadTransitionProgress);
     	    
-    		Easings easing = GunReloadAnimationHelper.getReloadStartEasing(lookForParentAnimation("reload", getItemLocationKey(weapon)), component);
-    		{
-    			if (!ReloadHandler.get().getReloading(player))
-    			easing = GunReloadAnimationHelper.getReloadEndEasing(lookForParentAnimation("reload", getItemLocationKey(weapon)), component);
-    		}
+    	    Easings easing = GunReloadAnimationHelper.getReloadStartEasing(lookForParentAnimation("reload", getItemLocationKey(weapon)), component);
     	    float finalReloadTransition = (float) getEaseFactor(easing, reloadTransitionProgress);
+    		if (!ReloadHandler.get().getReloading(player))
+    		{
+    			easing = GunReloadAnimationHelper.getReloadEndEasing(lookForParentAnimation("reload", getItemLocationKey(weapon)), component);
+        	    finalReloadTransition = (float) getReversedEaseFactor(easing, reloadTransitionProgress);
+    		}
     	    return transforms.scale(finalReloadTransition);
     	}
-    	if (animType.equals("fire"))
+    	if (animType.equals("fire") && hasAnimation("fire", weapon))
     	{
     		ItemCooldowns tracker = Minecraft.getInstance().player.getCooldowns();
             float cooldown = tracker.getCooldownPercent(weapon.getItem(), Minecraft.getInstance().getFrameTime());
@@ -129,31 +127,30 @@ public final class GunAnimationHelper
     	if (animType.equals("reloadStart"))
     	{
     		float reloadTransitionProgress = ReloadHandler.get().getReloadProgress(partialTicks);
-    		float delta = GunRenderingHandler.get().getReloadDeltaTime(weapon);
 			return getAnimationRot("reloadStart", weapon, reloadTransitionProgress, component);
     	}
     	if (animType.equals("reloadEnd"))
     	{
     		float reloadTransitionProgress = ReloadHandler.get().getReloadProgress(partialTicks);
-    		float delta = GunRenderingHandler.get().getReloadDeltaTime(weapon);
     		return getAnimationRot("reloadEnd", weapon, 1-reloadTransitionProgress, component);
     		
     	}
-    	if (animType.equals("reload"))
+    	if (animType.equals("reload") && hasAnimation("reload", weapon))
     	{
     		float reloadTransitionProgress = ReloadHandler.get().getReloadProgress(partialTicks);
     	    float progress = GunRenderingHandler.get().getReloadCycleProgress(weapon);
     	    Vec3 transforms = getAnimationRot("reload", weapon, progress, component).scale(reloadTransitionProgress);
     	    
     	    Easings easing = GunReloadAnimationHelper.getReloadStartEasing(lookForParentAnimation("reload", getItemLocationKey(weapon)), component);
-    		{
-    			if (!ReloadHandler.get().getReloading(player))
-    			easing = GunReloadAnimationHelper.getReloadEndEasing(lookForParentAnimation("reload", getItemLocationKey(weapon)), component);
-    		}
     	    float finalReloadTransition = (float) getEaseFactor(easing, reloadTransitionProgress);
+    		if (!ReloadHandler.get().getReloading(player))
+    		{
+    			easing = GunReloadAnimationHelper.getReloadEndEasing(lookForParentAnimation("reload", getItemLocationKey(weapon)), component);
+        	    finalReloadTransition = (float) getReversedEaseFactor(easing, reloadTransitionProgress);
+    		}
     	    return transforms.scale(finalReloadTransition);
     	}
-    	if (animType.equals("fire"))
+    	if (animType.equals("fire") && hasAnimation("fire", weapon))
     	{
     		ItemCooldowns tracker = Minecraft.getInstance().player.getCooldowns();
             float cooldown = tracker.getCooldownPercent(weapon.getItem(), Minecraft.getInstance().getFrameTime());
@@ -184,6 +181,25 @@ public final class GunAnimationHelper
 		int frameDiv = Math.max(Math.abs(nextFrame-priorFrame),1);
 		float frameProgress = Math.max(scaledProgress - ((float) priorFrame), 0);
 		
+		String priorAnimType = animationType;
+		String nextAnimType = animationType;
+		
+		if (animationType.equals("reloadStart"))
+		{
+			if (nextFrame==GunAnimationHelper.getAnimationFrames(animationType, weapKey))
+			{
+				nextFrame = 0;
+				nextAnimType = "reload";
+			}
+		}
+		if (animationType.equals("reloadEnd"))
+		{
+			if (priorFrame==0)
+			{
+				priorFrame = GunAnimationHelper.getAnimationFrames("reload", weapKey);
+				priorAnimType = "reload";
+			}
+		}
 		if (animationType.equals("reload"))
 		{
 			float delta = GunRenderingHandler.get().getReloadDeltaTime(weapon);
@@ -191,9 +207,9 @@ public final class GunAnimationHelper
 			priorFrame = GunAnimationHelper.getAnimationFrames("reload", weapKey);
 		}
 		
-		Vec3 priorTransforms = getAnimTranslation(animationType, weapKey, component, priorFrame, weapon);
-		Vec3 nextTransforms = getAnimTranslation(animationType, weapKey, component, nextFrame, weapon);
-		Easings easing = getAnimEasing(animationType, weapKey, component, findPriorFrame(animationType, weapKey, component, nextFrame, "translation"), false);
+		Vec3 priorTransforms = getAnimTranslation(priorAnimType, weapKey, component, priorFrame, weapon);
+		Vec3 nextTransforms = getAnimTranslation(nextAnimType, weapKey, component, nextFrame, weapon);
+		Easings easing = getAnimEasing(nextAnimType, weapKey, component, findPriorFrame(nextAnimType, weapKey, component, nextFrame, "translation"), false);
 		double easeFactor = getEaseFactor(easing, frameProgress/frameDiv);
 		blendedTransforms = priorTransforms.lerp(nextTransforms, Mth.clamp(easeFactor, 0F,1F));
 		
@@ -211,6 +227,25 @@ public final class GunAnimationHelper
 		int frameDiv = Math.max(Math.abs(nextFrame-priorFrame),1);
 		float frameProgress = Math.max(scaledProgress - ((float) priorFrame), 0);
 		
+		String priorAnimType = animationType;
+		String nextAnimType = animationType;
+		
+		if (animationType.equals("reloadStart"))
+		{
+			if (nextFrame==GunAnimationHelper.getAnimationFrames(animationType, weapKey))
+			{
+				nextFrame = 0;
+				nextAnimType = "reload";
+			}
+		}
+		if (animationType.equals("reloadEnd"))
+		{
+			if (priorFrame==0)
+			{
+				priorFrame = GunAnimationHelper.getAnimationFrames("reload", weapKey);
+				priorAnimType = "reload";
+			}
+		}
 		if (animationType.equals("reload"))
 		{
 			float delta = GunRenderingHandler.get().getReloadDeltaTime(weapon);
@@ -218,9 +253,9 @@ public final class GunAnimationHelper
 			priorFrame = GunAnimationHelper.getAnimationFrames("reload", weapKey);
 		}
 		
-		Vec3 priorTransforms = getAnimRotation(animationType, weapKey, component, priorFrame);
-		Vec3 nextTransforms = getAnimRotation(animationType, weapKey, component, nextFrame);
-		Easings easing = getAnimEasing(animationType, weapKey, component, findPriorFrame(animationType, weapKey, component, nextFrame, "rotation"), true);
+		Vec3 priorTransforms = getAnimRotation(priorAnimType, weapKey, component, priorFrame);
+		Vec3 nextTransforms = getAnimRotation(nextAnimType, weapKey, component, nextFrame);
+		Easings easing = getAnimEasing(nextAnimType, weapKey, component, findPriorFrame(nextAnimType, weapKey, component, nextFrame, "rotation"), true);
 		double easeFactor = getEaseFactor(easing, frameProgress/frameDiv);
 		blendedTransforms = priorTransforms.lerp(nextTransforms, Mth.clamp(easeFactor, 0F,1F));
 		
@@ -263,11 +298,11 @@ public final class GunAnimationHelper
     // Rotations
 	public static void rotateAroundOffset(PoseStack poseStack, Vec3 rotations, Vec3 offsets)
 	{
-    	poseStack.translate(-offsets.x, -offsets.y, -offsets.z);
+    	poseStack.translate(-offsets.x * 0.0625, -offsets.y * 0.0625, offsets.z * 0.0625);
     	poseStack.mulPose(Vector3f.XP.rotationDegrees((float) rotations.x));
     	poseStack.mulPose(Vector3f.YP.rotationDegrees((float) rotations.y));
     	poseStack.mulPose(Vector3f.ZP.rotationDegrees((float) rotations.z));
-    	poseStack.translate(offsets.x, offsets.y, offsets.z);
+    	poseStack.translate(offsets.x * 0.0625, offsets.y * 0.0625, -offsets.z * 0.0625);
 	}
 	public static void rotateAroundOffset(PoseStack poseStack, Vec3 rotations, String animationType, ItemStack weapon, String component)
 	{
@@ -300,13 +335,13 @@ public final class GunAnimationHelper
 	}
 	
 	static ResourceLocation lookForParentAnimation(String animationType, ResourceLocation weapKey) {
-		ResourceLocation output = weapKey;
-		
 		DataObject animObject = getObjectByPath(weapKey, ANIMATION_KEY, animationType);
 		if (animObject.has("parent", DataType.STRING))
 		{
 			DataString parent = animObject.getDataString("parent");
-			output = new ResourceLocation(parent.asString());
+			String[] splitString = parent.asString().split(":");
+        	//GunMod.LOGGER.info("Animation System: Successfully detected a parent object: " + new ResourceLocation(splitString[0],splitString[1]));
+			return new ResourceLocation(splitString[0],splitString[1]);
 		}
 		else
 		{
@@ -314,12 +349,13 @@ public final class GunAnimationHelper
 			if (animObject.has("parent", DataType.STRING))
 			{
 				DataString parent = animObject.getDataString("parent");
-				output = new ResourceLocation(parent.asString());
+				String[] splitString = parent.asString().split(":");
+				return new ResourceLocation(splitString[0],splitString[1]);
 			}
 		}
 		
 		
-		return output;
+		return weapKey;
 	}
 	
 	static int getAnimationFrames(String animationType, ResourceLocation weapKey) {
@@ -464,21 +500,6 @@ public final class GunAnimationHelper
 	public static ResourceLocation getItemLocationKey(ItemStack stack)
 	{
         return stack.getItem().builtInRegistryHolder().key().location();
-	}
-	public static String getItemString(ItemStack stack)
-	{
-        ResourceLocation key = stack.getItem().builtInRegistryHolder().key().location();
-		return key.getPath();
-	}
-	public static String getItemNamespaceString(ItemStack stack)
-	{
-        ResourceLocation key = stack.getItem().builtInRegistryHolder().key().location();
-		return key.getNamespace();
-	}
-	public static String[] getItemStringArray(ItemStack stack)
-	{
-		String[] strings = {getItemNamespaceString(stack), getItemString(stack)};
-		return strings;
 	}
 	
 	

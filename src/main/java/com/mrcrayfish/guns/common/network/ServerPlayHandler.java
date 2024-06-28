@@ -268,7 +268,7 @@ public class ServerPlayHandler
             	if (modifiedGun.getSounds().getReloadEndDelay()>0)
                 {
             		Player finalPlayer = player;
-                	DelayedTask.runAfter(modifiedGun.getSounds().getReloadEndDelay(), () ->
+                	DelayedTask.runAfter(modifiedGun.getSounds().getReloadStartDelay()*(GunEnchantmentHelper.getReloadInterval(heldItem)/10), () ->
                     {
                         playReloadStartSound(finalPlayer, finalSound);
                     });

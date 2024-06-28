@@ -3,6 +3,7 @@ package com.mrcrayfish.guns.client.util;
 import com.mrcrayfish.framework.api.serialize.DataObject;
 import com.mrcrayfish.framework.api.serialize.DataString;
 import com.mrcrayfish.framework.api.serialize.DataType;
+import com.mrcrayfish.guns.GunMod;
 import com.mrcrayfish.guns.cache.ObjectCache;
 import com.mrcrayfish.guns.client.handler.GunRenderingHandler;
 
@@ -22,16 +23,18 @@ public final class GunReloadAnimationHelper
     
     /* Property Helpers for Reload Animations */
 	// Easings
-	public static Easings getReloadStartEasing(ResourceLocation weapKey, String type) {
-		DataObject frameObject = GunAnimationHelper.getObjectByPath(weapKey, ANIMATION_KEY, "reload", type);
+	public static Easings getReloadStartEasing(ResourceLocation weapKey, String component) {
+		DataObject frameObject = GunAnimationHelper.getObjectByPath(weapKey, ANIMATION_KEY, "reload", component);
 		if (frameObject.has("startEasing", DataType.STRING))
 		{
 			DataString easing = frameObject.getDataString("startEasing");
 			if (easing!=null)
+			{
 				return (Easings.byName(easing.asString()));
+			}
 		}
 		else
-		frameObject = GunAnimationHelper.getObjectByPath(weapKey, ANIMATION_KEY, "reload", type, "0");
+		frameObject = GunAnimationHelper.getObjectByPath(weapKey, ANIMATION_KEY, "reload", component, "0");
 		if (frameObject.has("easing", DataType.STRING))
 		{
 			DataString easing = frameObject.getDataString("easing");
@@ -41,8 +44,8 @@ public final class GunReloadAnimationHelper
 		
 		return Easings.LINEAR;
 	}
-	public static Easings getReloadStartEasing(ResourceLocation weapKey, String type, boolean easeRotationInstead) {
-		DataObject frameObject = GunAnimationHelper.getObjectByPath(weapKey, ANIMATION_KEY, "reload", type);
+	public static Easings getReloadStartEasing(ResourceLocation weapKey, String component, boolean easeRotationInstead) {
+		DataObject frameObject = GunAnimationHelper.getObjectByPath(weapKey, ANIMATION_KEY, "reload", component);
 		if (frameObject!=null && frameObject.has("startEasing", DataType.STRING))
 		{
 			DataString easing = frameObject.getDataString("startEasing");
@@ -64,7 +67,7 @@ public final class GunReloadAnimationHelper
 					return (Easings.byName(easing.asString()));
 			}
 		else
-		frameObject = GunAnimationHelper.getObjectByPath(weapKey, ANIMATION_KEY, "reload", type, "0");
+		frameObject = GunAnimationHelper.getObjectByPath(weapKey, ANIMATION_KEY, "reload", component, "0");
 		if (frameObject!=null && frameObject.has("easing", DataType.STRING))
 		{
 			DataString easing = frameObject.getDataString("easing");
@@ -91,8 +94,8 @@ public final class GunReloadAnimationHelper
 		return Easings.LINEAR;
 	}
 	
-	public static Easings getReloadEndEasing(ResourceLocation weapKey, String type) {
-		DataObject frameObject = GunAnimationHelper.getObjectByPath(weapKey, ANIMATION_KEY, "reload", type);
+	public static Easings getReloadEndEasing(ResourceLocation weapKey, String component) {
+		DataObject frameObject = GunAnimationHelper.getObjectByPath(weapKey, ANIMATION_KEY, "reload", component);
 		if (frameObject!=null && frameObject.has("endEasing", DataType.STRING))
 		{
 			DataString easing = frameObject.getDataString("endEasing");
@@ -102,8 +105,8 @@ public final class GunReloadAnimationHelper
 		
 		return Easings.EASE_OUT_QUAD;
 	}
-	public static Easings getReloadEndEasing(ResourceLocation weapKey, String type, boolean easeRotationInstead) {
-		DataObject frameObject = GunAnimationHelper.getObjectByPath(weapKey, ANIMATION_KEY, "reload", type);
+	public static Easings getReloadEndEasing(ResourceLocation weapKey, String component, boolean easeRotationInstead) {
+		DataObject frameObject = GunAnimationHelper.getObjectByPath(weapKey, ANIMATION_KEY, "reload", component);
 		if (frameObject!=null && frameObject.has("endEasing", DataType.STRING))
 		{
 			DataString easing = frameObject.getDataString("endEasing");

@@ -160,7 +160,7 @@ public class TwoHandedPose extends WeaponPose
         	
         	Vec3 translations = GunAnimationHelper.getSmartAnimationTrans(stack, player, partialTicks, "forwardHand");
             Vec3 rotations = GunAnimationHelper.getSmartAnimationRot(stack, player, partialTicks, "forwardHand");
-        	if(!GunAnimationHelper.hasAnimation("fire", stack) && ReloadHandler.get().getReloadProgress(partialTicks) <= 0)
+        	if(!GunAnimationHelper.hasAnimation("fire", stack) && GunAnimationHelper.getSmartAnimationType(stack, player, partialTicks)=="fire")
         	{
         		translations = GunLegacyAnimationHelper.getHandTranslation(stack, false, cooldown);
         	}
@@ -198,7 +198,7 @@ public class TwoHandedPose extends WeaponPose
         	
         	Vec3 translations = GunAnimationHelper.getSmartAnimationTrans(stack, player, partialTicks, "rearHand");
             Vec3 rotations = GunAnimationHelper.getSmartAnimationRot(stack, player, partialTicks, "rearHand");
-        	if(!GunAnimationHelper.hasAnimation("fire", stack) && ReloadHandler.get().getReloadProgress(partialTicks) <= 0)
+        	if(!GunAnimationHelper.hasAnimation("fire", stack) && GunAnimationHelper.getSmartAnimationType(stack, player, partialTicks)=="fire")
         	{
         		translations = GunLegacyAnimationHelper.getHandTranslation(stack, true, cooldown);
         	}

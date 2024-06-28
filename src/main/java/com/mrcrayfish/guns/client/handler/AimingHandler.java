@@ -282,7 +282,7 @@ public class AimingHandler
         if(!this.localTracker.isAiming() && this.isLookingAtInteractableBlock())
             return false;
 
-        if(ModSyncedDataKeys.RELOADING.getValue(mc.player))
+        if(ModSyncedDataKeys.RELOADING.getValue(mc.player) || ReloadHandler.get().getReloadTimer()!=0)
             return false;
 
         boolean zooming = KeyBinds.getAimMapping().isDown();
