@@ -117,6 +117,7 @@ public class GunRenderingHandler
     private int hitMarkerMaxTime = 2;
     private boolean hitMarkerCrit = false;
     
+    private int lastStartReloadTick = 0;
     private float lastReloadCycle = 0;
     private float lastReloadDeltaTime = 0;
     
@@ -513,7 +514,7 @@ public class GunRenderingHandler
         poseStack.mulPose(Vector3f.XP.rotationDegrees(equipProgress * -50F));
 
         /* Update the current reload progress, when applicable */
-        this.updateReloadProgress(heldItem, true, true);
+        this.updateReloadProgress(heldItem, true);
         
         /* Renders the reload arm. Will only render if actually reloading. This is applied before
          * any recoil or reload rotations as the animations would be borked if applied after. */
@@ -1211,40 +1212,32 @@ public class GunRenderingHandler
         poseStack.popPose();
     }
     
-    public float updateReloadProgress(ItemStack stack, boolean updateReloadCycle, boolean updateReloadDelta)
+    public void updateReloadProgress(ItemStack stack, boolean updateReloadCycle)
     {
     	Minecraft mc = Minecraft.getInstance();
         if(mc.player == null)
-            return 0;
+            return;
     	
         if(ReloadHandler.get().getReloading(mc.player))
         {
-	    	float interval = GunEnchantmentHelper.getRealReloadSpeed(stack);
+	    	float reloadInterval = GunEnchantmentHelper.getRealReloadSpeed(stack);
 	    	int reloadStartDelay = 5;
 	    	if (stack.getItem() instanceof GunItem gunItem)
 	    	{
 	    		Gun gun = gunItem.getModifiedGun(stack);
 	    		reloadStartDelay = Math.max(gun.getGeneral().getReloadStartDelay(),0);
 	    	}
+	    	this.lastStartReloadTick = ReloadHandler.get().getStartReloadTick();
+	    	float startReloadTick = (float) lastStartReloadTick;
+    		float reloadDelta = (mc.player.tickCount - (startReloadTick + reloadStartDelay) + mc.getFrameTime()) / reloadInterval;
+    		this.lastReloadDeltaTime = reloadDelta;
 	    	
 	    	if (updateReloadCycle)
 	    	{
-	    		float reload = ((mc.player.tickCount - (ReloadHandler.get().getStartReloadTick() + reloadStartDelay) + mc.getFrameTime()) % interval) / interval;
+	    		float reload = reloadDelta % 1F;
 	    		this.lastReloadCycle = reload;
-	    		if (!updateReloadDelta)
-			    	return reload;
         	}
-
-	    	if (updateReloadDelta)
-	    	{
-	    		float reloadDelta = (mc.player.tickCount - (ReloadHandler.get().getStartReloadTick() + reloadStartDelay) + mc.getFrameTime()) / interval;
-	    		this.lastReloadDeltaTime = reloadDelta;
-	    		if (!updateReloadCycle)
-	    			return reloadDelta;
-	    	}
     	}
-        
-        return 0;
     }
     
     public float getReloadCycleProgress(ItemStack stack)
@@ -1253,7 +1246,7 @@ public class GunRenderingHandler
         if(mc.player == null)
             return 0;
     	
-        updateReloadProgress(stack, true, false);
+        updateReloadProgress(stack, true);
         return this.lastReloadCycle;
         
         /*if(!ModSyncedDataKeys.RELOADING.getValue(mc.player))
@@ -1281,7 +1274,7 @@ public class GunRenderingHandler
         if(mc.player == null)
             return 0;
 
-        updateReloadProgress(stack, false, true);
+        updateReloadProgress(stack, false);
         return this.lastReloadDeltaTime;
         
         /*if(!ModSyncedDataKeys.RELOADING.getValue(mc.player))

@@ -57,7 +57,7 @@ public class ReloadTracker
         this.slot = player.getInventory().selected;
         this.stack = player.getInventory().getSelected();
         this.gun = ((GunItem) stack.getItem()).getModifiedGun(stack);
-        this.reloadStartDelay = Math.max(gun.getGeneral().getReloadStartDelay()+1,0);
+        this.reloadStartDelay = Math.max(gun.getGeneral().getReloadStartDelay(),0);
         this.reloadEndDelay = Math.max(gun.getGeneral().getReloadEndDelay(),1);
     }
 
