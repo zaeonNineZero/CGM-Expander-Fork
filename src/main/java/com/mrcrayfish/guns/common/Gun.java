@@ -594,7 +594,7 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
 
         /**
          * @return The delay (in ticks) before the main reload cycle starts.
-         * This is also used as a fallback for the Interrupt Delay.
+         * This is also used as a fallback for the Interrupt and End Delays.
          */
         public int getReloadStartDelay()
         {
@@ -614,7 +614,7 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
 
         /**
          * @return The delay (in ticks) that occurs after a complete reload.
-         * This is not used when a reload ends via interruption.
+         * This is also used as a fallback for the Interrupt Delay.
          */
         public int getReloadEndDelay()
         {

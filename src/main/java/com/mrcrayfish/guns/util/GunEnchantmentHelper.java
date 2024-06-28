@@ -38,9 +38,9 @@ public class GunEnchantmentHelper
     public static int getRealReloadSpeed(ItemStack weapon)
     {
         Gun modifiedGun = ((GunItem) weapon.getItem()).getModifiedGun(weapon);
-        if (modifiedGun.getGeneral().getUseMagReload())
-        return getMagReloadSpeed(weapon);
-        else
+        if (modifiedGun.getGeneral().usesMagReload())
+        	return getMagReloadSpeed(weapon);
+
         return getReloadInterval(weapon);
     }
 

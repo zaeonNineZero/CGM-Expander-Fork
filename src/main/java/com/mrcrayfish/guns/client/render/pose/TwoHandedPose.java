@@ -165,7 +165,7 @@ public class TwoHandedPose extends WeaponPose
         		translations = GunLegacyAnimationHelper.getHandTranslation(stack, false, cooldown);
         	}
         	else
-        	if(!GunAnimationHelper.hasAnimation("reload", stack) && ReloadHandler.get().getReloadProgress(partialTicks) > 0)
+        	if(!GunAnimationHelper.hasAnimation("reload", stack))
         	{
         		float reloadProg = ReloadHandler.get().getReloadProgress(partialTicks);
                 poseStack.translate(0, (-24 * reloadProg) * 0.0625, (-6 * reloadProg) * 0.0625);

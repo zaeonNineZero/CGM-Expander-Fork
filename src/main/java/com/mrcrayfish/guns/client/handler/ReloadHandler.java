@@ -1,5 +1,6 @@
 package com.mrcrayfish.guns.client.handler;
 
+import com.mrcrayfish.guns.GunMod;
 import com.mrcrayfish.guns.client.KeyBinds;
 import com.mrcrayfish.guns.common.AmmoContext;
 import com.mrcrayfish.guns.common.Gun;
@@ -151,16 +152,32 @@ public class ReloadHandler
                 ModSyncedDataKeys.SWITCHTIME.setValue(player, storedReloadDelay+1);
                 PacketHandler.getPlayChannel().sendToServer(new C2SMessageReload(false));
                 this.reloadingSlot = -1;
+                
+                // Debug
+                if (false)
+                {
+                	ItemStack stack = player.getMainHandItem();
+                    if(stack.getItem() instanceof GunItem gunItem)
+                    {
+        		    	float interval = GunEnchantmentHelper.getRealReloadSpeed(stack);
+        		    	String logOutput = 
+        		    		"Reload cancelled after " + (Math.round(GunRenderingHandler.get().getReloadDeltaTime(stack)*interval*10)/10)
+        		    		+ " ticks (" + (Math.round(GunRenderingHandler.get().getReloadDeltaTime(stack)*1000)/10) + "%)"
+        		    		+ ", and at " + (Math.round(GunRenderingHandler.get().getReloadCycleProgress(stack)*interval*10)/10)
+        		    		+ " ticks (" + (Math.round(GunRenderingHandler.get().getReloadCycleProgress(stack)*1000)/10) + "%)"
+        		    		+ " into the current reload cycle."
+        		    		+ " Full reload cycle is " + interval + " ticks"
+        		    	;
+                    	GunMod.LOGGER.info(logOutput);
+                    }
+                }
             }
         }
     }
     
     public boolean getReloading(Player player)
     {
-        if(ModSyncedDataKeys.RELOADING.getValue(player))
-        return true;
-        else
-        return false;
+    	return (ModSyncedDataKeys.RELOADING.getValue(player));
     }
 
     private void updateReloadDelay(Player player)
@@ -195,13 +212,13 @@ public class ReloadHandler
         }
         else
         {
-            if(this.startReloadTick != -1)
-            {
-                this.startReloadTick = -1;
-            }
             if(this.reloadTimer > 0)
             {
                 this.reloadTimer-=1/reloadDelay;
+            }
+            if(reloadTimer<=0 && this.startReloadTick != -1)
+            {
+                this.startReloadTick = -1;
             }
         }
         reloadTimer=Mth.clamp(reloadTimer ,0,1);

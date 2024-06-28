@@ -512,8 +512,8 @@ public class GunRenderingHandler
         //poseStack.translate(0, equipProgress * -0.6F, 0);
         poseStack.mulPose(Vector3f.XP.rotationDegrees(equipProgress * -50F));
 
-        /* Update the current reload cycle, when applicable */
-        this.updateReloadCycleProgress(heldItem);
+        /* Update the current reload progress, when applicable */
+        this.updateReloadProgress(heldItem, true, true);
         
         /* Renders the reload arm. Will only render if actually reloading. This is applied before
          * any recoil or reload rotations as the animations would be borked if applied after. */
@@ -648,7 +648,7 @@ public class GunRenderingHandler
     	Minecraft mc = Minecraft.getInstance();
     	Vec3 translations = GunAnimationHelper.getSmartAnimationTrans(item, player, partialTicks, "viewModel");
         Vec3 rotations = GunAnimationHelper.getSmartAnimationRot(item, player, partialTicks, "viewModel");
-    	if(!GunAnimationHelper.hasAnimation("fire", item) && ReloadHandler.get().getReloadProgress(partialTicks) <= 0)
+    	if(!GunAnimationHelper.hasAnimation("fire", item) && GunAnimationHelper.getSmartAnimationType(item, player, partialTicks)=="fire")
     	{
     		ItemCooldowns tracker = mc.player.getCooldowns();
             float cooldown = tracker.getCooldownPercent(item.getItem(), Minecraft.getInstance().getFrameTime());
@@ -1210,13 +1210,50 @@ public class GunRenderingHandler
         poseStack.popPose();
     }
     
-    public void updateReloadCycleProgress(ItemStack stack)
+    public void updateReloadProgress(ItemStack stack, boolean updateReloadCycle, boolean updateReloadDelta)
     {
     	Minecraft mc = Minecraft.getInstance();
         if(mc.player == null)
             return;
     	
-        if(ModSyncedDataKeys.RELOADING.getValue(mc.player))
+        if(ReloadHandler.get().getReloading(mc.player))
+        {
+	    	float interval = GunEnchantmentHelper.getRealReloadSpeed(stack);
+	    	int reloadStartDelay = 5;
+	    	if (stack.getItem() instanceof GunItem gunItem)
+	    	{
+	    		Gun gun = gunItem.getModifiedGun(stack);
+	    		reloadStartDelay = Math.max(gun.getGeneral().getReloadStartDelay(),0);
+	    	}
+	    	
+	    	if (updateReloadCycle)
+	    	{
+	    		float reload = ((mc.player.tickCount - (ReloadHandler.get().getStartReloadTick() + reloadStartDelay) + mc.getFrameTime()) % interval) / interval;
+	    		this.lastReloadCycle = reload;
+        	}
+
+	    	if (updateReloadDelta)
+	    	{
+	    		float reloadDelta = (mc.player.tickCount - (ReloadHandler.get().getStartReloadTick() + reloadStartDelay) + mc.getFrameTime()) / interval;
+	    		this.lastReloadDeltaTime = reloadDelta;
+	    	}
+    	}
+    }
+    
+    public float getReloadCycleProgress(ItemStack stack)
+    {
+    	Minecraft mc = Minecraft.getInstance();
+        if(mc.player == null)
+            return 0;
+    	
+        updateReloadProgress(stack, true, false);
+        return this.lastReloadCycle;
+        
+        /*if(!ModSyncedDataKeys.RELOADING.getValue(mc.player))
+        {
+        	return this.lastReloadCycle;
+        }
+        else
         {
 	    	float interval = GunEnchantmentHelper.getRealReloadSpeed(stack);
 	    	int reloadStartDelay = 5;
@@ -1227,34 +1264,8 @@ public class GunRenderingHandler
 	    	}
 	        float reload = ((mc.player.tickCount - (ReloadHandler.get().getStartReloadTick() + reloadStartDelay) + mc.getFrameTime()) % interval) / interval;
 	        this.lastReloadCycle = reload;
-	        float reload2 = (mc.player.tickCount - (ReloadHandler.get().getStartReloadTick() + reloadStartDelay) + mc.getFrameTime()) / interval;
-	        this.lastReloadDeltaTime = reload2;
-    	}
-    }
-    
-    public float getReloadCycleProgress(ItemStack stack)
-    {
-    	Minecraft mc = Minecraft.getInstance();
-        if(mc.player == null)
-            return 0;
-    	
-        if(!ModSyncedDataKeys.RELOADING.getValue(mc.player))
-        {
-        	return lastReloadCycle;
-        }
-        else
-        {
-	    	float interval = GunEnchantmentHelper.getRealReloadSpeed(stack);
-	    	int reloadStartDelay = ((GunItem) (stack.getItem())).getModifiedGun(stack).getGeneral().getReloadStartDelay();
-	    	if (stack.getItem() instanceof GunItem gunItem)
-	    	{
-	    		Gun gun = gunItem.getModifiedGun(stack);
-	    		reloadStartDelay = Math.max(gun.getGeneral().getReloadStartDelay(),0);
-	    	}
-	        float reload = ((mc.player.tickCount - (ReloadHandler.get().getStartReloadTick() + reloadStartDelay) + mc.getFrameTime()) % interval) / interval;
-	        this.lastReloadCycle = reload;
 	        return reload;
-    	}
+    	}*/
     }
     
     public float getReloadDeltaTime(ItemStack stack)
@@ -1262,24 +1273,27 @@ public class GunRenderingHandler
     	Minecraft mc = Minecraft.getInstance();
         if(mc.player == null)
             return 0;
-    	
-        if(!ModSyncedDataKeys.RELOADING.getValue(mc.player))
+
+        updateReloadProgress(stack, false, true);
+        return this.lastReloadDeltaTime;
+        
+        /*if(!ModSyncedDataKeys.RELOADING.getValue(mc.player))
         {
-        	return lastReloadDeltaTime;
+        	return this.lastReloadDeltaTime;
         }
         else
         {
 	    	float interval = GunEnchantmentHelper.getRealReloadSpeed(stack);
-	    	int reloadStartDelay = ((GunItem) (stack.getItem())).getModifiedGun(stack).getGeneral().getReloadStartDelay();
+	    	int reloadStartDelay = 5;
 	    	if (stack.getItem() instanceof GunItem gunItem)
 	    	{
 	    		Gun gun = gunItem.getModifiedGun(stack);
 	    		reloadStartDelay = Math.max(gun.getGeneral().getReloadStartDelay(),0);
 	    	}
-	        float reload = (mc.player.tickCount - (ReloadHandler.get().getStartReloadTick() + reloadStartDelay) + mc.getFrameTime()) / interval;
-	        this.lastReloadDeltaTime = reload;
-	        return reload;
-    	}
+	        float reloadDelta = (mc.player.tickCount - (ReloadHandler.get().getStartReloadTick() + reloadStartDelay) + mc.getFrameTime()) / interval;
+	        this.lastReloadDeltaTime = reloadDelta;
+	        return reloadDelta;
+    	}*/
     }
 
     /**
