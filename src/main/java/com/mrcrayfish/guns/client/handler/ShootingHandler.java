@@ -285,7 +285,7 @@ public class ShootingHandler
         	GunItem gunItem = (GunItem) heldItem.getItem();
         	if (!gunItem.getModifiedGun(heldItem).getGeneral().getUseMagReload())
         	{
-        		ModSyncedDataKeys.RELOADING.setValue(player, false);
+        		ReloadHandler.get().setReloading(false, false);
         		PacketHandler.getPlayChannel().sendToServer(new C2SMessageReload(false));
         	}
         	return false;

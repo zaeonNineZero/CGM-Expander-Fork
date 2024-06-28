@@ -51,12 +51,12 @@ public final class GunAnimationHelper
 			if (reloadTransitionProgress<1.0)
 			{
 				float delta = GunRenderingHandler.get().getReloadDeltaTime(weapon);
-	    		if (hasAnimation("reloadStart", weapon) && ReloadHandler.get().doReloadStartAnimation() && delta < 0.3)
+	    		if (hasAnimation("reloadStart", weapon) && ReloadHandler.get().getReloading(player) && ReloadHandler.get().doReloadStartAnimation())
 	    		{
 	    			return "reloadStart";
 	    		}
 	    		else
-	        	if (hasAnimation("reloadEnd", weapon) && ReloadHandler.get().doReloadFinishAnimation())
+	        	if (hasAnimation("reloadEnd", weapon) && !ReloadHandler.get().getReloading(player) && ReloadHandler.get().doReloadFinishAnimation())
 	        	{
 	        		return "reloadEnd";
 	        	}

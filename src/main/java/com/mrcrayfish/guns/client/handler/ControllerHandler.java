@@ -192,7 +192,7 @@ public class ControllerHandler
         }
         else if(this.reloadCounter > 0 && !Controllable.isButtonPressed(GunButtonBindings.RELOAD.getButton()))
         {
-            ReloadHandler.get().setReloading(!ModSyncedDataKeys.RELOADING.getValue(player));
+            ReloadHandler.get().setReloading(!ModSyncedDataKeys.RELOADING.getValue(player), true);
             this.reloadCounter = -1;
         }
     }

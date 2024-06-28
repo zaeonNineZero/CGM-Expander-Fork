@@ -86,14 +86,14 @@ public class ReloadHandler
         if(KeyBinds.KEY_RELOAD.isDown() && event.getAction() == GLFW.GLFW_PRESS)
         {
         	if (reloadTimer<=0 || reloadTimer>=1)
-            this.setReloading(!ModSyncedDataKeys.RELOADING.getValue(player));
+            this.setReloading(!ModSyncedDataKeys.RELOADING.getValue(player), true);
             KeyBinds.KEY_RELOAD.setDown(false);
             if(player.getMainHandItem().getItem() instanceof GunItem)
             GunRenderingHandler.get().updateReserveAmmo(player);
         }
         if(KeyBinds.KEY_UNLOAD.consumeClick() && event.getAction() == GLFW.GLFW_PRESS)
         {
-            this.setReloading(false);
+            this.setReloading(false, true);
             PacketHandler.getPlayChannel().sendToServer(new C2SMessageUnload());
             if(player.getMainHandItem().getItem() instanceof GunItem)
         	GunRenderingHandler.get().stageReserveAmmoUpdate(2);
@@ -102,7 +102,7 @@ public class ReloadHandler
 
     public void setReloading(boolean reloading)
     {
-    	setReloading(reloading, true);
+    	setReloading(reloading, false);
     }
     
     public void setReloading(boolean reloading, boolean fromInput)
