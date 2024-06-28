@@ -1245,7 +1245,7 @@ public class GunRenderingHandler
         else
         {
 	    	float interval = GunEnchantmentHelper.getRealReloadSpeed(stack);
-	    	int reloadStartDelay = 5;
+	    	int reloadStartDelay = ((GunItem) (stack.getItem())).getModifiedGun(stack).getGeneral().getReloadStartDelay();
 	    	if (stack.getItem() instanceof GunItem gunItem)
 	    	{
 	    		Gun gun = gunItem.getModifiedGun(stack);
@@ -1270,7 +1270,7 @@ public class GunRenderingHandler
         else
         {
 	    	float interval = GunEnchantmentHelper.getRealReloadSpeed(stack);
-	    	int reloadStartDelay = 5;
+	    	int reloadStartDelay = ((GunItem) (stack.getItem())).getModifiedGun(stack).getGeneral().getReloadStartDelay();
 	    	if (stack.getItem() instanceof GunItem gunItem)
 	    	{
 	    		Gun gun = gunItem.getModifiedGun(stack);
