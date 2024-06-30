@@ -51,7 +51,7 @@ public final class GunAnimationHelper
 			if (reloadTransitionProgress<1.0)
 			{
 				float delta = GunRenderingHandler.get().getReloadDeltaTime(weapon);
-	    		if (hasAnimation("reloadStart", weapon) && ReloadHandler.get().getReloading(player) && delta < 0.5F && ReloadHandler.get().doReloadStartAnimation())
+	    		if (hasAnimation("reloadStart", weapon) && ReloadHandler.get().getReloading(player) && delta < 0.4F && ReloadHandler.get().doReloadStartAnimation())
 	    		{
 	    			return "reloadStart";
 	    		}
@@ -204,12 +204,12 @@ public final class GunAnimationHelper
 		}
 		if (animationType.equals("reloadEnd"))
 		{
-			if (priorFrame<=0)
+			if (priorFrame<1)
 			{
 				priorFrame = GunAnimationHelper.getAnimationFrames("reload", weapKey);
 				priorAnimType = "reload";
 			}
-			if (nextFrame<=0)
+			if (nextFrame<1)
 			{
 				nextFrame = GunAnimationHelper.getAnimationFrames("reload", weapKey);
 				nextAnimType = "reload";
@@ -274,7 +274,7 @@ public final class GunAnimationHelper
 		if (animationType.equals("reload"))
 		{
 			float delta = GunRenderingHandler.get().getReloadDeltaTime(weapon);
-			if (priorFrame==0 && delta>0.9F)
+			if (priorFrame==0 && nextFrame<GunAnimationHelper.getAnimationFrames(animationType, weapKey) && delta>0.8F)
 			priorFrame = GunAnimationHelper.getAnimationFrames("reload", weapKey);
 		}
 		
@@ -294,10 +294,12 @@ public final class GunAnimationHelper
 	public static float getScaledProgress(String animationType, ResourceLocation weapKey, float progress)
 	{
 		int animationFrames = getAnimationFrames(animationType, weapKey);
-		float progress1 = Mth.clamp(progress*(animationFrames)+0.03F, 0,animationFrames);
-		float progress2 = Mth.clamp(progress*(animationFrames)*1.1F, 0,animationFrames);
+		float offset = getAnimationValueFloat(animationType, weapKey, "progressOffset");
+		float progress1 = Mth.clamp((progress*animationFrames)+offset, 0,animationFrames);
+		float progress2 = Mth.clamp((progress*animationFrames)/1.1F, 0,animationFrames);
+		float progress3 = Mth.clamp((progress*animationFrames)*1.1F, 0,animationFrames);
 		
-		return Mth.clamp(progress1, 0, progress2);
+		return Mth.clamp(progress1, progress2, progress3);
 		//return Mth.clamp(progress*(animationFrames)+0.14F, 0,animationFrames);
 	}
 	
@@ -369,7 +371,8 @@ public final class GunAnimationHelper
 		{
 			DataString parent = animObject.getDataString("parent");
 			String[] splitString = parent.asString().split(":");
-        	//GunMod.LOGGER.info("Animation System: Successfully detected a parent object: " + new ResourceLocation(splitString[0],splitString[1]));
+        	GunMod.LOGGER.info("Animation System: Successfully detected the parent object of " + weapKey);
+        	GunMod.LOGGER.info("Parent object is " + new ResourceLocation(splitString[0],splitString[1]));
 			return new ResourceLocation(splitString[0],splitString[1]);
 		}
 		else
@@ -412,6 +415,17 @@ public final class GunAnimationHelper
 		
 		return Vec3.ZERO;
 	}
+	/*public static Vec3 getRotationOffsetPoint(String animationType, ResourceLocation weapKey, String component) {
+		DataObject offsetObject = getObjectByPath(weapKey, ANIMATION_KEY, animationType, component);
+		if (offsetObject.has("rotOffset", DataType.ARRAY))
+		{
+			DataArray offsetArray = offsetObject.getDataArray("rotOffset");
+			if (offsetArray!=null)
+            return PropertyHelper.arrayToVec3(offsetArray, Vec3.ZERO);
+		}
+		
+		return Vec3.ZERO;
+	}*/
 	
 	
 	// Frames
@@ -453,6 +467,56 @@ public final class GunAnimationHelper
 	
 	
 	// Animation Values
+	static Vec3 getAnimationArray(String animationType, ResourceLocation weapKey, String component, int frame, String transform) {
+		DataObject transformObject = getObjectByPath(weapKey, ANIMATION_KEY, animationType, component, ""+frame);
+		if (transformObject.has(transform, DataType.ARRAY))
+		{
+			DataArray transformArray = transformObject.getDataArray(transform);
+			if (transformArray!=null)
+			{
+				Vec3 transforms = PropertyHelper.arrayToVec3(transformArray, Vec3.ZERO);
+				return transforms;
+			}
+		}
+		
+		return Vec3.ZERO;
+	}
+	
+	static double getAnimationValue(String animationType, ResourceLocation weapKey, String transform) {
+		DataObject transformObject = getObjectByPath(weapKey, ANIMATION_KEY, animationType);
+		if (transformObject.has(transform, DataType.NUMBER))
+		{
+			DataNumber transformData = transformObject.getDataNumber(transform);
+			if (transformData!=null)
+			{
+	        	//GunMod.LOGGER.info("Animation System: Found" + transform + " number data of " + weapKey);
+				return transformData.asDouble();
+			}
+        	//GunMod.LOGGER.info("Animation System: Found animation object of " + weapKey + " but did not find " + transform + " number data");
+			
+		}
+		
+		return 0;
+	}
+	static float getAnimationValueFloat(String animationType, ResourceLocation weapKey, String transform) {
+		return (float) getAnimationValue(animationType, weapKey, transform);
+	}
+	
+	static double getAnimationValue(String animationType, ResourceLocation weapKey, String component, int frame, String transform) {
+		DataObject transformObject = getObjectByPath(weapKey, ANIMATION_KEY, animationType, component, ""+frame);
+		if (transformObject.has(transform, DataType.NUMBER))
+		{
+			DataNumber transformData = transformObject.getDataNumber(transform);
+			if (transformData!=null)
+			return transformData.asDouble();
+		}
+		
+		return 0;
+	}
+	static float getAnimationValueFloat(String animationType, ResourceLocation weapKey, String component, int frame, String transform) {
+		return (float) getAnimationValue(animationType, weapKey, component, frame, transform);
+	}
+	
 	static Vec3 getAnimTranslation(String animationType, ResourceLocation weapKey, String component, int frame) {
 		DataObject frameObject = getObjectByPath(weapKey, ANIMATION_KEY, animationType, component, ""+frame);
 		if (frameObject.has("translation", DataType.ARRAY))
@@ -461,7 +525,6 @@ public final class GunAnimationHelper
 			if (translationArray!=null)
 			{
 				Vec3 translations = PropertyHelper.arrayToVec3(translationArray, Vec3.ZERO);
-				if(component.equals("forwardHand") || component.equals("rearHand"))
 				return translations;
 			}
 		}

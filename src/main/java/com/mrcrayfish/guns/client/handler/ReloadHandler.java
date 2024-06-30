@@ -180,7 +180,7 @@ public class ReloadHandler
     		    		+ " ticks (" + (Math.round(GunRenderingHandler.get().getReloadDeltaTime(stack)*1000)/10) + "%)"
     		    		+ ", and at " + (Math.round(GunRenderingHandler.get().getReloadCycleProgress(stack)*interval*10)/10)
     		    		+ " ticks (" + (Math.round(GunRenderingHandler.get().getReloadCycleProgress(stack)*1000)/10) + "%)"
-    		    		+ " into the current reload cycle."
+    		    		+ " into the current reload cycle. + (" + interval + " ticks)"
     		    	;
                 	GunMod.LOGGER.info(logOutput);
                 }

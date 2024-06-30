@@ -514,7 +514,7 @@ public class GunRenderingHandler
         poseStack.mulPose(Vector3f.XP.rotationDegrees(equipProgress * -50F));
 
         /* Update the current reload progress, when applicable */
-        this.updateReloadProgress(heldItem, true);
+        this.updateReloadProgress(heldItem);
         
         /* Renders the reload arm. Will only render if actually reloading. This is applied before
          * any recoil or reload rotations as the animations would be borked if applied after. */
@@ -524,7 +524,7 @@ public class GunRenderingHandler
         int offset = right ? 1 : -1;
         poseStack.translate(0.56 * offset, -0.52, -0.72);
 
-        /* Applies recoil and reload rotations */
+        /* Apply various transforms, such as for aiming, sprinting, reloading, and custom animations */
         this.applyAimingTransforms(poseStack, heldItem, modifiedGun, translateX, translateY, translateZ, offset);
         this.applySwayTransforms(poseStack, modifiedGun, player, translateX, translateY, translateZ, event.getPartialTick());
         this.applySprintingTransforms(modifiedGun, hand, poseStack, event.getPartialTick());
@@ -649,7 +649,7 @@ public class GunRenderingHandler
     	Minecraft mc = Minecraft.getInstance();
     	Vec3 translations = GunAnimationHelper.getSmartAnimationTrans(item, player, partialTicks, "viewModel");
         Vec3 rotations = GunAnimationHelper.getSmartAnimationRot(item, player, partialTicks, "viewModel");
-        Vec3 offsets = GunAnimationHelper.getSmartAnimationRotOffset(item, player, partialTicks, "viewModel");
+        Vec3 offsets = GunAnimationHelper.getSmartAnimationRotOffset(item, player, partialTicks, "viewModel").add(5.25, 4.0, 4.0);
     	if(!GunAnimationHelper.hasAnimation("fire", item) && GunAnimationHelper.getSmartAnimationType(item, player, partialTicks)=="fire")
     	{
     		ItemCooldowns tracker = mc.player.getCooldowns();
@@ -1137,14 +1137,12 @@ public class GunRenderingHandler
         poseStack.translate(translateX * side, 0, 0);
 
         float baseReload = getReloadCycleProgress(stack);
-        float reload = baseReload;
+        float reload = (baseReload*2) % 1;
         if (!modifiedGun.getGeneral().getUseMagReload())
         {
         	float progressOffset = 0.63F;
         	reload = (baseReload+progressOffset) % 1;
     	}
-        else
-        reload = (reload*2) % 1;
         
         float percent = 1.0F - reload;
         if(percent >= 0.5F)
@@ -1212,7 +1210,7 @@ public class GunRenderingHandler
         poseStack.popPose();
     }
     
-    public void updateReloadProgress(ItemStack stack, boolean updateReloadCycle)
+    public void updateReloadProgress(ItemStack stack)
     {
     	Minecraft mc = Minecraft.getInstance();
         if(mc.player == null)
@@ -1231,12 +1229,7 @@ public class GunRenderingHandler
 	    	float startReloadTick = (float) lastStartReloadTick;
     		float reloadDelta = (mc.player.tickCount - (startReloadTick + reloadStartDelay) + mc.getFrameTime()) / reloadInterval;
     		this.lastReloadDeltaTime = reloadDelta;
-	    	
-	    	if (updateReloadCycle)
-	    	{
-	    		float reload = reloadDelta % 1F;
-	    		this.lastReloadCycle = reload;
-        	}
+	    	this.lastReloadCycle = reloadDelta % 1F;
     	}
     }
     
@@ -1246,7 +1239,7 @@ public class GunRenderingHandler
         if(mc.player == null)
             return 0;
     	
-        updateReloadProgress(stack, true);
+        updateReloadProgress(stack);
         return this.lastReloadCycle;
         
         /*if(!ModSyncedDataKeys.RELOADING.getValue(mc.player))
@@ -1274,7 +1267,7 @@ public class GunRenderingHandler
         if(mc.player == null)
             return 0;
 
-        updateReloadProgress(stack, false);
+        updateReloadProgress(stack);
         return this.lastReloadDeltaTime;
         
         /*if(!ModSyncedDataKeys.RELOADING.getValue(mc.player))
