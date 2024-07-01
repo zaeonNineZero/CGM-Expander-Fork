@@ -161,7 +161,7 @@ public class ReloadHandler
     		    		+ ", and at " + (Math.round(GunRenderingHandler.get().getReloadCycleProgress(stack)*interval*10)/10)
     		    		+ " ticks (" + (Math.round(GunRenderingHandler.get().getReloadCycleProgress(stack)*1000)/10) + "%)"
     		    		+ " into the current reload cycle."
-    		    		+ " Full reload cycle is " + interval + " ticks"
+    		    		+ " (Full reload cycle is " + interval + " ticks long.)"
     		    	;
                 	GunMod.LOGGER.info(logOutput);
                 }*/
@@ -172,7 +172,7 @@ public class ReloadHandler
                 this.reloadingSlot = -1;
 
             	// Debug 2
-                if(stack.getItem() instanceof GunItem gunItem)
+                /*if(stack.getItem() instanceof GunItem gunItem)
                 {
     		    	float interval = GunEnchantmentHelper.getRealReloadSpeed(stack);
     		    	String logOutput = 
@@ -180,10 +180,10 @@ public class ReloadHandler
     		    		+ " ticks (" + (Math.round(GunRenderingHandler.get().getReloadDeltaTime(stack)*1000)/10) + "%)"
     		    		+ ", and at " + (Math.round(GunRenderingHandler.get().getReloadCycleProgress(stack)*interval*10)/10)
     		    		+ " ticks (" + (Math.round(GunRenderingHandler.get().getReloadCycleProgress(stack)*1000)/10) + "%)"
-    		    		+ " into the current reload cycle. + (" + interval + " ticks)"
+    		    		+ " into the current reload cycle. (" + interval + " ticks per cycle)"
     		    	;
                 	GunMod.LOGGER.info(logOutput);
-                }
+                }*/
             }
         }
     }

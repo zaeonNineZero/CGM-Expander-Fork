@@ -654,8 +654,8 @@ public class GunRenderingHandler
     	{
     		ItemCooldowns tracker = mc.player.getCooldowns();
             float cooldown = tracker.getCooldownPercent(item.getItem(), Minecraft.getInstance().getFrameTime());
-    		translations.add(GunLegacyAnimationHelper.getViewModelTranslation(item, cooldown));
-    		rotations = GunLegacyAnimationHelper.getViewModelRotation(item, cooldown);
+            translations = translations.add(GunLegacyAnimationHelper.getViewModelTranslation(item, cooldown));
+    		rotations = rotations.add(GunLegacyAnimationHelper.getViewModelRotation(item, cooldown));
     	}
         
         poseStack.translate(translations.x * 0.0625, translations.y * 0.0625, translations.z * 0.0625);
