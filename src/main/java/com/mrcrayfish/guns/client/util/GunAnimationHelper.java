@@ -10,7 +10,7 @@ import com.mrcrayfish.framework.api.serialize.DataString;
 import com.mrcrayfish.framework.api.serialize.DataType;
 import com.mrcrayfish.guns.GunMod;
 import com.mrcrayfish.guns.cache.ObjectCache;
-import com.mrcrayfish.guns.client.AnimationMetaLoader;
+import com.mrcrayfish.guns.client.AnimationLoader;
 import com.mrcrayfish.guns.client.MetaLoader;
 import com.mrcrayfish.guns.client.handler.GunRenderingHandler;
 import com.mrcrayfish.guns.client.handler.ReloadHandler;
@@ -36,9 +36,9 @@ import net.minecraft.world.phys.Vec3;
 public final class GunAnimationHelper
 {
 	public static final String ANIMATION_KEY = "cgm:animations";
-	static boolean doMetaLoadMessage=false;
-	static boolean doHasAnimationMessage=false;
-	static boolean doTryingMetaLoadMessage=false;
+	static boolean doMetaLoadMessage=true;
+	static boolean doHasAnimationMessage=true;
+	static boolean doTryingMetaLoadMessage=true;
 	static boolean doParentMessage1=true;
 	static boolean doParentMessage2=true;
 
@@ -634,6 +634,6 @@ public final class GunAnimationHelper
         	GunMod.LOGGER.info("Animation System: Attempting to load animation data with resource key: " + location);
         	doTryingMetaLoadMessage=false;
     	}
-        return AnimationMetaLoader.getInstance().getData(location);
+        return AnimationLoader.getInstance().getData(location);
     }
 }
