@@ -1412,6 +1412,12 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         private ResourceLocation fire;
         @Optional
         @Nullable
+        private ResourceLocation fireExtra;
+        @Optional
+        @Nullable
+        private ResourceLocation singleFire;
+        @Optional
+        @Nullable
         private ResourceLocation reload;
 
         @Optional
@@ -1456,6 +1462,9 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         @Optional
         @Nullable
         private ResourceLocation cock;
+        @Optional
+        @Nullable
+        private ResourceLocation cycle;
         @Optional
         @Nullable
         private ResourceLocation drawGun;

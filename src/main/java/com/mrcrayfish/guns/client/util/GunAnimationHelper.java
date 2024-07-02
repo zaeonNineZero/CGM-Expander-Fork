@@ -39,6 +39,8 @@ public final class GunAnimationHelper
 	static boolean doMetaLoadMessage=false;
 	static boolean doHasAnimationMessage=false;
 	static boolean doTryingMetaLoadMessage=false;
+	static boolean doParentMessage1=true;
+	static boolean doParentMessage2=true;
 
 
     
@@ -82,7 +84,7 @@ public final class GunAnimationHelper
     public static Vec3 getSmartAnimationTrans(ItemStack weapon, Player player, float partialTicks, String component)
     {
     	String animType = getSmartAnimationType(weapon, player, partialTicks);
-    	//ResourceLocation weapKey = lookForParentAnimation(animType, getItemLocationKey(weapon));
+    	ResourceLocation weapKey = lookForParentAnimation(animType, getItemLocationKey(weapon));
     	if (animType.equals("reloadStart"))
     	{
     		float reloadTransitionProgress = ReloadHandler.get().getReloadProgress(partialTicks);
@@ -99,11 +101,11 @@ public final class GunAnimationHelper
     	    float progress = ((GunItem) (weapon.getItem())).getModifiedGun(weapon).getGeneral().usesMagReload() ? GunRenderingHandler.get().getReloadDeltaTime(weapon) : GunRenderingHandler.get().getReloadCycleProgress(weapon);
     	    Vec3 transforms = getAnimationTrans("reload", weapon, progress, component).scale(reloadTransitionProgress);
     	    
-    	    Easings easing = GunReloadAnimationHelper.getReloadStartEasing(lookForParentAnimation("reload", getItemLocationKey(weapon)), component);
+    	    Easings easing = GunReloadAnimationHelper.getReloadStartEasing(weapKey, component);
     	    float finalReloadTransition = (float) getEaseFactor(easing, reloadTransitionProgress);
     		if (!ReloadHandler.get().getReloading(player))
     		{
-    			easing = GunReloadAnimationHelper.getReloadEndEasing(lookForParentAnimation("reload", getItemLocationKey(weapon)), component);
+    			easing = GunReloadAnimationHelper.getReloadEndEasing(weapKey, component);
         	    finalReloadTransition = (float) getReversedEaseFactor(easing, reloadTransitionProgress);
     		}
     	    return transforms.scale(finalReloadTransition);
@@ -124,6 +126,7 @@ public final class GunAnimationHelper
     public static Vec3 getSmartAnimationRot(ItemStack weapon, Player player, float partialTicks, String component)
     {
     	String animType = getSmartAnimationType(weapon, player, partialTicks);
+    	ResourceLocation weapKey = lookForParentAnimation(animType, getItemLocationKey(weapon));
     	if (animType.equals("reloadStart"))
     	{
     		float reloadTransitionProgress = ReloadHandler.get().getReloadProgress(partialTicks);
@@ -141,11 +144,11 @@ public final class GunAnimationHelper
     		float progress = ((GunItem) (weapon.getItem())).getModifiedGun(weapon).getGeneral().usesMagReload() ? GunRenderingHandler.get().getReloadDeltaTime(weapon) : GunRenderingHandler.get().getReloadCycleProgress(weapon);
     	    Vec3 transforms = getAnimationRot("reload", weapon, progress, component);
     	    
-    	    Easings easing = GunReloadAnimationHelper.getReloadStartEasing(lookForParentAnimation("reload", getItemLocationKey(weapon)), component);
+    	    Easings easing = GunReloadAnimationHelper.getReloadStartEasing(weapKey, component);
     	    float finalReloadTransition = (float) getEaseFactor(easing, reloadTransitionProgress);
     		if (!ReloadHandler.get().getReloading(player))
     		{
-    			easing = GunReloadAnimationHelper.getReloadEndEasing(lookForParentAnimation("reload", getItemLocationKey(weapon)), component);
+    			easing = GunReloadAnimationHelper.getReloadEndEasing(weapKey, component);
         	    finalReloadTransition = (float) getReversedEaseFactor(easing, reloadTransitionProgress);
     		}
     	    return transforms.scale(finalReloadTransition);
@@ -371,8 +374,11 @@ public final class GunAnimationHelper
 		{
 			DataString parent = animObject.getDataString("parent");
 			String[] splitString = parent.asString().split(":");
-        	GunMod.LOGGER.info("Animation System: Successfully detected the parent object of " + weapKey);
-        	GunMod.LOGGER.info("Parent object is " + new ResourceLocation(splitString[0],splitString[1]));
+			if (doParentMessage1)
+			{
+				GunMod.LOGGER.info("Animation System (1): Successfully detected the parent object of " + weapKey + ". Parent object is " + new ResourceLocation(splitString[0],splitString[1]).toString());
+				doParentMessage1 = false;
+			}
 			return new ResourceLocation(splitString[0],splitString[1]);
 		}
 		else
@@ -382,6 +388,11 @@ public final class GunAnimationHelper
 			{
 				DataString parent = animObject.getDataString("parent");
 				String[] splitString = parent.asString().split(":");
+				if (doParentMessage2)
+				{
+					GunMod.LOGGER.info("Animation System (2): Successfully detected the parent object of " + weapKey + ". Parent object is " + new ResourceLocation(splitString[0],splitString[1]).toString());
+					doParentMessage2 = false;
+				}
 				return new ResourceLocation(splitString[0],splitString[1]);
 			}
 		}
