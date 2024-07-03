@@ -291,7 +291,7 @@ public class ReloadTracker
     	if(sound != null && player.isAlive())
         {
             double soundX = player.getX();
-            double soundY = player.getY() + 1.0;
+            double soundY = player.getY() + player.getEyeHeight();
             double soundZ = player.getZ();
             double radius = Config.SERVER.reloadMaxDistance.get();
             S2CMessageGunSound messageSound = new S2CMessageGunSound(sound, SoundSource.PLAYERS, (float) soundX, (float) soundY, (float) soundZ, 1.0F, 1.0F, player.getId(), false, true);

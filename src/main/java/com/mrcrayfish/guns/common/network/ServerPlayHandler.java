@@ -184,6 +184,36 @@ public class ServerPlayHandler
                     PacketHandler.getPlayChannel().sendToNearbyPlayers(() -> LevelLocation.create(player.level, posX, posY, posZ, radius), messageSound);
                 }
 
+                ResourceLocation cycleSound = getGunSound(heldItem, modifiedGun, "cycle");
+                {
+                	if (modifiedGun.getSounds().getReloadEndDelay()>0)
+                    {
+                    	final ResourceLocation finalSound = cycleSound;
+                    	final Player finalPlayer = player;
+                    	DelayedTask.runAfter(modifiedGun.getSounds().getCycleDelay()*(GunEnchantmentHelper.getReloadInterval(heldItem)/10), () ->
+                    	{
+                    		if (finalPlayer.isAlive())
+	                    	{
+		                    	double posX = finalPlayer.getX();
+		                        double posY = finalPlayer.getY() + finalPlayer.getEyeHeight();
+		                        double posZ = finalPlayer.getZ();
+			                  	double radius = Config.SERVER.reloadMaxDistance.get();
+			                    S2CMessageGunSound messageSound = new S2CMessageGunSound(finalSound, SoundSource.PLAYERS, (float) posX, (float) posY, (float) posZ, 1.0F, 1.0F, player.getId(), false, true);
+			                    PacketHandler.getPlayChannel().sendToNearbyPlayers(() -> LevelLocation.create(player.level, posX, posY, posZ, radius), messageSound);
+		                    }
+                    	});
+                    }
+                	else
+                	{
+                		double posX = player.getX();
+                        double posY = player.getY() + player.getEyeHeight();
+                        double posZ = player.getZ();
+	                  	double radius = Config.SERVER.reloadMaxDistance.get();
+	                    S2CMessageGunSound messageSound = new S2CMessageGunSound(cycleSound, SoundSource.PLAYERS, (float) posX, (float) posY, (float) posZ, 1.0F, 1.0F, player.getId(), false, true);
+	                    PacketHandler.getPlayChannel().sendToNearbyPlayers(() -> LevelLocation.create(player.level, posX, posY, posZ, radius), messageSound);
+                	}
+                }
+
                 if(!player.isCreative())
                 {
                     CompoundTag tag = heldItem.getOrCreateTag();
@@ -232,17 +262,17 @@ public class ServerPlayHandler
         ResourceLocation fireSound = null;
         if(GunModifierHelper.isSilencedFire(stack))
         {
-            fireSound = modifiedGun.getSounds().getSilencedFire();
+            fireSound = modifiedGun.getSounds().getSilencedFireEx();
         }
         else if(stack.isEnchanted())
         {
-            fireSound = modifiedGun.getSounds().getEnchantedFire();
+            fireSound = modifiedGun.getSounds().getEnchantedFireEx();
         }
         if(fireSound != null)
         {
             return fireSound;
         }
-        return modifiedGun.getSounds().getFire();
+        return modifiedGun.getSounds().getFireEx();
     }
     
     /**
@@ -260,9 +290,9 @@ public class ServerPlayHandler
             if(modifiedGun != null)
             {
 
-            	String soundType = "cock";
+            	String soundType = "none";
             	if (modifiedGun.getSounds().hasExtraReloadSounds())
-            	soundType = "end";
+            	soundType = "reloadStart";
             	final ResourceLocation finalSound = getGunSound(heldItem, modifiedGun, soundType);
             	
             	if (modifiedGun.getSounds().getReloadEndDelay()>0)
@@ -278,15 +308,16 @@ public class ServerPlayHandler
             }
         }
     }
+    
     private static ResourceLocation getGunSound(ItemStack stack, Gun modifiedGun, String soundType)
     {
     	ResourceLocation sound = null;
     	
-    	if(soundType == "start")
+    	if(soundType == "reloadStart")
     	sound = modifiedGun.getSounds().getReloadStart();
     	else
-    	if(soundType == "reload")
-    	sound = modifiedGun.getSounds().getReload();
+    	if(soundType == "cycle")
+    	sound = modifiedGun.getSounds().getCycle();
     	
         if(sound != null)
         {
@@ -294,6 +325,7 @@ public class ServerPlayHandler
         }
         return null;
     }
+    
     public static void playReloadStartSound(Player player, ResourceLocation sound)
     {
     	double posX = player.getX();

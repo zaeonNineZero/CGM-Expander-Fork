@@ -1412,10 +1412,7 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         private ResourceLocation fire;
         @Optional
         @Nullable
-        private ResourceLocation fireExtra;
-        @Optional
-        @Nullable
-        private ResourceLocation singleFire;
+        private ResourceLocation fireEx;
         @Optional
         @Nullable
         private ResourceLocation reload;
@@ -1466,6 +1463,8 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         @Nullable
         private ResourceLocation cycle;
         @Optional
+        private int cycleDelay = 10;
+        @Optional
         @Nullable
         private ResourceLocation drawGun;
         @Optional
@@ -1473,7 +1472,13 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         private ResourceLocation silencedFire;
         @Optional
         @Nullable
+        private ResourceLocation silencedFireEx;
+        @Optional
+        @Nullable
         private ResourceLocation enchantedFire;
+        @Optional
+        @Nullable
+        private ResourceLocation enchantedFireEx;
         @Optional
         @Nullable
         private ResourceLocation weaponSelect;
@@ -1491,6 +1496,10 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             if(this.fire != null)
             {
                 tag.putString("Fire", this.fire.toString());
+            }
+            if(this.fireEx != null)
+            {
+                tag.putString("FireEx", this.fireEx.toString());
             }
             if(this.reload != null)
             {
@@ -1539,14 +1548,29 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             {
                 tag.putString("Cock", this.cock.toString());
             }
+            if(this.cycle != null)
+            {
+                tag.putString("Cycle", this.cycle.toString());
+            }
+            tag.putFloat("CycleDelay", this.cycleDelay);
+            
             if(this.silencedFire != null)
             {
                 tag.putString("SilencedFire", this.silencedFire.toString());
+            }
+            if(this.silencedFireEx != null)
+            {
+                tag.putString("SilencedFireEx", this.silencedFireEx.toString());
             }
             if(this.enchantedFire != null)
             {
                 tag.putString("EnchantedFire", this.enchantedFire.toString());
             }
+            if(this.enchantedFireEx != null)
+            {
+                tag.putString("EnchantedFireEx", this.enchantedFireEx.toString());
+            }
+            
             if(this.weaponSelect != null)
             {
                 tag.putString("WeaponSelect", this.weaponSelect.toString());
@@ -1568,6 +1592,10 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             if(tag.contains("Fire", Tag.TAG_STRING))
             {
                 this.fire = this.createSound(tag, "Fire");
+            }
+            if(tag.contains("FireEx", Tag.TAG_STRING))
+            {
+                this.fireEx = this.createSound(tag, "FireEx");
             }
             if(tag.contains("Reload", Tag.TAG_STRING))
             {
@@ -1640,14 +1668,32 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             {
                 this.cock = this.createSound(tag, "Cock");
             }
+            if(tag.contains("Cycle", Tag.TAG_STRING))
+            {
+                this.cycle = this.createSound(tag, "Cycle");
+            }
+            if(tag.contains("CycleDelay", Tag.TAG_ANY_NUMERIC))
+            {
+                this.cycleDelay = tag.getInt("CycleDelay");
+            }
+            
             if(tag.contains("SilencedFire", Tag.TAG_STRING))
             {
                 this.silencedFire = this.createSound(tag, "SilencedFire");
+            }
+            if(tag.contains("SilencedFireEx", Tag.TAG_STRING))
+            {
+                this.silencedFireEx = this.createSound(tag, "SilencedFireEx");
             }
             if(tag.contains("EnchantedFire", Tag.TAG_STRING))
             {
                 this.enchantedFire = this.createSound(tag, "EnchantedFire");
             }
+            if(tag.contains("EnchantedFireEx", Tag.TAG_STRING))
+            {
+                this.enchantedFireEx = this.createSound(tag, "EnchantedFireEx");
+            }
+            
             if(tag.contains("WeaponSelect", Tag.TAG_STRING))
             {
                 this.weaponSelect = this.createSound(tag, "WeaponSelect");
@@ -1668,6 +1714,10 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             if(this.fire != null)
             {
                 object.addProperty("fire", this.fire.toString());
+            }
+            if(this.fireEx != null)
+            {
+                object.addProperty("fireEx", this.fireEx.toString());
             }
             if(this.reload != null)
             {
@@ -1716,14 +1766,29 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             {
                 object.addProperty("cock", this.cock.toString());
             }
+            if(this.cycle != null)
+            {
+                object.addProperty("cycle", this.cycle.toString());
+            }
+            if(this.cycleDelay != 10) object.addProperty("cycleDelay", this.cycleDelay);
+            
             if(this.silencedFire != null)
             {
                 object.addProperty("silencedFire", this.silencedFire.toString());
+            }
+            if(this.silencedFireEx != null)
+            {
+                object.addProperty("silencedFireEx", this.silencedFireEx.toString());
             }
             if(this.enchantedFire != null)
             {
                 object.addProperty("enchantedFire", this.enchantedFire.toString());
             }
+            if(this.enchantedFireEx != null)
+            {
+                object.addProperty("enchantedFireEx", this.enchantedFireEx.toString());
+            }
+            
             if(this.weaponSelect != null)
             {
                 object.addProperty("weaponSelect", this.weaponSelect.toString());
@@ -1743,6 +1808,7 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         {
             Sounds sounds = new Sounds();
             sounds.fire = this.fire;
+            sounds.fireEx = this.fireEx;
             sounds.reload = this.reload;
             sounds.reloadFrames = this.reloadFrames;
             sounds.reloadStart = this.reloadStart;
@@ -1760,8 +1826,12 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             sounds.reloadClipIn = this.reloadClipIn;
             sounds.reloadClipInThreshold = this.reloadClipInThreshold;
             sounds.cock = this.cock;
+            sounds.cycle = this.cycle;
+            sounds.cycleDelay = this.cycleDelay;
             sounds.silencedFire = this.silencedFire;
+            sounds.silencedFireEx = this.silencedFireEx;
             sounds.enchantedFire = this.enchantedFire;
+            sounds.enchantedFireEx = this.enchantedFireEx;
             sounds.weaponSelect = this.weaponSelect;
             sounds.emptyClick = this.emptyClick;
             sounds.fireSwitch = this.fireSwitch;
@@ -1776,12 +1846,26 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         }
 
         /**
-         * @return The registry id of the sound event when firing this weapon
+         * @return The registry id of the sound event when firing this weapon.
          */
         @Nullable
         public ResourceLocation getFire()
         {
             return this.fire;
+        }
+
+        /**
+         * @return The registry id of an alternative sound event when firing this weapon.
+         * This fully replaces the standard fire sound, allowing for a backup fire sound
+         * to be specified for use without CGM Expanded.
+         * "fire" is used as a fallback.
+         */
+        @Nullable
+        public ResourceLocation getFireEx()
+        {
+            if (this.fireEx==null)
+            	return getFire();
+            return this.fireEx;
         }
 
         /**
@@ -1949,10 +2033,10 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         }
 
         /**
-         * @return The registry id of the sound event when cocking/chambering this weapon
+         * @return The registry id of the sound event when cocking/chambering this weapon.
          * This normally plays when finishing reloading a weapon without mag reloads, but may also be called
          * as a fallback for the mag reload end sound in the event that no custom sounds are loaded.
-         * It also can be called after a weapon fires, for cycling bolts or slides.
+         * It also can be called as a fallback for the weapon cycling sound.
          */
         @Nullable
         public ResourceLocation getCock()
@@ -1961,7 +2045,31 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         }
 
         /**
-         * @return The registry id of the sound event when firing this weapon while it's silenced
+         * @return The registry id of the sound event when cycling this weapon.
+         * If defined, this sound will play a set amount of time after firing a weapon, and will only be audiable within
+         * the reload sound range. Intended for bolt/slide-action cycles, but can be used for other cycles too.
+         * "cock" is used as a fallback.
+         */
+        @Nullable
+        public ResourceLocation getCycle()
+        {
+            if (this.cycle==null)
+            	return getCock();
+            return this.cycle;
+        }
+        /**
+         * @return The delay after shooting before the cycle sound plays.
+         * Setting this to zero will play the sound immediately.
+         * By default it's set to 10.
+         */
+        @Nullable
+        public int getCycleDelay()
+        {
+            return this.cycleDelay;
+        }
+
+        /**
+         * @return The registry id of the sound event when firing this weapon while it's silenced.
          */
         @Nullable
         public ResourceLocation getSilencedFire()
@@ -1970,12 +2078,36 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         }
 
         /**
-         * @return The registry id of the sound event when firing this weapon while it's enchanted
+         * @return The registry id of an alternative sound event when firing this weapon while it's silenced.
+         * Similar to fireEx, just for silenced fire sounds.
+         */
+        @Nullable
+        public ResourceLocation getSilencedFireEx()
+        {
+            if (this.silencedFireEx==null)
+            	return getSilencedFire();
+            return this.silencedFireEx;
+        }
+
+        /**
+         * @return The registry id of the sound event when firing this weapon while it's enchanted.
          */
         @Nullable
         public ResourceLocation getEnchantedFire()
         {
             return this.enchantedFire;
+        }
+
+        /**
+         * @return The registry id of an alternative sound event when firing this weapon while it's enchanted.
+         * Similar to fireEx, just for enchanted fire sounds.
+         */
+        @Nullable
+        public ResourceLocation getEnchantedFireEx()
+        {
+            if (this.enchantedFireEx==null)
+            	return getEnchantedFire();
+            return this.enchantedFireEx;
         }
 
         /**
