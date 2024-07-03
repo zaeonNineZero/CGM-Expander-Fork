@@ -37,7 +37,7 @@ import net.minecraft.world.phys.Vec3;
 public final class GunAnimationHelper
 {
 	public static final String ANIMATION_KEY = "cgm:animations";
-	private static final boolean useLegacyLoader=false;
+	private static final boolean useLegacyLoader=true;
 	static boolean doMetaLoadMessage=true;
 	static boolean doHasAnimationMessage=true;
 	static boolean doTryingMetaLoadMessage=true;
@@ -605,7 +605,7 @@ public final class GunAnimationHelper
 	public static ResourceLocation getItemLocationKey(ItemStack stack)
 	{
 		ResourceLocation location = stack.getItem().builtInRegistryHolder().key().location();
-        return new ResourceLocation(location.getNamespace(), location.getPath());
+        return location;
 	}
 	
 	
@@ -634,7 +634,7 @@ public final class GunAnimationHelper
     {
         if (doTryingMetaLoadMessage)
         {
-        	GunMod.LOGGER.info("Animation System: Attempting to load animation data with resource key: " + location);
+        	GunMod.LOGGER.info("Animation System: Attempting to load animation data with resource key: " + location.toString());
         	doTryingMetaLoadMessage=false;
     	}
         if (useLegacyLoader)

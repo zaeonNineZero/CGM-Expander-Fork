@@ -23,7 +23,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Author: MrCrayfish
@@ -50,13 +52,14 @@ public final class AnimationLoader implements IDataLoader<AnimationLoader.AnimRe
         return instance;
     }
 
-    private final Object2ObjectMap<ResourceLocation, DataObject> resourceToData = Util.make(new Object2ObjectOpenCustomHashMap<>(Util.identityStrategy()), map -> map.defaultReturnValue(DataObject.EMPTY));
+    private final Object2ObjectMap<String, DataObject> resourceToData = Util.make(new Object2ObjectOpenCustomHashMap<>(Util.identityStrategy()), map -> map.defaultReturnValue(DataObject.EMPTY));
+    
 
     private AnimationLoader() {}
 
     public DataObject getData(ResourceLocation key)
     {
-    	return this.resourceToData.get(key);
+    	return this.resourceToData.get(key.toString());
     }
 
 	@Override
@@ -74,7 +77,7 @@ public final class AnimationLoader implements IDataLoader<AnimationLoader.AnimRe
 	            {
 	                ResourceLocation key = resource.getKey();
 	                ResourceLocation location = new ResourceLocation(key.getNamespace(), key.getPath());
-	                ResourceLocation identifier = new ResourceLocation(key.getNamespace(), convertToName(key.getPath().toString()));
+	                String identifier = key.getNamespace() + ":" + convertToName(key.getPath().toString());
 	                resources.add(new AnimResource(identifier, location));
                 	GunMod.LOGGER.info("Added animation resource " + identifier + " with resource location " + location);
             	}
@@ -89,7 +92,7 @@ public final class AnimationLoader implements IDataLoader<AnimationLoader.AnimRe
     @Override
     public void process(List<Pair<AnimResource, DataObject>> list)
     {
-        this.resourceToData.clear();
+    	this.resourceToData.clear();
         list.forEach(pair ->
         {
             DataObject object = pair.getRight();
@@ -118,7 +121,7 @@ public final class AnimationLoader implements IDataLoader<AnimationLoader.AnimRe
         return output;
     }
 
-    public record AnimResource(ResourceLocation identifier, ResourceLocation location) implements IResourceSupplier
+    public record AnimResource(String identifier, ResourceLocation location) implements IResourceSupplier
     {
         @Override
         public ResourceLocation getLocation()

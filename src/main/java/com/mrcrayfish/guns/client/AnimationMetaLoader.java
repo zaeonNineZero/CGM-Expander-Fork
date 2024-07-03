@@ -71,7 +71,7 @@ public final class AnimationMetaLoader implements IDataLoader<AnimationMetaLoade
             {
             	AnimResource resource = pair.getLeft();
                 this.resourceToData.put(resource.key(), object); 
-                GunMod.LOGGER.info("LEGACY LOADER: Loaded animation " + resource.key() + " at file location " + resource.location());
+                GunMod.LOGGER.info("LEGACY LOADER: Loaded animation " + resource.key().toString() + " at file location " + resource.location());
             }
         });
     }
