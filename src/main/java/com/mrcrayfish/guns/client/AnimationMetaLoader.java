@@ -24,6 +24,7 @@ public final class AnimationMetaLoader implements IDataLoader<AnimationMetaLoade
 	/**
 	 * This is a modified MetaLoader designed for loading animations
 	 * designed around the Common Animation System.
+	 * (Legacy version)
 	 */
 	
 	private static AnimationMetaLoader instance;
@@ -55,7 +56,6 @@ public final class AnimationMetaLoader implements IDataLoader<AnimationMetaLoade
             ResourceLocation key = item.builtInRegistryHolder().key().location();
             ResourceLocation location = new ResourceLocation(key.getNamespace(), "animations/" + key.getPath() + ".cgmanim");
             resources.add(new AnimResource(key, location));
-            //GunMod.LOGGER.info("Added new animation resource " + key + " with the following resource location: " + location );
         });
         return resources;
     }
@@ -71,8 +71,7 @@ public final class AnimationMetaLoader implements IDataLoader<AnimationMetaLoade
             {
             	AnimResource resource = pair.getLeft();
                 this.resourceToData.put(resource.key(), object); 
-                GunMod.LOGGER.info("Loaded animation " + resource.key() + " at file location " + resource.location());
-                //GunMod.LOGGER.info("Successfully paired data for animation resource " + resource.key());
+                GunMod.LOGGER.info("LEGACY LOADER: Loaded animation " + resource.key() + " at file location " + resource.location());
             }
         });
     }
