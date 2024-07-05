@@ -1463,7 +1463,7 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         @Nullable
         private ResourceLocation cycle;
         @Optional
-        private int cycleDelay = 10;
+        private int cycleDelay = -1;
         @Optional
         @Nullable
         private ResourceLocation drawGun;
@@ -1642,7 +1642,7 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             {
                 this.reloadEnd = this.createSound(tag, "ReloadEnd");
             }
-            if(tag.contains("ReloadEndDelay", Tag.TAG_STRING))
+            if(tag.contains("ReloadEndDelay", Tag.TAG_ANY_NUMERIC))
             {
                 this.reloadEndDelay = tag.getInt("ReloadEndDelay");
             }
@@ -1770,7 +1770,7 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             {
                 object.addProperty("cycle", this.cycle.toString());
             }
-            if(this.cycleDelay != 10) object.addProperty("cycleDelay", this.cycleDelay);
+            if(this.cycleDelay >= 0) object.addProperty("cycleDelay", this.cycleDelay);
             
             if(this.silencedFire != null)
             {
@@ -2060,7 +2060,7 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         /**
          * @return The delay after shooting before the cycle sound plays.
          * Setting this to zero will play the sound immediately.
-         * By default it's set to 10.
+         * Setting this to less than zero disables it.
          */
         @Nullable
         public int getCycleDelay()

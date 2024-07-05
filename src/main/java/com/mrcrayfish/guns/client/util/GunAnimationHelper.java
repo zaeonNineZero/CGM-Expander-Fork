@@ -174,6 +174,94 @@ public final class GunAnimationHelper
     	return getRotationOffsetPoint(animType, lookForParentAnimation(animType, getItemLocationKey(weapon)), component);
     }
     
+    public static Vec3 getSpecificAnimationTrans(String animType, ItemStack weapon, Player player, float partialTicks, String component)
+    {
+    	ResourceLocation weapKey = lookForParentAnimation(animType, getItemLocationKey(weapon));
+    	if (animType.equals("reloadStart"))
+    	{
+    		float reloadTransitionProgress = ReloadHandler.get().getReloadProgress(partialTicks);
+    		return getAnimationTrans("reloadStart", weapon, reloadTransitionProgress, component);
+    	}
+    	if (animType.equals("reloadEnd"))
+    	{
+    		float reloadTransitionProgress = ReloadHandler.get().getReloadProgress(partialTicks);
+    		return getAnimationTrans("reloadEnd", weapon, 1-reloadTransitionProgress, component);
+    	}
+    	if (animType.equals("reload") && hasAnimation("reload", weapon))
+    	{
+    		float reloadTransitionProgress = ReloadHandler.get().getReloadProgress(partialTicks);
+    	    float progress = ((GunItem) (weapon.getItem())).getModifiedGun(weapon).getGeneral().usesMagReload() ? GunRenderingHandler.get().getReloadDeltaTime(weapon) : GunRenderingHandler.get().getReloadCycleProgress(weapon);
+    	    Vec3 transforms = getAnimationTrans("reload", weapon, progress, component).scale(reloadTransitionProgress);
+    	    
+    	    Easings easing = GunReloadAnimationHelper.getReloadStartEasing(weapKey, component);
+    	    float finalReloadTransition = (float) getEaseFactor(easing, reloadTransitionProgress);
+    		if (!ReloadHandler.get().getReloading(player))
+    		{
+    			easing = GunReloadAnimationHelper.getReloadEndEasing(weapKey, component);
+        	    finalReloadTransition = (float) getReversedEaseFactor(easing, reloadTransitionProgress);
+    		}
+    	    return transforms.scale(finalReloadTransition);
+    	}
+    	if (animType.equals("fire") && hasAnimation("fire", weapon))
+    	{
+    		ItemCooldowns tracker = Minecraft.getInstance().player.getCooldowns();
+            float cooldown = tracker.getCooldownPercent(weapon.getItem(), Minecraft.getInstance().getFrameTime());
+            if (cooldown>0);
+            {
+            	float progress = 1-cooldown;
+            	return getAnimationTrans("fire", weapon, progress, component);
+            }
+    	}
+    	
+    	return Vec3.ZERO;
+    }
+    public static Vec3 getSpecificAnimationRot(String animType, ItemStack weapon, Player player, float partialTicks, String component)
+    {
+    	ResourceLocation weapKey = lookForParentAnimation(animType, getItemLocationKey(weapon));
+    	if (animType.equals("reloadStart"))
+    	{
+    		float reloadTransitionProgress = ReloadHandler.get().getReloadProgress(partialTicks);
+			return getAnimationRot("reloadStart", weapon, reloadTransitionProgress, component);
+    	}
+    	if (animType.equals("reloadEnd"))
+    	{
+    		float reloadTransitionProgress = ReloadHandler.get().getReloadProgress(partialTicks);
+    		return getAnimationRot("reloadEnd", weapon, 1-reloadTransitionProgress, component);
+    		
+    	}
+    	if (animType.equals("reload") && hasAnimation("reload", weapon))
+    	{
+    		float reloadTransitionProgress = ReloadHandler.get().getReloadProgress(partialTicks);
+    		float progress = ((GunItem) (weapon.getItem())).getModifiedGun(weapon).getGeneral().usesMagReload() ? GunRenderingHandler.get().getReloadDeltaTime(weapon) : GunRenderingHandler.get().getReloadCycleProgress(weapon);
+    	    Vec3 transforms = getAnimationRot("reload", weapon, progress, component);
+    	    
+    	    Easings easing = GunReloadAnimationHelper.getReloadStartEasing(weapKey, component);
+    	    float finalReloadTransition = (float) getEaseFactor(easing, reloadTransitionProgress);
+    		if (!ReloadHandler.get().getReloading(player))
+    		{
+    			easing = GunReloadAnimationHelper.getReloadEndEasing(weapKey, component);
+        	    finalReloadTransition = (float) getReversedEaseFactor(easing, reloadTransitionProgress);
+    		}
+    	    return transforms.scale(finalReloadTransition);
+    	}
+    	if (animType.equals("fire") && hasAnimation("fire", weapon))
+    	{
+    		ItemCooldowns tracker = Minecraft.getInstance().player.getCooldowns();
+            float cooldown = tracker.getCooldownPercent(weapon.getItem(), Minecraft.getInstance().getFrameTime());
+            if (cooldown>0);
+            {
+            	float progress = 1-cooldown;
+            	return getAnimationRot("fire", weapon, progress, component);
+            }
+    	}
+    	
+    	return Vec3.ZERO;
+    }
+    public static Vec3 getSpecificAnimationRotOffset(String animType, ItemStack weapon, String component)
+    {
+    	return getRotationOffsetPoint(animType, lookForParentAnimation(animType, getItemLocationKey(weapon)), component);
+    }
+    
     
     
     

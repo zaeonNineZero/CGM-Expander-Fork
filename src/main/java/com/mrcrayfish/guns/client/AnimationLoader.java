@@ -36,12 +36,12 @@ public final class AnimationLoader implements IDataLoader<AnimationLoader.AnimRe
 	/**
 	 * This is a modified MetaLoader designed for loading animations
 	 * designed around the Common Animation System.
-	 * (UNUSED)
 	 */
 	
 	private static AnimationLoader instance;
     private static final String EXTENSION = ".cgmanim";
     private static final Gson GSON = new GsonBuilder().create();
+	static boolean doTryingMetaLoadMessage=true;
 
     public static AnimationLoader getInstance()
     {
@@ -59,7 +59,13 @@ public final class AnimationLoader implements IDataLoader<AnimationLoader.AnimRe
 
     public DataObject getData(ResourceLocation key)
     {
-    	return this.resourceToData.get(key.toString());
+    	String newKey = new ResourceLocation(key.getNamespace(), key.getPath()).toString();
+    	if (doTryingMetaLoadMessage)
+    	{
+    		GunMod.LOGGER.info("Searching for animation " + newKey + "; HashMap contains the following keys: " + resourceToData);
+    		doTryingMetaLoadMessage=false;
+    	}
+    	return this.resourceToData.get(newKey);
     }
 
 	@Override
@@ -79,7 +85,7 @@ public final class AnimationLoader implements IDataLoader<AnimationLoader.AnimRe
 	                ResourceLocation location = new ResourceLocation(key.getNamespace(), key.getPath());
 	                String identifier = key.getNamespace() + ":" + convertToName(key.getPath().toString());
 	                resources.add(new AnimResource(identifier, location));
-                	GunMod.LOGGER.info("Added animation resource " + identifier + " with resource location " + location);
+                	//GunMod.LOGGER.info("Added animation resource " + identifier + " with resource location " + location);
             	}
             } catch (IOException e) {
             	GunMod.LOGGER.info("Failed to load animation file " + resource.getKey());

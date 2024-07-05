@@ -25,6 +25,7 @@ import com.mrcrayfish.guns.network.message.C2SMessageFireSwitch;
 import com.mrcrayfish.guns.network.message.C2SMessageShoot;
 import com.mrcrayfish.guns.network.message.S2CMessageBulletTrail;
 import com.mrcrayfish.guns.network.message.S2CMessageGunSound;
+import com.mrcrayfish.guns.util.GunCompositeStatHelper;
 import com.mrcrayfish.guns.util.GunEnchantmentHelper;
 import com.mrcrayfish.guns.util.GunModifierHelper;
 import net.minecraft.core.BlockPos;
@@ -185,12 +186,13 @@ public class ServerPlayHandler
                 }
 
                 ResourceLocation cycleSound = getGunSound(heldItem, modifiedGun, "cycle");
+                if(cycleSound != null && modifiedGun.getSounds().getCycleDelay() >= 0)
                 {
-                	if (modifiedGun.getSounds().getReloadEndDelay()>0)
+                	if (modifiedGun.getSounds().getCycleDelay()>0)
                     {
                     	final ResourceLocation finalSound = cycleSound;
                     	final Player finalPlayer = player;
-                    	DelayedTask.runAfter(modifiedGun.getSounds().getCycleDelay()*(GunEnchantmentHelper.getReloadInterval(heldItem)/10), () ->
+                    	DelayedTask.runAfter(modifiedGun.getSounds().getCycleDelay(), () ->
                     	{
                     		if (finalPlayer.isAlive())
 	                    	{
@@ -295,10 +297,10 @@ public class ServerPlayHandler
             	soundType = "reloadStart";
             	final ResourceLocation finalSound = getGunSound(heldItem, modifiedGun, soundType);
             	
-            	if (modifiedGun.getSounds().getReloadEndDelay()>0)
+            	if (modifiedGun.getSounds().getReloadStartDelay()>0)
                 {
             		Player finalPlayer = player;
-                	DelayedTask.runAfter(modifiedGun.getSounds().getReloadStartDelay()*(GunEnchantmentHelper.getReloadInterval(heldItem)/10), () ->
+                	DelayedTask.runAfter(modifiedGun.getSounds().getReloadStartDelay(), () ->
                     {
                         playReloadStartSound(finalPlayer, finalSound);
                     });

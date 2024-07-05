@@ -647,8 +647,9 @@ public class GunRenderingHandler
     private void applyAnimationTransforms(PoseStack poseStack, LocalPlayer player, ItemStack item, Gun modifiedGun, float partialTicks)
     {
     	Minecraft mc = Minecraft.getInstance();
-    	Vec3 translations = GunAnimationHelper.getSmartAnimationTrans(item, player, partialTicks, "viewModel");
-        Vec3 rotations = GunAnimationHelper.getSmartAnimationRot(item, player, partialTicks, "viewModel");
+    	double zoomFactor = (1-Gun.getFovModifier(item, modifiedGun)) * AimingHandler.get().getNormalisedAdsProgress();
+    	Vec3 translations = GunAnimationHelper.getSmartAnimationTrans(item, player, partialTicks, "viewModel").scale(1-zoomFactor);
+        Vec3 rotations = GunAnimationHelper.getSmartAnimationRot(item, player, partialTicks, "viewModel").scale(1-zoomFactor);
         Vec3 offsets = GunAnimationHelper.getSmartAnimationRotOffset(item, player, partialTicks, "viewModel").add(5.25, 4.0, 4.0);
     	if(!GunAnimationHelper.hasAnimation("fire", item) && GunAnimationHelper.getSmartAnimationType(item, player, partialTicks)=="fire")
     	{

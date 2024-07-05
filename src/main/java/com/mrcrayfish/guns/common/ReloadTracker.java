@@ -2,6 +2,7 @@ package com.mrcrayfish.guns.common;
 
 import com.mrcrayfish.framework.api.network.LevelLocation;
 import com.mrcrayfish.guns.Config;
+import com.mrcrayfish.guns.GunMod;
 import com.mrcrayfish.guns.Reference;
 import com.mrcrayfish.guns.client.handler.GunRenderingHandler;
 import com.mrcrayfish.guns.init.ModSyncedDataKeys;
@@ -203,31 +204,43 @@ public class ReloadTracker
                     final Player finalPlayer = player;
                     ModSyncedDataKeys.RELOADING.setValue(finalPlayer, false);
                     ModSyncedDataKeys.SWITCHTIME.setValue(player, tracker.reloadEndDelay);
+                	String soundType = "cock";
+                	if (gun.getSounds().hasExtraReloadSounds())
+                	soundType = "end";
+                	final ResourceLocation finalSound = getReloadSound(finalPlayer, soundType);
+                	
                     if (!gun.getGeneral().getUseMagReload())
                     {
-	                    DelayedTask.runAfter(4, () ->
+                    	if (gun.getSounds().hasExtraReloadSounds())
+                    	{
+                    		if (gun.getSounds().getReloadEndDelay()>0)
+    	                    {
+    	                    	DelayedTask.runAfter(gun.getSounds().getReloadEndDelay(), () ->
+    		                    {
+    		                        playReloadSound(finalPlayer, finalSound);
+    		                    });
+    	                    }
+	                    	else
+	                        playReloadSound(finalPlayer, finalSound);
+                    	}
+                    	else
+                    	DelayedTask.runAfter(4, () ->
 	                    {
-	                        ResourceLocation cockSound = gun.getSounds().getCock();
-	                        if(cockSound != null)
+	                        ResourceLocation cockSound = tracker.gun.getSounds().getCock();
 	                        playReloadSound(finalPlayer, cockSound);
 	                    });
-	                    }
+                    }
                     else
                     {
-                    	String soundType = "cock";
-                    	if (gun.getSounds().hasExtraReloadSounds())
-                    	soundType = "end";
-                    	final String finalSound = "cock";
-                    	
                     	if (gun.getSounds().getReloadEndDelay()>0)
 	                    {
-	                    	DelayedTask.runAfter(gun.getSounds().getReloadEndDelay()*(GunEnchantmentHelper.getReloadInterval(tracker.stack)/10), () ->
+	                    	DelayedTask.runAfter(gun.getSounds().getReloadEndDelay(), () ->
 		                    {
 		                        playReloadSound(finalPlayer, finalSound);
 		                    });
 	                    }
                     	else
-                        playReloadSound(finalPlayer, soundType);
+                        playReloadSound(finalPlayer, finalSound);
                     }
                     
                     RELOAD_TRACKER_MAP.remove(player);
@@ -299,10 +312,10 @@ public class ReloadTracker
         }
     }
     
-    public static void playReloadSound(Player player, String soundType)
+    public static ResourceLocation getReloadSound(Player player, String soundType)
     {
     	if(!RELOAD_TRACKER_MAP.containsKey(player))
-    		return;
+    		return null;
     	ReloadTracker tracker = RELOAD_TRACKER_MAP.get(player);
         ResourceLocation sound = null;
 
@@ -332,6 +345,15 @@ public class ReloadTracker
         else
         if(soundType == "cock")
         sound = tracker.gun.getSounds().getCock();
+
+        return sound;
+    }
+    
+    public static void playReloadSound(Player player, String soundType)
+    {
+    	if(!RELOAD_TRACKER_MAP.containsKey(player))
+    		return;
+    	ResourceLocation sound = getReloadSound(player, soundType);
         
         if (sound != null)
         playReloadSound(player, sound);
