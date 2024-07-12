@@ -40,7 +40,7 @@ public final class AnimationLoader implements IDataLoader<AnimationLoader.AnimRe
 	
 	private static AnimationLoader instance;
     private static final String EXTENSION = ".cgmanim";
-    private static final Gson GSON = new GsonBuilder().create();
+    //private static final Gson GSON = new GsonBuilder().create();
 	static boolean doTryingMetaLoadMessage=true;
 
     public static AnimationLoader getInstance()
@@ -75,18 +75,15 @@ public final class AnimationLoader implements IDataLoader<AnimationLoader.AnimRe
 		ResourceManager manager = Minecraft.getInstance().getResourceManager();
 		for (var resource: manager.listResources("animations", location -> location.getPath().endsWith(EXTENSION)).entrySet()) {
             try(var input = resource.getValue().open()) {
-            	JsonElement element;
+            	/*JsonElement element;
             	try (InputStreamReader reader = new InputStreamReader(input, StandardCharsets.UTF_8)) {
                     element = GsonHelper.fromJson(GSON, reader, JsonElement.class);
-                }
-	            if (element!=null)
-	            {
-	                ResourceLocation key = resource.getKey();
-	                ResourceLocation location = new ResourceLocation(key.getNamespace(), key.getPath());
-	                String identifier = key.getNamespace() + ":" + convertToName(key.getPath().toString());
-	                resources.add(new AnimResource(identifier, location));
-                	//GunMod.LOGGER.info("Added animation resource " + identifier + " with resource location " + location);
-            	}
+                }*/
+            	ResourceLocation key = resource.getKey();
+                ResourceLocation location = new ResourceLocation(key.getNamespace(), key.getPath());
+                String identifier = key.getNamespace() + ":" + convertToName(key.getPath().toString());
+                resources.add(new AnimResource(identifier, location));
+                //GunMod.LOGGER.info("Added animation resource " + identifier + " with resource location " + location);
             } catch (IOException e) {
             	GunMod.LOGGER.info("Failed to load animation file " + resource.getKey());
 				e.printStackTrace();
@@ -123,7 +120,7 @@ public final class AnimationLoader implements IDataLoader<AnimationLoader.AnimRe
      */
     public static String convertToName(String arg) {
         String output = arg.replace("animations/", "");
-        output = output.replace(".cgmanim", "");
+        output = output.replace(EXTENSION, "");
         return output;
     }
 

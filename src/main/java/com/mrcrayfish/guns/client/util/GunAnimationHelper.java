@@ -299,12 +299,14 @@ public final class GunAnimationHelper
 		{
 			if (priorFrame<1)
 			{
-				priorFrame = GunAnimationHelper.getAnimationFrames("reload", weapKey);
+				int reloadFrames = GunAnimationHelper.getAnimationFrames("reload", weapKey);
+				priorFrame = findPriorFrame("reload", weapKey, component, reloadFrames, "translation");
 				priorAnimType = "reload";
 			}
 			if (nextFrame<1)
 			{
-				nextFrame = GunAnimationHelper.getAnimationFrames("reload", weapKey);
+				int reloadFrames = GunAnimationHelper.getAnimationFrames("reload", weapKey);
+				nextFrame = findPriorFrame("reload", weapKey, component, reloadFrames, "translation");
 				nextAnimType = "reload";
 			}
 		}

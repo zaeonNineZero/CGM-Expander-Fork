@@ -1216,6 +1216,9 @@ public class GunRenderingHandler
     	Minecraft mc = Minecraft.getInstance();
         if(mc.player == null)
             return;
+        
+        if(!(stack.getItem() instanceof GunItem))
+            return;
     	
         if(ReloadHandler.get().getReloading(mc.player))
         {
@@ -1226,7 +1229,9 @@ public class GunRenderingHandler
 	    		Gun gun = gunItem.getModifiedGun(stack);
 	    		reloadStartDelay = Math.max(gun.getGeneral().getReloadStartDelay(),0);
 	    	}
+	    	if (ReloadHandler.get().getStartReloadTick()>0)
 	    	this.lastStartReloadTick = ReloadHandler.get().getStartReloadTick();
+	    	
 	    	float startReloadTick = (float) lastStartReloadTick;
     		float reloadDelta = (mc.player.tickCount - (startReloadTick + reloadStartDelay) + mc.getFrameTime()) / reloadInterval;
     		this.lastReloadDeltaTime = reloadDelta;
