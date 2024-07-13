@@ -2046,15 +2046,12 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
 
         /**
          * @return The registry id of the sound event when cycling this weapon.
-         * If defined, this sound will play a set amount of time after firing a weapon, and will only be audiable within
+         * If defined, this sound will play a set amount of time after firing a weapon, and will only be audible within
          * the reload sound range. Intended for bolt/slide-action cycles, but can be used for other cycles too.
-         * "cock" is used as a fallback.
          */
         @Nullable
         public ResourceLocation getCycle()
         {
-            if (this.cycle==null)
-            	return getCock();
             return this.cycle;
         }
         /**

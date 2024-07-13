@@ -728,6 +728,8 @@ public class GunRenderingHandler
         ItemStack heldItem = player.getItemInHand(InteractionHand.MAIN_HAND);
         if(heldItem.isEmpty())
             return;
+        
+        updateReloadProgress(heldItem);
 
         if(player.isUsingItem() && player.getUsedItemHand() == InteractionHand.MAIN_HAND && heldItem.getItem() instanceof GrenadeItem)
         {
@@ -1232,8 +1234,7 @@ public class GunRenderingHandler
 	    	if (ReloadHandler.get().getStartReloadTick()>0)
 	    	this.lastStartReloadTick = ReloadHandler.get().getStartReloadTick();
 	    	
-	    	float startReloadTick = (float) lastStartReloadTick;
-    		float reloadDelta = (mc.player.tickCount - (startReloadTick + reloadStartDelay) + mc.getFrameTime()) / reloadInterval;
+    		float reloadDelta = (mc.player.tickCount - (lastStartReloadTick + reloadStartDelay) + mc.getFrameTime()) / reloadInterval;
     		this.lastReloadDeltaTime = reloadDelta;
 	    	this.lastReloadCycle = reloadDelta % 1F;
     	}

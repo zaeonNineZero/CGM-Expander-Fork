@@ -64,10 +64,7 @@ public final class GunAnimationHelper
 	        	{
 	        		return "reloadEnd";
 	        	}
-	        	else
-	        	return "reload";
     		}
-			else
     	    return "reload";
 		}
 		else

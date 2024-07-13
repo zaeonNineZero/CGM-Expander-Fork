@@ -186,13 +186,17 @@ public class ServerPlayHandler
                 }
 
                 ResourceLocation cycleSound = getGunSound(heldItem, modifiedGun, "cycle");
-                if(cycleSound != null && modifiedGun.getSounds().getCycleDelay() >= 0)
+                if(cycleSound != null || modifiedGun.getSounds().getCycleDelay() >= 0)
                 {
-                	if (modifiedGun.getSounds().getCycleDelay()>0)
+            		final ResourceLocation finalSound = (cycleSound != null? cycleSound : getGunSound(heldItem, modifiedGun, "cock"));
+            		
+            		double modifiedCycleDelay = modifiedGun.getSounds().getCycleDelay();
+            		modifiedCycleDelay = modifiedCycleDelay * (double) (GunCompositeStatHelper.getCompositeRate(heldItem, modifiedGun, player) / Math.max(modifiedGun.getGeneral().getRate(),1.0));
+            		final int trueCycleDelay = (int) Math.round(modifiedCycleDelay);
+            		if (trueCycleDelay>0)
                     {
-                    	final ResourceLocation finalSound = cycleSound;
                     	final Player finalPlayer = player;
-                    	DelayedTask.runAfter(modifiedGun.getSounds().getCycleDelay(), () ->
+                    	DelayedTask.runAfter(trueCycleDelay, () ->
                     	{
                     		if (finalPlayer.isAlive())
 	                    	{
@@ -211,7 +215,7 @@ public class ServerPlayHandler
                         double posY = player.getY() + player.getEyeHeight();
                         double posZ = player.getZ();
 	                  	double radius = Config.SERVER.reloadMaxDistance.get();
-	                    S2CMessageGunSound messageSound = new S2CMessageGunSound(cycleSound, SoundSource.PLAYERS, (float) posX, (float) posY, (float) posZ, 1.0F, 1.0F, player.getId(), false, true);
+	                    S2CMessageGunSound messageSound = new S2CMessageGunSound(finalSound, SoundSource.PLAYERS, (float) posX, (float) posY, (float) posZ, 1.0F, 1.0F, player.getId(), false, true);
 	                    PacketHandler.getPlayChannel().sendToNearbyPlayers(() -> LevelLocation.create(player.level, posX, posY, posZ, radius), messageSound);
                 	}
                 }
@@ -320,6 +324,9 @@ public class ServerPlayHandler
     	else
     	if(soundType == "cycle")
     	sound = modifiedGun.getSounds().getCycle();
+    	else
+    	if(soundType == "cock")
+    	sound = modifiedGun.getSounds().getCock();
     	
         if(sound != null)
         {
