@@ -251,8 +251,12 @@ public class ReloadTracker
                 final Gun gun = tracker.gun;
                 if (!tracker.reloadEarlyState && tracker.getReloadProgress(player)>=gun.getSounds().getReloadEarlyThreshold())
             	{
-            		playReloadSound(player, "early");
-            		tracker.reloadEarlyState=true;
+                	//if (tracker.getReloadProgress(player)<gun.getSounds().getReloadMidThreshold())
+                	{
+                		playReloadSound(player, "early");
+            			tracker.reloadEarlyState=true;
+            			GunMod.LOGGER.info(player.getName().getContents() + ": Playing reloadEarly sound at " + tracker.getReloadProgress(player) + "% reload progress. Threshold is " + gun.getSounds().getReloadEarlyThreshold() + "%");
+            		}
             	}
             	else
             	if (!tracker.reloadMidState && tracker.getReloadProgress(player)>=gun.getSounds().getReloadMidThreshold())

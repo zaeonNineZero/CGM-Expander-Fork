@@ -273,11 +273,11 @@ public final class GunAnimationHelper
 		int currentFrame = getCurrentFrame(weapon, scaledProgress);
 		int priorFrame = findPriorFrame(animationType, weapKey, component, currentFrame, "translation");
 		int nextFrame = findNextFrame(animationType, weapKey, component, currentFrame+1, "translation");
-		int frameDiv = Math.max(Math.abs(nextFrame-priorFrame),1);
 		float frameProgress = Math.max(scaledProgress - ((float) priorFrame), 0);
 		
 		String priorAnimType = animationType;
 		String nextAnimType = animationType;
+		int frameDiv = Math.max(Math.abs(nextFrame-priorFrame),1);
 		
 		if (animationType.equals("reloadStart"))
 		{
@@ -286,7 +286,7 @@ public final class GunAnimationHelper
 				nextFrame = 0;
 				nextAnimType = "reload";
 			}
-			if (priorFrame>=GunAnimationHelper.getAnimationFrames(animationType, weapKey))
+			if (currentFrame>=GunAnimationHelper.getAnimationFrames(animationType, weapKey))
 			{
 				priorFrame = 0;
 				priorAnimType = "reload";
@@ -300,7 +300,7 @@ public final class GunAnimationHelper
 				priorFrame = findPriorFrame("reload", weapKey, component, reloadFrames, "translation");
 				priorAnimType = "reload";
 			}
-			if (nextFrame<1)
+			if (currentFrame<0)
 			{
 				int reloadFrames = GunAnimationHelper.getAnimationFrames("reload", weapKey);
 				nextFrame = findPriorFrame("reload", weapKey, component, reloadFrames, "translation");
@@ -331,11 +331,11 @@ public final class GunAnimationHelper
 		int currentFrame = getCurrentFrame(weapon, scaledProgress);
 		int priorFrame = findPriorFrame(animationType, weapKey, component, currentFrame, "rotation");
 		int nextFrame = findNextFrame(animationType, weapKey, component, currentFrame+1, "rotation");
-		int frameDiv = Math.max(Math.abs(nextFrame-priorFrame),1);
 		float frameProgress = Math.max(scaledProgress - ((float) priorFrame), 0);
 		
 		String priorAnimType = animationType;
 		String nextAnimType = animationType;
+		int frameDiv = Math.max(Math.abs(nextFrame-priorFrame),1);
 		
 		if (animationType.equals("reloadStart"))
 		{
@@ -344,7 +344,7 @@ public final class GunAnimationHelper
 				nextFrame = 0;
 				nextAnimType = "reload";
 			}
-			if (priorFrame>=GunAnimationHelper.getAnimationFrames(animationType, weapKey))
+			if (currentFrame>=GunAnimationHelper.getAnimationFrames(animationType, weapKey))
 			{
 				priorFrame = 0;
 				priorAnimType = "reload";
@@ -357,7 +357,7 @@ public final class GunAnimationHelper
 				priorFrame = GunAnimationHelper.getAnimationFrames("reload", weapKey);
 				priorAnimType = "reload";
 			}
-			if (nextFrame<=0)
+			if (currentFrame<0)
 			{
 				nextFrame = GunAnimationHelper.getAnimationFrames("reload", weapKey);
 				nextAnimType = "reload";

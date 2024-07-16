@@ -1505,28 +1505,32 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             {
                 tag.putString("Reload", this.reload.toString());
             }
-
             tag.putInt("ReloadFrames", this.reloadFrames);
+            
             if(this.reloadStart != null)
             {
                 tag.putString("ReloadStart", this.reloadStart.toString());
             }
             tag.putInt("ReloadStartDelay", this.reloadStartDelay);
+            
             if(this.reloadEarly != null)
             {
-                tag.putString("ReloadMid", this.reloadEarly.toString());
+                tag.putString("ReloadEarly", this.reloadEarly.toString());
             }
-            tag.putFloat("ReloadMidThreshold", this.reloadEarlyThreshold);
+            tag.putFloat("ReloadEarlyThreshold", this.reloadEarlyThreshold);
+            
             if(this.reloadMid != null)
             {
                 tag.putString("ReloadMid", this.reloadMid.toString());
             }
             tag.putFloat("ReloadMidThreshold", this.reloadMidThreshold);
+            
             if(this.reloadLate != null)
             {
                 tag.putString("ReloadLate", this.reloadLate.toString());
             }
             tag.putFloat("ReloadLateThreshold", this.reloadLateThreshold);
+            
             if(this.reloadEnd != null)
             {
                 tag.putString("ReloadEnd", this.reloadEnd.toString());
@@ -1538,6 +1542,7 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
                 tag.putString("ReloadClipOut", this.reloadClipOut.toString());
             }
             tag.putFloat("ReloadClipOutThreshold", this.reloadClipOutThreshold);
+            
             if(this.reloadClipIn != null)
             {
                 tag.putString("ReloadClipIn", this.reloadClipIn.toString());
@@ -1725,26 +1730,31 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             }
 
             if(this.reloadFrames != 1) object.addProperty("reloadFrames", this.reloadFrames);
+            
             if(this.reloadStart != null)
             {
                 object.addProperty("reloadStart", this.reloadStart.toString());
             }
             if(this.reloadStartDelay != 0) object.addProperty("reloadStartDelay", this.reloadStartDelay);
+            
             if(this.reloadEarly != null)
             {
                 object.addProperty("reloadEarly", this.reloadEarly.toString());
             }
-            if(this.reloadLateThreshold != 0.25F) object.addProperty("reloadEarlyThreshold", this.reloadEarlyThreshold);
+            if(this.reloadEarlyThreshold != 0.25F) object.addProperty("reloadEarlyThreshold", this.reloadEarlyThreshold);
+            
             if(this.reloadMid != null)
             {
                 object.addProperty("reloadMid", this.reloadMid.toString());
             }
             if(this.reloadMidThreshold != 0.5F) object.addProperty("reloadMidThreshold", this.reloadMidThreshold);
+            
             if(this.reloadLate != null)
             {
                 object.addProperty("reloadLate", this.reloadLate.toString());
             }
             if(this.reloadLateThreshold != 0.75F) object.addProperty("reloadLateThreshold", this.reloadLateThreshold);
+            
             if(this.reloadEnd != null)
             {
                 object.addProperty("reloadEnd", this.reloadEnd.toString());
@@ -1756,6 +1766,7 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
                 object.addProperty("reloadClipOut", this.reloadClipOut.toString());
             }
             if(this.reloadClipOutThreshold != 0.33F) object.addProperty("reloadClipOutThreshold", this.reloadClipOutThreshold);
+            
             if(this.reloadClipIn != null)
             {
                 object.addProperty("reloadClipIn", this.reloadClipIn.toString());
