@@ -31,7 +31,8 @@ public enum SpecialModels
     
     PISTOL_BASE("pistol_base"),
     PISTOL_SLIDE("pistol_slide"),
-    PISTOL_SIGHTMOUNT("pistol_sightmount");
+    PISTOL_SIGHTMOUNT("pistol_sightmount"),
+    PISTOL_MAGAZINE("pistol_magazine");
 
     /**
      * The location of an item model in the [MOD_ID]/models/special/[NAME] folder

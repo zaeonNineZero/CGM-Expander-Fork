@@ -157,6 +157,7 @@ public class ReloadTracker
         });
 
         ResourceLocation reloadSound = this.gun.getSounds().getReload();
+    	
         resetAnimationSounds();
         if(reloadSound != null && !this.gun.getGeneral().getUseMagReload())
         {
@@ -195,6 +196,54 @@ public class ReloadTracker
             	return;
         	}
             
+            // Extra reload sound logic
+            {
+                final Gun gun = tracker.gun;
+                if (!tracker.reloadEarlyState && tracker.getReloadProgress(player)>=gun.getSounds().getReloadEarlyThreshold())
+            	{
+                	//if (tracker.getReloadProgress(player)<gun.getSounds().getReloadMidThreshold())
+                	{
+                		playReloadSound(player, "early");
+            			tracker.reloadEarlyState=true;
+            			//GunMod.LOGGER.info(player.getName().getContents() + ": Playing reloadEarly sound at " + tracker.getReloadProgress(player) + "% reload progress. Threshold is " + gun.getSounds().getReloadEarlyThreshold() + "%");
+            		}
+            	}
+            	if (!tracker.reloadMidState && tracker.getReloadProgress(player)>=gun.getSounds().getReloadMidThreshold())
+            	{
+            		playReloadSound(player, "mid");
+            		tracker.reloadMidState=true;
+            	}
+            	if (!tracker.reloadLateState && tracker.getReloadProgress(player)>=gun.getSounds().getReloadLateThreshold())
+            	{
+            		playReloadSound(player, "late");
+            		tracker.reloadLateState=true;
+            	}
+            	if (!tracker.reloadClipOutState)
+            	{
+                	if (gun.getSounds().hasExtraReloadSounds() && tracker.getReloadProgress(player)>=gun.getSounds().getReloadClipOutThreshold()
+                	|| (!gun.getSounds().hasExtraReloadSounds() && gun.getGeneral().usesMagReload() && tracker.getReloadProgress(player)>=0.25F))
+                	{
+                		if (gun.getSounds().hasExtraReloadSounds() || !gun.getGeneral().usesMagReload())
+                    	playReloadSound(player, "clipOut");
+                    	else
+                        playReloadSound(player, "reload");
+                		tracker.reloadClipOutState=true;
+            		}
+            	}
+            	if (!tracker.reloadClipInState)
+            	{
+                	if (gun.getSounds().hasExtraReloadSounds() && tracker.getReloadProgress(player)>=gun.getSounds().getReloadClipInThreshold()
+                	|| (!gun.getSounds().hasExtraReloadSounds() && gun.getGeneral().usesMagReload() && tracker.getReloadProgress(player)>=0.75F))
+                	{
+                		if (gun.getSounds().hasExtraReloadSounds() || !gun.getGeneral().usesMagReload())
+                    	playReloadSound(player, "clipIn");
+                    	else
+                        playReloadSound(player, "reload");
+                    	tracker.reloadClipInState=true;
+            		}
+            	}
+            }
+            
             if(tracker.canReload(player))
             {
                 tracker.increaseAmmo(player);
@@ -206,7 +255,9 @@ public class ReloadTracker
                     ModSyncedDataKeys.SWITCHTIME.setValue(player, tracker.reloadEndDelay);
                 	String soundType = "cock";
                 	if (gun.getSounds().hasExtraReloadSounds())
-                	soundType = "end";
+                	{
+                		soundType = "end";
+                	}
                 	final ResourceLocation finalSound = getReloadSound(finalPlayer, soundType);
                 	
                     if (!gun.getGeneral().getUseMagReload())
@@ -245,56 +296,6 @@ public class ReloadTracker
                     
                     RELOAD_TRACKER_MAP.remove(player);
                 }
-            }
-            else
-            {
-                final Gun gun = tracker.gun;
-                if (!tracker.reloadEarlyState && tracker.getReloadProgress(player)>=gun.getSounds().getReloadEarlyThreshold())
-            	{
-                	//if (tracker.getReloadProgress(player)<gun.getSounds().getReloadMidThreshold())
-                	{
-                		playReloadSound(player, "early");
-            			tracker.reloadEarlyState=true;
-            			GunMod.LOGGER.info(player.getName().getContents() + ": Playing reloadEarly sound at " + tracker.getReloadProgress(player) + "% reload progress. Threshold is " + gun.getSounds().getReloadEarlyThreshold() + "%");
-            		}
-            	}
-            	else
-            	if (!tracker.reloadMidState && tracker.getReloadProgress(player)>=gun.getSounds().getReloadMidThreshold())
-            	{
-            		playReloadSound(player, "mid");
-            		tracker.reloadMidState=true;
-            	}
-            	else
-            	if (!tracker.reloadLateState && tracker.getReloadProgress(player)>=gun.getSounds().getReloadLateThreshold())
-            	{
-            		playReloadSound(player, "late");
-            		tracker.reloadLateState=true;
-            	}
-            	if (!tracker.reloadClipOutState)
-            	{
-                	if (gun.getSounds().hasExtraReloadSounds() && tracker.getReloadProgress(player)>=gun.getSounds().getReloadClipOutThreshold()
-                	|| (!gun.getSounds().hasExtraReloadSounds() && gun.getGeneral().usesMagReload() && tracker.getReloadProgress(player)>=0.25F))
-                	{
-                		if (gun.getSounds().hasExtraReloadSounds() || !gun.getGeneral().usesMagReload())
-                    	playReloadSound(player, "clipOut");
-                    	else
-                        playReloadSound(player, "reload");
-                		tracker.reloadClipOutState=true;
-            		}
-            	}
-            	else
-            	if (!tracker.reloadClipInState)
-            	{
-                	if (gun.getSounds().hasExtraReloadSounds() && tracker.getReloadProgress(player)>=gun.getSounds().getReloadClipInThreshold()
-                	|| (!gun.getSounds().hasExtraReloadSounds() && gun.getGeneral().usesMagReload() && tracker.getReloadProgress(player)>=0.75F))
-                	{
-                		if (gun.getSounds().hasExtraReloadSounds() || !gun.getGeneral().usesMagReload())
-                    	playReloadSound(player, "clipIn");
-                    	else
-                        playReloadSound(player, "reload");
-                    	tracker.reloadClipInState=true;
-            		}
-            	}
             }
         }
         else if(RELOAD_TRACKER_MAP.containsKey(player))

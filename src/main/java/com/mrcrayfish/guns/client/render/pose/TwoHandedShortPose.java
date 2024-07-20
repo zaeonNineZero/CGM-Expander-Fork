@@ -119,7 +119,6 @@ public class TwoHandedShortPose extends WeaponPose
         	{
         		translations = GunLegacyAnimationHelper.getHandTranslation(stack, false, cooldown);
         	}
-        	else
         	if(!GunAnimationHelper.hasAnimation("reload", stack))
         	{
         		float reloadProg = ReloadHandler.get().getReloadProgress(partialTicks);
