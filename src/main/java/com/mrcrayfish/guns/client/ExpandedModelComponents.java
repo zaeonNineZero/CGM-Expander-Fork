@@ -14,20 +14,16 @@ import net.minecraftforge.fml.common.Mod;
  * Author: MrCrayfish
  */
 @Mod.EventBusSubscriber(modid = Reference.MOD_ID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
-public enum SpecialModels
+public enum ExpandedModelComponents
 {
-    ASSAULT_RIFLE("gun/assault_rifle"),
-    BAZOOKA("gun/bazooka"),
-    HEAVY_RIFLE("gun/heavy_rifle"),
-    MACHINE_PISTOL("gun/machine_pistol"),
-    PISTOL("gun/pistol"),
-    RIFLE("gun/rifle"),
-    SHOTGUN("gun/shotgun"),
-    FLAME("flame"),
-    MINI_GUN_BASE("mini_gun_base"),
-    MINI_GUN_BARRELS("mini_gun_barrels"),
-    GRENADE_LAUNCHER_BASE("grenade_launcher_base"),
-    GRENADE_LAUNCHER_CYLINDER("grenade_launcher_cylinder");
+    PISTOL_BASE("pistol_base"),
+    PISTOL_SLIDE("pistol_slide"),
+    PISTOL_SIGHTMOUNT("pistol_sightmount"),
+    PISTOL_MAGAZINE("pistol_magazine"),
+    
+    ASSAULT_RIFLE_BASE("assault_rifle_base"),
+    ASSAULT_RIFLE_SIGHTS("assault_rifle_sights"),
+    ASSAULT_RIFLE_MAGAZINE("assault_rifle_magazine");
 
     /**
      * The location of an item model in the [MOD_ID]/models/special/[NAME] folder
@@ -44,7 +40,7 @@ public enum SpecialModels
      *
      * @param modelName name of the model file
      */
-    SpecialModels(String modelName)
+    ExpandedModelComponents(String modelName)
     {
         this.modelLocation = new ResourceLocation(Reference.MOD_ID, "special/" + modelName);
     }
@@ -70,7 +66,7 @@ public enum SpecialModels
     @SubscribeEvent
     public static void registerAdditional(ModelEvent.RegisterAdditional event)
     {
-        for(SpecialModels model : values())
+        for(ExpandedModelComponents model : values())
         {
             event.register(model.modelLocation);
         }
@@ -83,7 +79,7 @@ public enum SpecialModels
     @SubscribeEvent
     public static void onBake(ModelEvent.BakingCompleted event)
     {
-        for(SpecialModels model : values())
+        for(ExpandedModelComponents model : values())
         {
             model.cachedModel = null;
         }

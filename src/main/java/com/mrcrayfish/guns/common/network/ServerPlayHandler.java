@@ -399,15 +399,14 @@ public class ServerPlayHandler
         if(stack.getItem() instanceof GunItem)
         {
             CompoundTag tag = stack.getTag();
-            Gun modifiedGun = ((GunItem) stack.getItem()).getModifiedGun(stack);
             if(tag != null && tag.contains("AmmoCount", Tag.TAG_INT) && !tag.getBoolean("IgnoreAmmo") && !Gun.hasUnlimitedReloads(stack))
             {
                 int count = tag.getInt("AmmoCount");
                 tag.putInt("AmmoCount", 0);
 
                 GunItem gunItem = (GunItem) stack.getItem();
-                Gun gun = gunItem.getModifiedGun(stack);
-                ResourceLocation id = gun.getProjectile().getItem();
+                Gun modifiedGun = gunItem.getModifiedGun(stack);
+                ResourceLocation id = modifiedGun.getProjectile().getItem();
 
                 Item item = ForgeRegistries.ITEMS.getValue(id);
                 if(item == null)

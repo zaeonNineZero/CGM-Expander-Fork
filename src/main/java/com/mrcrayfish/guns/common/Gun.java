@@ -783,6 +783,8 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
     	@Optional
         private boolean useFireModes;
     	@Optional
+        private int defaultFireMode = -1;
+    	@Optional
         private boolean hasSemiMode;
     	@Optional
         private boolean hasAutoMode;
@@ -798,6 +800,7 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         {
             CompoundTag tag = new CompoundTag();
             tag.putBoolean("UseFireModes", this.useFireModes);
+            tag.putInt("DefaultFireMode", this.defaultFireMode);
             tag.putBoolean("HasSemiMode", this.hasSemiMode);
             tag.putBoolean("HasAutoMode", this.hasAutoMode);
             tag.putBoolean("HasBurstMode", this.hasBurstMode);
@@ -812,6 +815,10 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             if(tag.contains("UseFireModes", Tag.TAG_ANY_NUMERIC))
             {
                 this.useFireModes = tag.getBoolean("UseFireModes");
+            }
+            if(tag.contains("DefaultFireMode", Tag.TAG_ANY_NUMERIC))
+            {
+                this.defaultFireMode = tag.getInt("DefaultFireMode");
             }
             if(tag.contains("HasSemiMode", Tag.TAG_ANY_NUMERIC))
             {
@@ -839,7 +846,9 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         {
             JsonObject object = new JsonObject();
             Preconditions.checkArgument(this.burstCount > 1 || this.burstCount == 0, "Burst count must be greater than one, or equal to zero; set to zero to use general.burstCount.");
+            Preconditions.checkArgument(this.defaultFireMode >= -1 || this.defaultFireMode <= 2, "Default Fire Mode must be a valid fire mode equivalent integer, or set to negative one to calculate it automatically.");
             object.addProperty("useFireModes", this.useFireModes);
+            if(this.defaultFireMode != -1) object.addProperty("defaultFireMode", this.defaultFireMode);
             if(this.hasSemiMode) object.addProperty("hasSemiMode", this.hasSemiMode);
             if(this.hasAutoMode) object.addProperty("hasAutoMode", this.hasAutoMode);
             if(this.hasBurstMode) object.addProperty("hasBurstMode", this.hasBurstMode);
@@ -852,6 +861,7 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         {
         	FireModes fireModes = new FireModes();
             fireModes.useFireModes = this.useFireModes;
+            fireModes.defaultFireMode = this.defaultFireMode;
             fireModes.hasSemiMode = this.hasSemiMode;
             fireModes.hasAutoMode = this.hasAutoMode;
             fireModes.hasBurstMode = this.hasBurstMode;
@@ -866,6 +876,18 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         public boolean usesFireModes()
         {
             return this.useFireModes;
+        }
+
+        /**
+         * @return The default fire mode of the gun, in its equivalent integer.
+         * For reference: 0 = Semi-Auto; 1 = Full-Auto; 2 = Burst-Fire.
+         * If this value is set to -1, the default fire mode will be automatically
+         * calculated based the available fire modes.
+         */
+        @Nullable
+        public int getDefaultFireMode()
+        {
+            return this.defaultFireMode;
         }
 
         /**
@@ -3161,6 +3183,9 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         
         if (modifiedGun.getFireModes().usesFireModes() && modifiedGun.getFireModes().hasAnyFireMode())
         {
+        	if (modifiedGun.getFireModes().getDefaultFireMode()>=0 && modifiedGun.getFireModes().getDefaultFireMode()<=2)
+            	return modifiedGun.getFireModes().getDefaultFireMode();
+        	else
         	if (modifiedGun.getFireModes().hasAutoMode())
             	return 1;
         	else

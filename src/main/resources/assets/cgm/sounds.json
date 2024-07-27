@@ -48,5 +48,14 @@
 	},
 	"item.pistol.slide_forward": {
 		"sounds": [{"name":"cgm:item/pistol/slide_forward"}]
+	},
+	
+	
+	"item.assault_rifle.mag_out": {
+		"sounds": [{"name":"cgm:item/assault_rifle/mag_out"}]
+	},
+	"item.assault_rifle.mag_in": {
+		"subtitle":"subtitle.cgm.reload",
+		"sounds": [{"name":"cgm:item/assault_rifle/mag_in"}]
 	}
 }
