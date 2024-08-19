@@ -43,6 +43,7 @@ public class ReloadHandler
     private int startReloadTick;
     private double reloadTimer;
     private double prevReloadTimer;
+    private boolean reloadFromEmpty = false;
     private int storedReloadDelay;
     private int reloadingSlot;
     private boolean reloadStart;
@@ -118,6 +119,11 @@ public class ReloadHandler
                     CompoundTag tag = stack.getTag();
                     if(tag != null && !tag.contains("IgnoreAmmo", Tag.TAG_BYTE))
                     {
+                    	if (Gun.hasAmmo(stack))
+                    		reloadFromEmpty = true;
+                    	else
+                        	reloadFromEmpty = false;
+                    	
                         Gun gun = ((GunItem) stack.getItem()).getModifiedGun(stack);
                         if (Gun.findAmmo((Player) player, gun.getProjectile().getItem()) == AmmoContext.NONE && !Gun.hasUnlimitedReloads(stack))
                         	return;
@@ -143,18 +149,13 @@ public class ReloadHandler
             }
             else
             {
-            	if (fromInput)
-            	{
-            		reloadFinish = false;
-            		reloadStart = false;
-            	}
             	ItemStack stack = player.getMainHandItem();
             	GunRenderingHandler.get().getReloadDeltaTime(stack);
             	
             	// Debug 1
                 /*if(stack.getItem() instanceof GunItem gunItem)
                 {
-    		    	float interval = GunEnchantmentHelper.getRealReloadSpeed(stack);
+    		    	float interval = GunEnchantmentHelper.getRealReloadSpeed(stack, ReloadHandler.get().isReloadFromEmpty());
     		    	String logOutput = 
     		    		"Cancelling after " + (Math.round(GunRenderingHandler.get().getReloadDeltaTime(stack)*interval*10)/10)
     		    		+ " ticks (" + (Math.round(GunRenderingHandler.get().getReloadDeltaTime(stack)*1000)/10) + "%)"
@@ -174,7 +175,7 @@ public class ReloadHandler
             	// Debug 2
                 /*if(stack.getItem() instanceof GunItem gunItem)
                 {
-    		    	float interval = GunEnchantmentHelper.getRealReloadSpeed(stack);
+    		    	float interval = GunEnchantmentHelper.getRealReloadSpeed(stack, ReloadHandler.get().isReloadFromEmpty());
     		    	String logOutput = 
     		    		"Reload cancelled after " + (Math.round(GunRenderingHandler.get().getReloadDeltaTime(stack)*interval*10)/10)
     		    		+ " ticks (" + (Math.round(GunRenderingHandler.get().getReloadDeltaTime(stack)*1000)/10) + "%)"
@@ -267,4 +268,18 @@ public class ReloadHandler
     {
         return reloadFinish;
     }
+
+    public boolean isReloadFromEmpty()
+    {
+        return reloadFromEmpty;
+    }
+
+    // This method allows the ShootingHandler to tell the ReloadHandler when a weapon was switched.
+	public void weaponSwitched()
+	{
+		reloadStart = false;
+		reloadFinish = false;
+		reloadTimer = 0;
+		prevReloadTimer = 0;
+	}
 }

@@ -140,9 +140,17 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         @Optional
         private int reloadEndDelay = -1;
         @Optional
+        private int reloadEmptyStartDelay = -1;
+        @Optional
+        private int reloadEmptyInterruptDelay = -1;
+        @Optional
+        private int reloadEmptyEndDelay = -1;
+        @Optional
         private boolean useMagReload = false;
         @Optional
-        private int magReloadTime = 20;
+        private int magReloadTime = 0;
+        @Optional
+        private int magReloadFromEmptyTime = 0;
         @Optional
         private float reloadAllowedCooldown = 1F;
         @Optional
@@ -196,8 +204,12 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             tag.putInt("ReloadStartDelay", this.reloadStartDelay);
             tag.putInt("ReloadInterruptDelay", this.reloadInterruptDelay);
             tag.putInt("ReloadEndDelay", this.reloadEndDelay);
+            tag.putInt("ReloadEmptyStartDelay", this.reloadEmptyStartDelay);
+            tag.putInt("ReloadEmptyInterruptDelay", this.reloadEmptyInterruptDelay);
+            tag.putInt("ReloadEmptyEndDelay", this.reloadEmptyEndDelay);
             tag.putBoolean("UseMagReload", this.useMagReload);
             tag.putInt("MagReloadTime", this.magReloadTime);
+            tag.putInt("MagReloadFromEmptyTime", this.magReloadFromEmptyTime);
             tag.putFloat("ReloadAllowedCooldown", this.reloadAllowedCooldown);
             tag.putInt("EnergyCapacity", this.energyCapacity);
             tag.putInt("EnergyPerShot", this.energyPerShot);
@@ -291,6 +303,18 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             {
                 this.reloadEndDelay = tag.getInt("ReloadEndDelay");
             }
+            if(tag.contains("ReloadEmptyStartDelay", Tag.TAG_ANY_NUMERIC))
+            {
+                this.reloadEmptyStartDelay = tag.getInt("ReloadEmptyStartDelay");
+            }
+            if(tag.contains("ReloadEmptyInterruptDelay", Tag.TAG_ANY_NUMERIC))
+            {
+                this.reloadEmptyInterruptDelay = tag.getInt("ReloadEmptyInterruptDelay");
+            }
+            if(tag.contains("ReloadEmptyEndDelay", Tag.TAG_ANY_NUMERIC))
+            {
+                this.reloadEmptyEndDelay = tag.getInt("ReloadEmptyEndDelay");
+            }
             if(tag.contains("UseMagReload", Tag.TAG_ANY_NUMERIC))
             {
                 this.useMagReload = tag.getBoolean("UseMagReload");
@@ -298,6 +322,10 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             if(tag.contains("MagReloadTime", Tag.TAG_ANY_NUMERIC))
             {
                 this.magReloadTime = tag.getInt("MagReloadTime");
+            }
+            if(tag.contains("MagReloadFromEmptyTime", Tag.TAG_ANY_NUMERIC))
+            {
+                this.magReloadFromEmptyTime = tag.getInt("MagReloadFromEmptyTime");
             }
             if(tag.contains("ReloadAllowedCooldown", Tag.TAG_ANY_NUMERIC))
             {
@@ -379,6 +407,7 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             Preconditions.checkArgument(this.ammoPerItem >= 1, "Ammo Per Item must be more than or equal to one");
             Preconditions.checkArgument(this.reloadRate >= 1, "Reload rate must be more than or equal to one");
             Preconditions.checkArgument(this.magReloadTime >= 1, "Mag reload time must be more than or equal to one");
+            Preconditions.checkArgument(this.magReloadFromEmptyTime >= 0, "Mag reload time must be more than or equal to zero");
             Preconditions.checkArgument(this.energyCapacity >= 0, "Energy capacity must be more than or equal to zero");
             Preconditions.checkArgument(this.energyPerShot >= 0, "Energy usage per shot must be more than or equal to zero");
             Preconditions.checkArgument(this.reloadAllowedCooldown >= 0.0F && this.reloadAllowedCooldown <= 1.0F, "Reload allowed cooldown must be between 0.0 and 1.0");
@@ -409,8 +438,12 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             if(this.reloadStartDelay != 5) object.addProperty("reloadStartDelay", this.reloadStartDelay);
             if(this.reloadInterruptDelay != 5) object.addProperty("reloadInterruptDelay", this.reloadInterruptDelay);
             if(this.reloadEndDelay != -1) object.addProperty("reloadEndDelay", this.reloadEndDelay);
+            if(this.reloadEmptyStartDelay != -1) object.addProperty("reloadEmptyStartDelay", this.reloadEmptyStartDelay);
+            if(this.reloadEmptyInterruptDelay != -1) object.addProperty("reloadEmptyInterruptDelay", this.reloadEmptyInterruptDelay);
+            if(this.reloadEmptyEndDelay != -1) object.addProperty("reloadEmptyEndDelay", this.reloadEmptyEndDelay);
             if(this.useMagReload != false) object.addProperty("useMagReload", this.useMagReload);
-            if(this.magReloadTime != 20) object.addProperty("magReloadTime", this.magReloadTime);
+            if(this.magReloadTime != 0) object.addProperty("magReloadTime", this.magReloadTime);
+            if(this.magReloadFromEmptyTime != 0) object.addProperty("magReloadFromEmptyTime", this.magReloadFromEmptyTime);
             if(this.reloadAllowedCooldown != 1) object.addProperty("reloadAllowedCooldown", this.reloadAllowedCooldown);
             if(this.recoilAngle != 0.0F) object.addProperty("recoilAngle", this.recoilAngle);
             if(this.recoilKick != 0.0F) object.addProperty("recoilKick", this.recoilKick);
@@ -450,8 +483,12 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             general.reloadStartDelay = this.reloadStartDelay;
             general.reloadInterruptDelay = this.reloadInterruptDelay;
             general.reloadEndDelay = this.reloadEndDelay;
+            general.reloadEmptyStartDelay = this.reloadEmptyStartDelay;
+            general.reloadEmptyInterruptDelay = this.reloadEmptyInterruptDelay;
+            general.reloadEmptyEndDelay = this.reloadEmptyEndDelay;
             general.useMagReload = this.useMagReload;
             general.magReloadTime = this.magReloadTime;
+            general.magReloadFromEmptyTime = this.magReloadFromEmptyTime;
             general.energyCapacity = this.energyCapacity;
             general.energyPerShot = this.energyPerShot;
             general.reloadAllowedCooldown = this.reloadAllowedCooldown;
@@ -625,6 +662,47 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         }
 
         /**
+         * @return The delay before the main reload cycle starts when reloading from empty.
+         * If zero, returns reloadStartDelay.
+         */
+        public int getReloadEmptyStartDelay()
+        {
+            return this.reloadEmptyStartDelay;
+        }
+
+        /**
+         * @return The delay (in ticks) that occurs after a reload is interrupted when reloading from empty.
+         * If zero, returns reloadStartDelay.
+         */
+        public int getReloadEmptyInterruptDelay()
+        {
+        	if (this.reloadEmptyInterruptDelay<0)
+        	{
+                if (this.reloadInterruptDelay>0)
+                	return this.reloadInterruptDelay;
+        		return getReloadEmptyEndDelay();
+        	}
+        	
+        	return this.reloadEmptyInterruptDelay;
+        }
+
+        /**
+         * @return The delay (in ticks) that occurs after a complete reload when reloading from empty.
+         * If zero, returns reloadStartDelay.
+         */
+        public int getReloadEmptyEndDelay()
+        {
+            if (this.reloadEmptyEndDelay<0)
+            {
+            	if (this.reloadEndDelay>0)
+                	return this.reloadEndDelay;
+        		return getReloadEmptyStartDelay();
+            }
+        	
+        	return this.reloadEmptyEndDelay;
+        }
+
+        /**
          * @return Whether to use the new magazine-style reload, where all ammo is loaded at the end of the reload cycle.
          */
         public boolean usesMagReload()
@@ -647,6 +725,15 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         {
             return this.magReloadTime;
         }
+        
+        /**
+         * @return The speed of magazine reloads when the gun is empty. If zero, returns magReloadTime.
+         */
+		public int getMagReloadFromEmptyTime() {
+			if (magReloadFromEmptyTime>0)
+				return this.magReloadFromEmptyTime;
+			return magReloadTime;
+		}
 
         /**
          * @return The speed of magazine reloads in ticks. The lower the value, shorter the reload time.

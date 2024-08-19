@@ -200,6 +200,7 @@ public class ShootingHandler
             	ModSyncedDataKeys.BURSTCOUNT.setValue(player, 0);
                 if(player.getMainHandItem().getItem() instanceof GunItem)
             	GunRenderingHandler.get().updateReserveAmmo(player);
+                ReloadHandler.get().weaponSwitched();
             }
             
             ItemStack heldItem = player.getMainHandItem();
@@ -285,7 +286,7 @@ public class ShootingHandler
         	GunItem gunItem = (GunItem) heldItem.getItem();
         	if (!gunItem.getModifiedGun(heldItem).getGeneral().getUseMagReload())
         	{
-        		ReloadHandler.get().setReloading(false, false);
+        		ReloadHandler.get().setReloading(false, true);
         		PacketHandler.getPlayChannel().sendToServer(new C2SMessageReload(false));
         	}
         	return false;

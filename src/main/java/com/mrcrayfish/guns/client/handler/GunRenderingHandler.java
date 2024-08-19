@@ -1222,13 +1222,17 @@ public class GunRenderingHandler
         if(!(stack.getItem() instanceof GunItem))
             return;
     	
+        //if(ReloadHandler.get().getReloadProgress(mc.getFrameTime())>0)
         if(ReloadHandler.get().getReloading(mc.player))
         {
-	    	float reloadInterval = GunEnchantmentHelper.getRealReloadSpeed(stack);
+	    	float reloadInterval = GunEnchantmentHelper.getRealReloadSpeed(stack, ReloadHandler.get().isReloadFromEmpty());
 	    	int reloadStartDelay = 5;
 	    	if (stack.getItem() instanceof GunItem gunItem)
 	    	{
 	    		Gun gun = gunItem.getModifiedGun(stack);
+	    		if (ReloadHandler.get().isReloadFromEmpty())
+		    	reloadStartDelay = Math.max(gun.getGeneral().getReloadEmptyStartDelay(),0);
+	    		else
 	    		reloadStartDelay = Math.max(gun.getGeneral().getReloadStartDelay(),0);
 	    	}
 	    	if (ReloadHandler.get().getStartReloadTick()>0)
@@ -1255,7 +1259,7 @@ public class GunRenderingHandler
         }
         else
         {
-	    	float interval = GunEnchantmentHelper.getRealReloadSpeed(stack);
+	    	float interval = GunEnchantmentHelper.getRealReloadSpeed(stack, ReloadHandler.get().isReloadFromEmpty());
 	    	int reloadStartDelay = 5;
 	    	if (stack.getItem() instanceof GunItem gunItem)
 	    	{
@@ -1283,7 +1287,7 @@ public class GunRenderingHandler
         }
         else
         {
-	    	float interval = GunEnchantmentHelper.getRealReloadSpeed(stack);
+	    	float interval = GunEnchantmentHelper.getRealReloadSpeed(stack, ReloadHandler.get().isReloadFromEmpty());
 	    	int reloadStartDelay = 5;
 	    	if (stack.getItem() instanceof GunItem gunItem)
 	    	{

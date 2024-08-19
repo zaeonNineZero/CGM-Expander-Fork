@@ -43,6 +43,7 @@ public class ReloadTracker
     private final Gun gun;
     private final int reloadStartDelay;
     private final int reloadEndDelay;
+    private final boolean reloadFromEmpty;
     private int delayedStartTick;
     private int reserveAmmo = 0;
     private boolean reloadEarlyState;
@@ -57,8 +58,20 @@ public class ReloadTracker
         this.delayedStartTick = player.tickCount;
         this.slot = player.getInventory().selected;
         this.stack = player.getInventory().getSelected();
+        
+        if (stack.getItem() instanceof GunItem)
+        this.reloadFromEmpty = (Gun.hasAmmo(stack) ? false : true);
+        else
+        this.reloadFromEmpty = false;
+        	
         this.gun = ((GunItem) stack.getItem()).getModifiedGun(stack);
+        if (reloadFromEmpty)
+        this.reloadStartDelay = Math.max(gun.getGeneral().getReloadEmptyStartDelay(),0);
+        else
         this.reloadStartDelay = Math.max(gun.getGeneral().getReloadStartDelay(),0);
+        if (reloadFromEmpty)
+        this.reloadEndDelay = Math.max(gun.getGeneral().getReloadEmptyEndDelay(),1);
+        else
         this.reloadEndDelay = Math.max(gun.getGeneral().getReloadEndDelay(),1);
     }
 
@@ -90,14 +103,14 @@ public class ReloadTracker
     private boolean canReload(Player player)
     {
         int deltaTicks = player.tickCount - (this.delayedStartTick);
-        int interval = GunEnchantmentHelper.getRealReloadSpeed(this.stack);
+        int interval = GunEnchantmentHelper.getRealReloadSpeed(this.stack, reloadFromEmpty);
         return deltaTicks > 0 && deltaTicks % interval == 0;
     }
 
     private float getReloadProgress(Player player)
     {
         int deltaTicks = player.tickCount - (this.delayedStartTick);
-        int interval = GunEnchantmentHelper.getRealReloadSpeed(this.stack);
+        int interval = GunEnchantmentHelper.getRealReloadSpeed(this.stack, reloadFromEmpty);
         return ((float) deltaTicks) / ((float) interval);
     }
     

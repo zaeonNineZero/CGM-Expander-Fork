@@ -35,17 +35,17 @@ public class GunEnchantmentHelper
         return new TrailData(weapon.isEnchanted());
     }
 
-    public static int getRealReloadSpeed(ItemStack weapon)
+    public static int getRealReloadSpeed(ItemStack weapon, boolean reloadFromEmpty)
     {
         Gun modifiedGun = ((GunItem) weapon.getItem()).getModifiedGun(weapon);
         if (modifiedGun.getGeneral().usesMagReload())
-        	return getMagReloadSpeed(weapon);
+        	return getMagReloadSpeed(weapon, reloadFromEmpty);
 
-        return getReloadInterval(weapon);
+        return getReloadInterval(weapon, reloadFromEmpty);
     }
 
 
-    public static int getReloadInterval(ItemStack weapon)
+    public static int getReloadInterval(ItemStack weapon, boolean reloadFromEmpty)
     {
         Gun modifiedGun = ((GunItem) weapon.getItem()).getModifiedGun(weapon);
         int interval = modifiedGun.getGeneral().getReloadRate();
@@ -58,12 +58,14 @@ public class GunEnchantmentHelper
         return Math.max(interval, 1);
     }
 
-    public static int getMagReloadSpeed(ItemStack weapon)
+    public static int getMagReloadSpeed(ItemStack weapon, boolean reloadFromEmpty)
     {
         Gun modifiedGun = ((GunItem) weapon.getItem()).getModifiedGun(weapon);
         //float rawSpeed = modifiedGun.getGeneral().getMagReloadTime() * (1F + 0.5F*((float) EnchantmentHelper.getItemEnchantmentLevel(ModEnchantments.OVER_CAPACITY.get(), weapon)));
         //int speed = (int) rawSpeed;
         int speed = modifiedGun.getGeneral().getMagReloadTime() + (EnchantmentHelper.getItemEnchantmentLevel(ModEnchantments.OVER_CAPACITY.get(), weapon)*4);
+        if (reloadFromEmpty)
+        speed = modifiedGun.getGeneral().getMagReloadFromEmptyTime() + (EnchantmentHelper.getItemEnchantmentLevel(ModEnchantments.OVER_CAPACITY.get(), weapon)*4);
         
         int level = EnchantmentHelper.getItemEnchantmentLevel(ModEnchantments.QUICK_HANDS.get(), weapon);
         if(level > 0)
