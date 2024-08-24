@@ -35,10 +35,9 @@ public class GunEnchantmentHelper
         return new TrailData(weapon.isEnchanted());
     }
 
-    public static int getRealReloadSpeed(ItemStack weapon, boolean reloadFromEmpty)
+    public static int getRealReloadSpeed(ItemStack weapon, boolean magReload, boolean reloadFromEmpty)
     {
-        Gun modifiedGun = ((GunItem) weapon.getItem()).getModifiedGun(weapon);
-        if (modifiedGun.getGeneral().usesMagReload())
+        if (magReload)
         	return getMagReloadSpeed(weapon, reloadFromEmpty);
 
         return getReloadInterval(weapon, reloadFromEmpty);

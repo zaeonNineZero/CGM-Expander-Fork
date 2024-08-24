@@ -1,6 +1,5 @@
 package com.mrcrayfish.guns.client.handler;
 
-import com.mrcrayfish.guns.GunMod;
 import com.mrcrayfish.guns.client.KeyBinds;
 import com.mrcrayfish.guns.common.AmmoContext;
 import com.mrcrayfish.guns.common.Gun;
@@ -43,6 +42,7 @@ public class ReloadHandler
     private int startReloadTick;
     private double reloadTimer;
     private double prevReloadTimer;
+    private boolean doMagReload = false;
     private boolean reloadFromEmpty = false;
     private int storedReloadDelay;
     private int reloadingSlot;
@@ -119,10 +119,15 @@ public class ReloadHandler
                     CompoundTag tag = stack.getTag();
                     if(tag != null && !tag.contains("IgnoreAmmo", Tag.TAG_BYTE))
                     {
-                    	if (Gun.hasAmmo(stack))
+                    	if (!Gun.hasAmmo(stack))
                     		reloadFromEmpty = true;
                     	else
                         	reloadFromEmpty = false;
+
+                    	if (Gun.usesMagReloads(stack))
+                    		doMagReload = true;
+                    	else
+                    		doMagReload = false;
                     	
                         Gun gun = ((GunItem) stack.getItem()).getModifiedGun(stack);
                         if (Gun.findAmmo((Player) player, gun.getProjectile().getItem()) == AmmoContext.NONE && !Gun.hasUnlimitedReloads(stack))
@@ -151,11 +156,13 @@ public class ReloadHandler
             {
             	ItemStack stack = player.getMainHandItem();
             	GunRenderingHandler.get().getReloadDeltaTime(stack);
+            	if (fromInput)
+            	reloadFinish = false;
             	
             	// Debug 1
                 /*if(stack.getItem() instanceof GunItem gunItem)
                 {
-    		    	float interval = GunEnchantmentHelper.getRealReloadSpeed(stack, ReloadHandler.get().isReloadFromEmpty());
+    		    	float interval = GunEnchantmentHelper.getRealReloadSpeed(stack, ReloadHandler.get().isDoMagReload(), ReloadHandler.get().isReloadFromEmpty());
     		    	String logOutput = 
     		    		"Cancelling after " + (Math.round(GunRenderingHandler.get().getReloadDeltaTime(stack)*interval*10)/10)
     		    		+ " ticks (" + (Math.round(GunRenderingHandler.get().getReloadDeltaTime(stack)*1000)/10) + "%)"
@@ -175,7 +182,7 @@ public class ReloadHandler
             	// Debug 2
                 /*if(stack.getItem() instanceof GunItem gunItem)
                 {
-    		    	float interval = GunEnchantmentHelper.getRealReloadSpeed(stack, ReloadHandler.get().isReloadFromEmpty());
+    		    	float interval = GunEnchantmentHelper.getRealReloadSpeed(stack, ReloadHandler.get().isDoMagReload(), ReloadHandler.get().isReloadFromEmpty());
     		    	String logOutput = 
     		    		"Reload cancelled after " + (Math.round(GunRenderingHandler.get().getReloadDeltaTime(stack)*interval*10)/10)
     		    		+ " ticks (" + (Math.round(GunRenderingHandler.get().getReloadDeltaTime(stack)*1000)/10) + "%)"
@@ -202,9 +209,9 @@ public class ReloadHandler
     	ItemStack stack = player.getMainHandItem();
     	if(player.getMainHandItem().getItem() instanceof GunItem gun)
     	{
-    		reloadStartDelay = Math.max(gun.getModifiedGun(stack).getGeneral().getReloadStartDelay(),1);
-    		reloadInterruptDelay = Math.max(gun.getModifiedGun(stack).getGeneral().getReloadInterruptDelay(),5);
-    		reloadEndDelay = Math.max(gun.getModifiedGun(stack).getGeneral().getReloadEndDelay(),1);
+    		reloadStartDelay = Math.max(reloadFromEmpty ? gun.getModifiedGun(stack).getGeneral().getReloadEmptyStartDelay() : gun.getModifiedGun(stack).getGeneral().getReloadStartDelay(),1);
+    		reloadInterruptDelay = Math.max(reloadFromEmpty ? gun.getModifiedGun(stack).getGeneral().getReloadEmptyInterruptDelay() : gun.getModifiedGun(stack).getGeneral().getReloadInterruptDelay(),5);
+    		reloadEndDelay = Math.max(reloadFromEmpty ? gun.getModifiedGun(stack).getGeneral().getReloadEmptyEndDelay() : gun.getModifiedGun(stack).getGeneral().getReloadEndDelay(),1);
     	}
     	storedReloadDelay = (reloadFinish && !getReloading(player)) ? reloadEndDelay : ((reloadStart && getReloading(player)) ? reloadStartDelay : reloadInterruptDelay);
     }
@@ -267,6 +274,11 @@ public class ReloadHandler
     public boolean doReloadFinishAnimation()
     {
         return reloadFinish;
+    }
+
+    public boolean isDoMagReload()
+    {
+        return doMagReload;
     }
 
     public boolean isReloadFromEmpty()
