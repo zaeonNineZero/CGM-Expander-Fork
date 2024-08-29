@@ -6,6 +6,7 @@ import com.mrcrayfish.guns.GunMod;
 import com.mrcrayfish.guns.blockentity.WorkbenchBlockEntity;
 import com.mrcrayfish.guns.common.DelayedTask;
 import com.mrcrayfish.guns.common.Gun;
+import com.mrcrayfish.guns.common.Gun.ReloadSoundsBase;
 import com.mrcrayfish.guns.common.ProjectileManager;
 import com.mrcrayfish.guns.common.ShootTracker;
 import com.mrcrayfish.guns.common.SpreadTracker;
@@ -185,10 +186,10 @@ public class ServerPlayHandler
                     PacketHandler.getPlayChannel().sendToNearbyPlayers(() -> LevelLocation.create(player.level, posX, posY, posZ, radius), messageSound);
                 }
 
-                ResourceLocation cycleSound = getGunSound(heldItem, modifiedGun, "cycle", false, false);
+                ResourceLocation cycleSound = getGunSound(modifiedGun, "cycle", false, false);
                 if(cycleSound != null || modifiedGun.getSounds().getCycleDelay() >= 0)
                 {
-            		final ResourceLocation finalSound = (cycleSound != null? cycleSound : getGunSound(heldItem, modifiedGun, "cock", false, false));
+            		final ResourceLocation finalSound = (cycleSound != null? cycleSound : getGunSound(modifiedGun, "cock", false, false));
             		
             		double modifiedCycleDelay = modifiedGun.getSounds().getCycleDelay();
             		modifiedCycleDelay = modifiedCycleDelay * (double) (GunCompositeStatHelper.getCompositeRate(heldItem, modifiedGun, player) / Math.max(modifiedGun.getGeneral().getRate(),1.0));
@@ -295,18 +296,19 @@ public class ServerPlayHandler
             Gun modifiedGun = item.getModifiedGun(heldItem);
             if(modifiedGun != null)
             {
-
-            	String soundType = "none";
-            	if (modifiedGun.getSounds().hasExtraReloadSounds())
-            	soundType = "reloadStart";
+            	String soundType = "reloadStart";
             	boolean magReload = Gun.usesMagReloads(heldItem);
             	boolean reloadFromEmpty = !Gun.hasAmmo(heldItem);
-            	final ResourceLocation finalSound = getGunSound(heldItem, modifiedGun, soundType, magReload, reloadFromEmpty);
+            	ReloadSoundsBase soundObj = Gun.findReloadSoundObj(modifiedGun, soundType, magReload, reloadFromEmpty);
+            	//if (Gun.hasExtraReloadSounds(modifiedGun, magReload, reloadFromEmpty))
+            	//soundType = "reloadStart";
             	
-            	if (Gun.getReloadSoundTimings(heldItem, modifiedGun, soundType, magReload, reloadFromEmpty)>0)
+            	final ResourceLocation finalSound = getGunReloadSound(modifiedGun, soundObj, soundType, magReload, reloadFromEmpty);
+            	
+            	if (Gun.getReloadSoundTimings(modifiedGun, soundObj, soundType, magReload, reloadFromEmpty)>0)
                 {
             		Player finalPlayer = player;
-                	DelayedTask.runAfter(modifiedGun.getSounds().getReloadStartDelay(), () ->
+                	DelayedTask.runAfter((int) Gun.getReloadSoundTimings(modifiedGun, soundObj, soundType, magReload, reloadFromEmpty), () ->
                     {
                         playReloadStartSound(finalPlayer, finalSound);
                     });
@@ -317,21 +319,31 @@ public class ServerPlayHandler
         }
     }
     
-    private static ResourceLocation getGunSound(ItemStack stack, Gun modifiedGun, String soundType, boolean doMagReload, boolean reloadFromEmpty)
+    private static ResourceLocation getGunSound(Gun modifiedGun, String soundType, boolean doMagReload, boolean reloadFromEmpty)
     {
     	ResourceLocation sound = null;
     	
-    	/*if(soundType == "reloadStart")
-    		sound = modifiedGun.getSounds().getReloadStart();
-        	//sound = Gun.getReloadSound(stack, modifiedGun, "getReloadStart", !Gun.hasAmmo(stack));
-    	else*/
     	if(soundType == "cycle")
     		sound = modifiedGun.getSounds().getCycle();
     	else
     	if(soundType == "cock")
     		sound = modifiedGun.getSounds().getCock();
-    	else
-        	sound = Gun.getReloadSound(stack, modifiedGun, soundType, doMagReload, reloadFromEmpty);
+    	
+        if(sound != null)
+        {
+            return sound;
+        }
+        return null;
+    }
+    
+    private static ResourceLocation getGunReloadSound(Gun modifiedGun, ReloadSoundsBase soundObj, String soundType, boolean doMagReload, boolean reloadFromEmpty)
+    {
+    	ResourceLocation sound = null;
+    	
+    	/*if(soundType == "reloadStart")
+    		sound = modifiedGun.getSounds().getReloadStart();
+        	//sound = Gun.getReloadSound(stack, modifiedGun, "getReloadStart", !Gun.hasAmmo(stack));*/
+    	sound = Gun.getReloadSound(modifiedGun, soundObj, soundType, doMagReload, reloadFromEmpty);
     	
         if(sound != null)
         {

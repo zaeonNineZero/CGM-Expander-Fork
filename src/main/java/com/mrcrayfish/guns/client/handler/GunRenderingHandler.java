@@ -629,6 +629,7 @@ public class GunRenderingHandler
         	{
             	float transition = (this.prevSprintTransition + (this.sprintTransition - this.prevSprintTransition) * partialTicks) / 5F;
             	transition = (float) Math.sin((transition * Math.PI) / 2);
+            	transition = (float) (transition*(1-AimingHandler.get().getNormalisedAdsProgress()));
             	poseStack.translate(0, 0.35 * transition, -0.1 * transition);
             	poseStack.mulPose(Vector3f.XP.rotationDegrees(45F * transition));
         	}
@@ -637,6 +638,7 @@ public class GunRenderingHandler
         		float leftHanded = hand == HumanoidArm.LEFT ? -1 : 1;
             	float transition = (this.prevSprintTransition + (this.sprintTransition - this.prevSprintTransition) * partialTicks) / 5F;
             	transition = (float) Math.sin((transition * Math.PI) / 2);
+            	transition = (float) (transition*(1-AimingHandler.get().getNormalisedAdsProgress()));
             	poseStack.translate(-0.25 * leftHanded * transition, -0.1 * transition, 0);
             	poseStack.mulPose(Vector3f.YP.rotationDegrees(45F * leftHanded * transition));
             	poseStack.mulPose(Vector3f.XP.rotationDegrees(-25F * transition));
