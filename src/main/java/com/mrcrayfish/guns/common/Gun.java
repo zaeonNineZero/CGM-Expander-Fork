@@ -4031,16 +4031,12 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
     {
     	ReloadSoundsBase soundObject = gun.getReloadSounds();
     	ResourceLocation soundEvent = null;
-
-    	soundObject = getReloadSoundGroup(gun, magReload, emptyReload);
-    	soundEvent = getReloadSoundEventDynamic(soundObject, soundType);
-    	
-    	if (soundEvent == null)
-    	{
-    		boolean tryMagReload=magReload;
-    		boolean tryEmptyReload=emptyReload;
-    		for(int i=0; i<4; i++)
-    		{
+    	boolean tryMagReload=magReload;
+    	boolean tryEmptyReload=emptyReload;
+		for(int i=0; i<4; i++)
+		{
+			if (i>0)
+			{
     			if (tryEmptyReload)
     			{ tryEmptyReload = false; }
     			else
@@ -4048,16 +4044,18 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
     			{ tryMagReload = false; tryEmptyReload = true; }
         		else
         		break;
-    			
-    	    	soundObject = getReloadSoundGroup(gun, tryMagReload, tryEmptyReload);
-    	    	soundEvent = getReloadSoundEventDynamic(soundObject, soundType);
-    		}
-    	}
+			}
+	    	soundObject = getReloadSoundGroup(gun, tryMagReload, tryEmptyReload);
+	    	soundEvent = getReloadSoundEventDynamic(soundObject, soundType);
+	    	
+	    	if (soundEvent!= null)
+	    	break;
+		}
     	//GunMod.LOGGER.info("Sound object for sound type " + soundType + " is " + (soundObject != null ? soundObject.toString() : "null"));
     	if (soundEvent == null)
     		return null;
     	
-    	return soundObject;
+		return soundObject;
     }
 
     public static ResourceLocation getReloadSound(Gun gun, ReloadSoundsBase soundObject, String soundType, boolean magReload, boolean emptyReload)
@@ -4094,12 +4092,12 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
     {
     	ReloadSoundsBase soundObject = gun.getReloadSounds();
     	boolean extraSounds = false;
-    	
-    	{
-    		boolean tryMagReload=true;
-    		boolean tryEmptyReload=true;
-    		for(int i=0; i<3; i++)
-    		{
+    	boolean tryMagReload=true;
+    	boolean tryEmptyReload=true;
+		for(int i=0; i<4; i++)
+		{
+			if (i>0)
+			{
     			if (tryEmptyReload)
     			{ tryEmptyReload = false; }
     			else
@@ -4107,12 +4105,15 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
     			{ tryMagReload = false; tryEmptyReload = true; }
         		else
         		break;
-    			
-    	    	soundObject = getReloadSoundGroup(gun, tryMagReload, tryEmptyReload);
-    	    	if (soundObject != null)
-    	    	extraSounds = soundObject.hasExtraReloadSounds();
-    		}
-    	}
+			}
+			
+	    	soundObject = getReloadSoundGroup(gun, tryMagReload, tryEmptyReload);
+	    	if (soundObject != null)
+	    	extraSounds = soundObject.hasExtraReloadSounds();
+	    	
+	    	if (extraSounds==true)
+	    	break;
+		}
     	
     	if (extraSounds == false)
     	{
@@ -4126,13 +4127,15 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
     {
     	ReloadSoundsBase defaultSoundObject = gun.getReloadSounds();
     	ReloadSoundsBase soundObject = defaultSoundObject;
-    	
-    	if (!magReload && emptyReload)
-    		soundObject = gun.getEmptyReloadSounds();
-    	if (magReload && !emptyReload)
-    		soundObject = gun.getMagReloadSounds();
+
         if (magReload && emptyReload)
-        	soundObject = gun.getEmptyMagReloadSounds();
+        soundObject = gun.getEmptyMagReloadSounds();
+        else
+        if (magReload)
+        soundObject = gun.getMagReloadSounds();
+        else
+    	if (emptyReload)
+    	soundObject = gun.getEmptyReloadSounds();
         
         if (soundObject == null)
         {

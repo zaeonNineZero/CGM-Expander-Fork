@@ -154,6 +154,7 @@ public class ReloadTracker
                 if(tag != null)
                 {
                     amount = Math.min(amount, maxAmmo - tag.getInt("AmmoCount"));
+                    if (tag.getInt("AmmoCount") < GunEnchantmentHelper.getAmmoCapacity(stack, gun))
                     tag.putInt("AmmoCount", tag.getInt("AmmoCount") + amount);
                     ammoLoaded += amount;
                     
@@ -220,6 +221,13 @@ public class ReloadTracker
             }
             if (player.tickCount - (tracker.startTick) < tracker.reloadStartDelay)
             {
+            	CompoundTag tag = tracker.stack.getTag();
+            	if(tag == null || tag.getInt("AmmoCount") >= GunEnchantmentHelper.getAmmoCapacity(tracker.stack, tracker.gun))
+            	{
+            		ModSyncedDataKeys.RELOADING.setValue(player, false);
+            		return;
+            	}
+            	
             	tracker.delayedStartTick = player.tickCount;
             	return;
         	}
