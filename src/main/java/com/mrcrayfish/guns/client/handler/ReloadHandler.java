@@ -9,6 +9,7 @@ import com.mrcrayfish.guns.item.GunItem;
 import com.mrcrayfish.guns.network.PacketHandler;
 import com.mrcrayfish.guns.network.message.C2SMessageReload;
 import com.mrcrayfish.guns.network.message.C2SMessageUnload;
+import com.mrcrayfish.guns.util.GunCompositeStatHelper;
 import com.mrcrayfish.guns.util.GunEnchantmentHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
@@ -72,6 +73,23 @@ public class ReloadHandler
                     this.setReloading(false, false);
                 }
             }
+            else
+            {
+            	ItemStack stack = player.getMainHandItem();
+                if(stack.getItem() instanceof GunItem)
+                {
+                    CompoundTag tag = stack.getTag();
+                    if(tag != null && !tag.contains("IgnoreAmmo", Tag.TAG_BYTE))
+                    {
+                    	if(tag.getInt("AmmoCount") > GunCompositeStatHelper.getAmmoCapacity(stack))
+                    	{
+                    		this.setReloading(false, true);
+                            PacketHandler.getPlayChannel().sendToServer(new C2SMessageUnload(true));
+                        	GunRenderingHandler.get().stageReserveAmmoUpdate(2);
+                    	}
+                    }
+                }
+            }
 
             this.updateReloadTimer(player);
         }
@@ -87,15 +105,27 @@ public class ReloadHandler
         if(KeyBinds.KEY_RELOAD.isDown() && event.getAction() == GLFW.GLFW_PRESS)
         {
         	if (reloadTimer<=0 || reloadTimer>=1)
-            this.setReloading(!ModSyncedDataKeys.RELOADING.getValue(player), true);
+        	{
+        		ItemStack stack = player.getMainHandItem();
+                if(stack.getItem() instanceof GunItem)
+                {
+                    CompoundTag tag = stack.getTag();
+                    if(tag != null && !tag.contains("IgnoreAmmo", Tag.TAG_BYTE))
+                    {
+                    	Gun gun = ((GunItem) stack.getItem()).getModifiedGun(stack);
+                    	if(tag.getInt("AmmoCount") < GunCompositeStatHelper.getAmmoCapacity(stack, gun))
+                    	this.setReloading(!ModSyncedDataKeys.RELOADING.getValue(player), true);
+                    }
+                }
+        	}
             KeyBinds.KEY_RELOAD.setDown(false);
             if(player.getMainHandItem().getItem() instanceof GunItem)
             GunRenderingHandler.get().updateReserveAmmo(player);
         }
-        if(KeyBinds.KEY_UNLOAD.consumeClick() && event.getAction() == GLFW.GLFW_PRESS)
+        if(KeyBinds.KEY_UNLOAD.consumeClick() && event.getAction() == GLFW.GLFW_PRESS && reloadTimer<=0)
         {
             this.setReloading(false, true);
-            PacketHandler.getPlayChannel().sendToServer(new C2SMessageUnload());
+            PacketHandler.getPlayChannel().sendToServer(new C2SMessageUnload(false));
             if(player.getMainHandItem().getItem() instanceof GunItem)
         	GunRenderingHandler.get().stageReserveAmmoUpdate(2);
         }
@@ -138,7 +168,7 @@ public class ReloadHandler
                         cooldown = tracker.getCooldownPercent(stack.getItem(), Minecraft.getInstance().getFrameTime());
                         if (cooldown > gun.getGeneral().getReloadAllowedCooldown())
                             return;
-                        if(tag.getInt("AmmoCount") >= GunEnchantmentHelper.getAmmoCapacity(stack, gun))
+                        if(tag.getInt("AmmoCount") >= GunCompositeStatHelper.getAmmoCapacity(stack, gun))
                             return;
                         if(MinecraftForge.EVENT_BUS.post(new GunReloadEvent.Pre(player, stack)))
                             return;

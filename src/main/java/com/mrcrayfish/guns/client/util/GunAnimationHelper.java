@@ -274,13 +274,13 @@ public final class GunAnimationHelper
 		String animSuffix = "";
 		if (animationType.contains("reload") && (magReload || emptyReload))
 		{
-			if (magReload && emptyReload && hasAnimation(animationType + "_EmptyMag", weapon))
+			if (magReload && emptyReload && hasAnimation(animationType + "_EmptyMag", weapKey))
 			animSuffix = "_EmptyMag";
 			else
-			if (magReload && hasAnimation(animationType + "_Mag", weapon))
+			if (magReload && hasAnimation(animationType + "_Mag", weapKey))
 			animSuffix = "_Mag";
 			else
-			if (emptyReload && hasAnimation(animationType + "_Empty", weapon))
+			if (emptyReload && hasAnimation(animationType + "_Empty", weapKey))
 			animSuffix = "_Empty";
 
 			animationType = animationType+animSuffix;
@@ -350,13 +350,13 @@ public final class GunAnimationHelper
 		String animSuffix = "";
 		if (animationType.contains("reload") && (magReload || emptyReload))
 		{
-			if (magReload && emptyReload && hasAnimation(animationType + "_EmptyMag", weapon))
+			if (magReload && emptyReload && hasAnimation(animationType + "_EmptyMag", weapKey))
 			animSuffix = "_EmptyMag";
 			else
-			if (magReload && hasAnimation(animationType + "_Mag", weapon))
+			if (magReload && hasAnimation(animationType + "_Mag", weapKey))
 			animSuffix = "_Mag";
 			else
-			if (emptyReload && hasAnimation(animationType + "_Empty", weapon))
+			if (emptyReload && hasAnimation(animationType + "_Empty", weapKey))
 			animSuffix = "_Empty";
 			
 			animationType = animationType+animSuffix;
@@ -420,6 +420,28 @@ public final class GunAnimationHelper
 	
     
 	/* Reload animation calculators methods for more advanced control */
+	public static String addReloadAnimSuffix(String animationType, ResourceLocation weapKey)
+	{
+		boolean magReload = ReloadHandler.get().isDoMagReload();
+		boolean emptyReload = ReloadHandler.get().isReloadFromEmpty();
+		String animSuffix = "";
+		if (animationType.contains("reload") && (magReload || emptyReload))
+		{
+			if (magReload && emptyReload && hasAnimation(animationType + "_EmptyMag", weapKey))
+			animSuffix = "_EmptyMag";
+			else
+			if (magReload && hasAnimation(animationType + "_Mag", weapKey))
+			animSuffix = "_Mag";
+			else
+			if (emptyReload && hasAnimation(animationType + "_Empty", weapKey))
+			animSuffix = "_Empty";
+			
+			animationType = animationType+animSuffix;
+		}
+		
+		return animationType;
+	}
+	
     // Frames
 	public static float getScaledProgress(String animationType, ResourceLocation weapKey, float progress)
 	{
@@ -468,7 +490,7 @@ public final class GunAnimationHelper
 	public static void rotateAroundOffset(PoseStack poseStack, Vec3 rotations, String animationType, ItemStack weapon, String component)
 	{
 		ResourceLocation weapKey = lookForParentAnimation(animationType, getItemLocationKey(weapon));
-		rotateAroundOffset(poseStack, rotations, GunAnimationHelper.getRotationOffsetPoint(animationType, weapKey, component));
+		rotateAroundOffset(poseStack, rotations, GunAnimationHelper.getRotationOffsetPoint(addReloadAnimSuffix(animationType, weapKey), weapKey, component));
 	}
 	
 	
@@ -543,6 +565,9 @@ public final class GunAnimationHelper
 	
 	// Rotation Offset Points
 	public static Vec3 getRotationOffsetPoint(String animationType, ResourceLocation weapKey, String component) {
+		if (!animationType.contains("_"))
+			animationType = addReloadAnimSuffix(animationType, weapKey);
+		
 		DataObject offsetObject = getObjectByPath(weapKey, ANIMATION_KEY, animationType, component);
 		if (offsetObject.has("rotOffset", DataType.ARRAY))
 		{
@@ -727,6 +752,7 @@ public final class GunAnimationHelper
 	
 	
 	// Additional methods to aid with interfacing with the animation system.
+	@SuppressWarnings("deprecation")
 	public static ResourceLocation getItemLocationKey(ItemStack stack)
 	{
 		ResourceLocation location = stack.getItem().builtInRegistryHolder().key().location();

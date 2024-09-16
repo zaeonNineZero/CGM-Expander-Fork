@@ -7,6 +7,7 @@ import com.mrcrayfish.guns.Reference;
 import com.mrcrayfish.guns.annotation.Ignored;
 import com.mrcrayfish.guns.annotation.Optional;
 import com.mrcrayfish.guns.client.ClientHandler;
+import com.mrcrayfish.guns.client.ExpandedModelComponents;
 import com.mrcrayfish.guns.compat.BackpackHelper;
 import com.mrcrayfish.guns.debug.Debug;
 import com.mrcrayfish.guns.debug.IDebugWidget;
@@ -149,13 +150,17 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         private int defaultColor = -1;
         private int maxAmmo;
         @Optional
+        private int lightMagAmmo = 0;
+        @Optional
+        private int extendedMagAmmo = 0;
+        @Optional
         private int overCapacityAmmo = 0;
         @Optional
         private boolean infiniteAmmo = false;
         @Optional
         private int reloadAmount = 1;
         @Optional
-        private int itemsPerAmmo = 1;
+        private int ammoPerShot = 1;
         @Optional
         private int ammoPerItem = 1;
         @Optional
@@ -177,11 +182,19 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         @Optional
         private boolean magReloadWhenEmpty = false;
         @Optional
+        private boolean magReloadWithLightMag = false;
+        @Optional
+        private boolean magReloadWithExtendedMag = false;
+        @Optional
         private boolean noMagReloadWithScope = false;
         @Optional
         private int magReloadTime = 0;
         @Optional
         private int magReloadFromEmptyTime = 0;
+        @Optional
+        private double lightMagReloadTimeModifier = 0.87;
+        @Optional
+        private double extendedMagReloadTimeModifier = 1.12;
         @Optional
         private float reloadAllowedCooldown = 1F;
         @Optional
@@ -226,10 +239,12 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             tag.putString("GripType", this.gripType.getId().toString());
             tag.putInt("DefaultColor", this.defaultColor);
             tag.putInt("MaxAmmo", this.maxAmmo);
+            tag.putInt("LightMagAmmo", this.lightMagAmmo);
+            tag.putInt("ExtendedMagAmmo", this.extendedMagAmmo);
             tag.putInt("OverCapacityAmmo", this.overCapacityAmmo);
             tag.putBoolean("InfiniteAmmo", this.infiniteAmmo);
             tag.putInt("ReloadAmount", this.reloadAmount);
-            tag.putInt("ItemsPerAmmo", this.itemsPerAmmo);
+            tag.putInt("AmmoPerShot", this.ammoPerShot);
             tag.putInt("AmmoPerItem", this.ammoPerItem);
             tag.putInt("ReloadRate", this.reloadRate);
             tag.putInt("ReloadStartDelay", this.reloadStartDelay);
@@ -243,6 +258,8 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             tag.putBoolean("NoMagReloadWithScope", this.noMagReloadWithScope);
             tag.putInt("MagReloadTime", this.magReloadTime);
             tag.putInt("MagReloadFromEmptyTime", this.magReloadFromEmptyTime);
+            tag.putDouble("LightMagReloadTimeModifier", this.lightMagReloadTimeModifier);
+            tag.putDouble("ExtendedMagReloadTimeModifier", this.extendedMagReloadTimeModifier);
             tag.putFloat("ReloadAllowedCooldown", this.reloadAllowedCooldown);
             tag.putInt("EnergyCapacity", this.energyCapacity);
             tag.putInt("EnergyPerShot", this.energyPerShot);
@@ -293,6 +310,14 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             {
                 this.maxAmmo = tag.getInt("MaxAmmo");
             }
+            if(tag.contains("LightMagAmmo", Tag.TAG_ANY_NUMERIC))
+            {
+                this.lightMagAmmo = tag.getInt("LightMagAmmo");
+            }
+            if(tag.contains("ExtendedMagAmmo", Tag.TAG_ANY_NUMERIC))
+            {
+                this.extendedMagAmmo = tag.getInt("ExtendedMagAmmo");
+            }
             if(tag.contains("OverCapacityAmmo", Tag.TAG_ANY_NUMERIC))
             {
                 this.overCapacityAmmo = tag.getInt("OverCapacityAmmo");
@@ -312,9 +337,9 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             	this.reloadAmount = tag.getInt("ReloadSpeed");
          	}
             
-            if(tag.contains("ItemsPerAmmo", Tag.TAG_ANY_NUMERIC))
+            if(tag.contains("AmmoPerShot", Tag.TAG_ANY_NUMERIC))
             {
-                this.itemsPerAmmo = tag.getInt("ItemsPerAmmo");
+                this.ammoPerShot = tag.getInt("AmmoPerShot");
             }
             if(tag.contains("AmmoPerItem", Tag.TAG_ANY_NUMERIC))
             {
@@ -367,6 +392,14 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             if(tag.contains("MagReloadFromEmptyTime", Tag.TAG_ANY_NUMERIC))
             {
                 this.magReloadFromEmptyTime = tag.getInt("MagReloadFromEmptyTime");
+            }
+            if(tag.contains("LightMagReloadTimeModifier", Tag.TAG_ANY_NUMERIC))
+            {
+                this.lightMagReloadTimeModifier = tag.getDouble("LightMagReloadTimeModifier");
+            }
+            if(tag.contains("ExtendedMagReloadTimeModifier", Tag.TAG_ANY_NUMERIC))
+            {
+                this.extendedMagReloadTimeModifier = tag.getDouble("ExtendedMagReloadTimeModifier");
             }
             if(tag.contains("ReloadAllowedCooldown", Tag.TAG_ANY_NUMERIC))
             {
@@ -438,17 +471,21 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         {
             Preconditions.checkArgument(this.rate > 0, "Rate must be more than zero");
             Preconditions.checkArgument(this.defaultColor == -1 || this.defaultColor>=0, "Default color must be a valid RGBA-integer-format color; use -1 to disable this.");
-            Preconditions.checkArgument(this.maxAmmo > 0, "Max ammo must be more than zero");
+            Preconditions.checkArgument(this.maxAmmo > 0, "Maximum ammo must be more than zero");
+            Preconditions.checkArgument(this.lightMagAmmo >= 0, "Light magazine maximum ammo cannot be negative; set to zero to match base maximum ammo");
+            Preconditions.checkArgument(this.extendedMagAmmo >= 0, "Extended magazine maximum ammo cannot be negative; set to zero to match base maximum ammo");
             Preconditions.checkArgument(this.burstCount >= 0, "Burst count cannot be negative; set to zero to disable bursts");
             Preconditions.checkArgument(this.burstCount != 1, "Burst count must be greater than one, or equal to zero; set to zero to disable bursts");
             Preconditions.checkArgument(this.burstCooldown >= 0, "Burst cooldown cannot be negative; set to zero to disable the cooldown");
             Preconditions.checkArgument(this.overCapacityAmmo > 0, "Over Capacity bonus ammo must be more than zero");
             Preconditions.checkArgument(this.reloadAmount >= 1, "Reload amount must be more than or equal to one");
-            Preconditions.checkArgument(this.itemsPerAmmo >= 1, "Items Per Ammo must be more than or equal to one");
-            Preconditions.checkArgument(this.ammoPerItem >= 1, "Ammo Per Item must be more than or equal to one");
+            Preconditions.checkArgument(this.ammoPerShot >= 1, "Ammo Consumed Per Shot must be more than or equal to one");
+            Preconditions.checkArgument(this.ammoPerItem >= 1, "Ammo Loaded Per Item must be more than or equal to one");
             Preconditions.checkArgument(this.reloadRate >= 1, "Reload rate must be more than or equal to one");
             Preconditions.checkArgument(this.magReloadTime >= 1, "Mag reload time must be more than or equal to one");
             Preconditions.checkArgument(this.magReloadFromEmptyTime >= 0, "Mag reload time must be more than or equal to zero");
+            Preconditions.checkArgument(this.lightMagReloadTimeModifier > 0, "Reload time modifier with a light magazine must be greater than zero");
+            Preconditions.checkArgument(this.extendedMagReloadTimeModifier > 0, "Reload time modifier with an extended magazine must be greater than zero");
             Preconditions.checkArgument(this.energyCapacity >= 0, "Energy capacity must be more than or equal to zero");
             Preconditions.checkArgument(this.energyPerShot >= 0, "Energy usage per shot must be more than or equal to zero");
             Preconditions.checkArgument(this.reloadAllowedCooldown >= 0.0F && this.reloadAllowedCooldown <= 1.0F, "Reload allowed cooldown must be between 0.0 and 1.0");
@@ -470,10 +507,12 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             object.addProperty("gripType", this.gripType.getId().toString());
             if(this.defaultColor != 1) object.addProperty("defaultColor", this.defaultColor);
             object.addProperty("maxAmmo", this.maxAmmo);
+            if(this.lightMagAmmo != 0) object.addProperty("lightMagAmmo", this.lightMagAmmo);
+            if(this.extendedMagAmmo != 0) object.addProperty("extendedMagAmmo", this.extendedMagAmmo);
             object.addProperty("overCapacityAmmo", this.overCapacityAmmo);
             if(this.infiniteAmmo != false) object.addProperty("infiniteAmmo", this.infiniteAmmo);
             if(this.reloadAmount != 1) object.addProperty("reloadAmount", this.reloadAmount);
-            if(this.itemsPerAmmo != 1) object.addProperty("itemsPerAmmo", this.itemsPerAmmo);
+            if(this.ammoPerShot != 1) object.addProperty("itemsPerAmmo", this.ammoPerShot);
             if(this.ammoPerItem != 1) object.addProperty("ammoPerItem", this.ammoPerItem);
             if(this.reloadRate != 10) object.addProperty("reloadRate", this.reloadRate);
             if(this.reloadStartDelay != 5) object.addProperty("reloadStartDelay", this.reloadStartDelay);
@@ -487,6 +526,8 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             if(this.noMagReloadWithScope != false) object.addProperty("noMagReloadWithScope", this.noMagReloadWithScope);
             if(this.magReloadTime != 0) object.addProperty("magReloadTime", this.magReloadTime);
             if(this.magReloadFromEmptyTime != 0) object.addProperty("magReloadFromEmptyTime", this.magReloadFromEmptyTime);
+            if(this.lightMagReloadTimeModifier != 0.87) object.addProperty("lightMagReloadTimeModifier", this.lightMagReloadTimeModifier);
+            if(this.extendedMagReloadTimeModifier != 1.15) object.addProperty("extendedMagReloadTimeModifier", this.extendedMagReloadTimeModifier);
             if(this.reloadAllowedCooldown != 1) object.addProperty("reloadAllowedCooldown", this.reloadAllowedCooldown);
             if(this.recoilAngle != 0.0F) object.addProperty("recoilAngle", this.recoilAngle);
             if(this.recoilKick != 0.0F) object.addProperty("recoilKick", this.recoilKick);
@@ -517,9 +558,12 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             general.gripType = this.gripType;
             general.defaultColor = this.defaultColor;
             general.maxAmmo = this.maxAmmo;
+            general.lightMagAmmo = this.lightMagAmmo;
+            general.extendedMagAmmo = this.extendedMagAmmo;
             general.overCapacityAmmo = this.overCapacityAmmo;
             general.infiniteAmmo = this.infiniteAmmo;
             general.reloadAmount = this.reloadAmount;
+            general.ammoPerShot = this.ammoPerShot;
             general.ammoPerItem = this.ammoPerItem;
             general.reloadAmount = this.reloadAmount;
             general.reloadRate = this.reloadRate;
@@ -534,6 +578,8 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             general.noMagReloadWithScope = this.noMagReloadWithScope;
             general.magReloadTime = this.magReloadTime;
             general.magReloadFromEmptyTime = this.magReloadFromEmptyTime;
+            general.lightMagReloadTimeModifier = this.lightMagReloadTimeModifier;
+            general.extendedMagReloadTimeModifier = this.extendedMagReloadTimeModifier;
             general.energyCapacity = this.energyCapacity;
             general.energyPerShot = this.energyPerShot;
             general.reloadAllowedCooldown = this.reloadAllowedCooldown;
@@ -626,6 +672,22 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         }
 
         /**
+         * @return The maximum amount of ammo this weapon can hold when equipped with a Light Magazine.
+         */
+        public int getLightMagAmmo()
+        {
+            return this.lightMagAmmo;
+        }
+
+        /**
+         * @return The maximum amount of ammo this weapon can hold when equipped with an Extended Magazine.
+         */
+        public int getExtendedMagAmmo()
+        {
+            return this.extendedMagAmmo;
+        }
+
+        /**
          * @return The bonus to MaxAmmo provided by one level of the Over Capacity enchantment.
          */
         public int getOverCapacityAmmo()
@@ -651,15 +713,15 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         }
         
         /**
-         * @return The amount of ammo to add to the weapon each reload cycle
+         * @return The amount of ammo consumed per shot.
          */
-        public int getItemsPerAmmo()
+        public int getAmmoPerShot()
         {
-            return this.itemsPerAmmo;
+            return this.ammoPerShot;
         }
         
         /**
-         * @return The amount of ammo to add to the weapon each reload cycle
+         * @return The amount of ammo loaded per item consumed.
          */
         public int getAmmoPerItem()
         {
@@ -799,6 +861,22 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
 				return this.magReloadFromEmptyTime;
 			return magReloadTime;
 		}
+
+        /**
+         * @return The modifier to reload speed when a light magazine is attached.
+         */
+        public double getLightMagReloadTimeModifier()
+        {
+            return this.lightMagReloadTimeModifier;
+        }
+
+        /**
+         * @return The modifier to reload speed when a extended magazine is attached.
+         */
+        public double getExtendedMagReloadTimeModifier()
+        {
+            return this.extendedMagReloadTimeModifier;
+        }
 
         /**
          * @return The speed of magazine reloads in ticks. The lower the value, shorter the reload time.
@@ -3205,6 +3283,12 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             @Optional
             @Nullable
             private ScaledPositioned underBarrel;
+            @Optional
+            @Nullable
+            private ScaledPositioned tactical;
+            @Optional
+            @Nullable
+            private ScaledPositioned magazine;
 
             @Nullable
             public ScaledPositioned getScope()
@@ -3230,6 +3314,18 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
                 return this.underBarrel;
             }
 
+            @Nullable
+            public ScaledPositioned getTactical()
+            {
+                return this.tactical;
+            }
+
+            @Nullable
+            public ScaledPositioned getMagazine()
+            {
+                return this.magazine;
+            }
+
             @Override
             public CompoundTag serializeNBT()
             {
@@ -3249,6 +3345,14 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
                 if(this.underBarrel != null)
                 {
                     tag.put("UnderBarrel", this.underBarrel.serializeNBT());
+                }
+                if(this.tactical != null)
+                {
+                    tag.put("Tactical", this.tactical.serializeNBT());
+                }
+                if(this.magazine != null)
+                {
+                    tag.put("Magazine", this.magazine.serializeNBT());
                 }
                 return tag;
             }
@@ -3272,6 +3376,14 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
                 {
                     this.underBarrel = this.createScaledPositioned(tag, "UnderBarrel");
                 }
+                if(tag.contains("Tactical", Tag.TAG_COMPOUND))
+                {
+                    this.tactical = this.createScaledPositioned(tag, "Tactical");
+                }
+                if(tag.contains("Magazine", Tag.TAG_COMPOUND))
+                {
+                    this.magazine = this.createScaledPositioned(tag, "Magazine");
+                }
             }
 
             public JsonObject toJsonObject()
@@ -3292,6 +3404,14 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
                 if(this.underBarrel != null)
                 {
                     object.add("underBarrel", this.underBarrel.toJsonObject());
+                }
+                if(this.tactical != null)
+                {
+                    object.add("tactical", this.tactical.toJsonObject());
+                }
+                if(this.magazine != null)
+                {
+                    object.add("magazine", this.magazine.toJsonObject());
                 }
                 return object;
             }
@@ -3314,6 +3434,14 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
                 if(this.underBarrel != null)
                 {
                     attachments.underBarrel = this.underBarrel.copy();
+                }
+                if(this.tactical != null)
+                {
+                    attachments.tactical = this.tactical.copy();
+                }
+                if(this.magazine != null)
+                {
+                    attachments.magazine = this.magazine.copy();
                 }
                 return attachments;
             }
@@ -3677,6 +3805,10 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
                     return this.modules.attachments.stock != null;
                 case UNDER_BARREL:
                     return this.modules.attachments.underBarrel != null;
+                case TACTICAL:
+                    return this.modules.attachments.tactical != null;
+                case MAGAZINE:
+                    return this.modules.attachments.magazine != null;
             }
         }
         return false;
@@ -3778,6 +3910,28 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
     {
         CompoundTag tag = gunStack.getOrCreateTag();
         return tag.getFloat("AdditionalDamage");
+    }
+
+    public static int getModifiedAmmoCapacity(ItemStack gunStack)
+    {
+        Gun modifiedGun = ((GunItem) gunStack.getItem()).getModifiedGun(gunStack);
+        ItemStack magStack = Gun.getAttachment(IAttachment.Type.byTagKey("Magazine"), gunStack);
+        if(!magStack.isEmpty())
+        {
+        	if (magStack.getItem().builtInRegistryHolder().key().location().getPath().equals("light_magazine"))
+        	{
+        		int magSize = modifiedGun.getGeneral().getLightMagAmmo();
+        		return magSize > 0 ? magSize : modifiedGun.getGeneral().getMaxAmmo();
+        	}
+            else
+            if (magStack.getItem().builtInRegistryHolder().key().location().getPath().equals("extended_magazine"))
+            {
+        		int magSize = modifiedGun.getGeneral().getExtendedMagAmmo();
+        		return magSize > 0 ? magSize : modifiedGun.getGeneral().getMaxAmmo();
+        	}
+        }
+        
+        return modifiedGun.getGeneral().getMaxAmmo();
     }
 
     public static AmmoContext findAmmo(Player player, ResourceLocation id)

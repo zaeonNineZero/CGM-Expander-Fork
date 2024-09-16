@@ -14,13 +14,26 @@ import java.util.function.Supplier;
  */
 public class C2SMessageUnload extends PlayMessage<C2SMessageUnload>
 {
+	private boolean partial;
+
+    public C2SMessageUnload() {}
+
+    public C2SMessageUnload(boolean partial)
+    {
+        this.partial = partial;
+    }
+
     @Override
-    public void encode(C2SMessageUnload message, FriendlyByteBuf buffer) {}
+    public void encode(C2SMessageUnload message, FriendlyByteBuf buffer)
+    {
+        buffer.writeBoolean(message.partial);
+    }
 
     @Override
     public C2SMessageUnload decode(FriendlyByteBuf buffer)
     {
-        return new C2SMessageUnload();
+        boolean partial = buffer.readBoolean();
+        return new C2SMessageUnload(partial);
     }
 
     @Override
@@ -31,7 +44,7 @@ public class C2SMessageUnload extends PlayMessage<C2SMessageUnload>
             ServerPlayer player = context.getPlayer();
             if(player != null && !player.isSpectator())
             {
-                ServerPlayHandler.handleUnload(player);
+                ServerPlayHandler.handleUnload(player, message.partial);
             }
         });
         context.setHandled(true);

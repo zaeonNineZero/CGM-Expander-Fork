@@ -413,40 +413,51 @@ public class ServerPlayHandler
     /**
      * @param player
      */
-    public static void handleUnload(ServerPlayer player)
+    public static void handleUnload(ServerPlayer player, boolean partial)
     {
         ItemStack stack = player.getMainHandItem();
-        if(stack.getItem() instanceof GunItem)
+        if(stack.getItem() instanceof GunItem gunItem)
         {
             CompoundTag tag = stack.getTag();
-            if(tag != null && tag.contains("AmmoCount", Tag.TAG_INT) && !tag.getBoolean("IgnoreAmmo") && !Gun.hasUnlimitedReloads(stack))
+            if(tag != null && tag.contains("AmmoCount", Tag.TAG_INT) && !tag.getBoolean("IgnoreAmmo"))
             {
-                int count = tag.getInt("AmmoCount");
-                tag.putInt("AmmoCount", 0);
-
-                GunItem gunItem = (GunItem) stack.getItem();
-                Gun modifiedGun = gunItem.getModifiedGun(stack);
-                ResourceLocation id = modifiedGun.getProjectile().getItem();
-
-                Item item = ForgeRegistries.ITEMS.getValue(id);
-                if(item == null)
-                {
-                    return;
-                }
-
-                int maxStackSize = item.getMaxStackSize();
-                int stacks = count / maxStackSize;
-                for(int i = 0; i < stacks; i++)
-                {
-                    spawnAmmo(player, new ItemStack(item, maxStackSize));
-                }
-
-                int remaining = count % maxStackSize;
-                if(remaining > 0)
-                {
-                    spawnAmmo(player, new ItemStack(item, remaining));
-                }
-            }
+            	int ammoStored = tag.getInt("AmmoCount");
+            	if (!Gun.hasUnlimitedReloads(stack))
+            	{
+	            	int count = Math.max(ammoStored - (partial ? GunCompositeStatHelper.getAmmoCapacity(stack) : 0),0);
+	                tag.putInt("AmmoCount", partial ? Math.min(GunCompositeStatHelper.getAmmoCapacity(stack), ammoStored) : 0);
+	                
+	                Gun modifiedGun = gunItem.getModifiedGun(stack);
+	                ResourceLocation id = modifiedGun.getProjectile().getItem();
+	
+	                Item item = ForgeRegistries.ITEMS.getValue(id);
+	                if(item == null)
+	                {
+	                    return;
+	                }
+	                
+	                if (!player.isCreative() || !partial)
+	                {
+		                int maxStackSize = item.getMaxStackSize();
+		                int stacks = count / maxStackSize;
+		                for(int i = 0; i < stacks; i++)
+		                {
+		                    spawnAmmo(player, new ItemStack(item, maxStackSize));
+		                }
+		
+		                int remaining = count % maxStackSize;
+		                if(remaining > 0)
+		                {
+		                    spawnAmmo(player, new ItemStack(item, remaining));
+		                }
+            		}
+	            }
+	            else
+	            {
+	            	if (partial)
+	            	tag.putInt("AmmoCount", Math.min(GunCompositeStatHelper.getAmmoCapacity(stack), ammoStored));
+	            }
+        	}
         }
     }
 

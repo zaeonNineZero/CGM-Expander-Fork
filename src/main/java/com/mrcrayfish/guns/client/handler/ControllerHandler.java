@@ -17,6 +17,7 @@ import com.mrcrayfish.guns.item.attachment.impl.Scope;
 import com.mrcrayfish.guns.network.PacketHandler;
 import com.mrcrayfish.guns.network.message.C2SMessageAttachments;
 import com.mrcrayfish.guns.network.message.C2SMessageUnload;
+import com.mrcrayfish.guns.util.GunCompositeStatHelper;
 import com.mrcrayfish.guns.util.GunEnchantmentHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
@@ -134,7 +135,7 @@ public class ControllerHandler
                 GunItem gunItem = (GunItem) heldItem.getItem();
                 Gun modifiedGun = gunItem.getModifiedGun(heldItem);
                 CompoundTag tag = heldItem.getTag();
-                if(tag != null && tag.getInt("AmmoCount") < GunEnchantmentHelper.getAmmoCapacity(heldItem, modifiedGun))
+                if(tag != null && tag.getInt("AmmoCount") < GunCompositeStatHelper.getAmmoCapacity(heldItem, modifiedGun))
                 {
                     event.getActions().put(GunButtonBindings.RELOAD, new Action(Component.translatable("cgm.action.reload"), Action.Side.LEFT));
                 }

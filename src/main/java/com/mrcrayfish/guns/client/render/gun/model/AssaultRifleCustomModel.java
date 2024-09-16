@@ -45,8 +45,8 @@ public class AssaultRifleCustomModel implements IOverrideModel
 		// Render the iron sights element, which is only present when a scope is not attached.
 		// We have to grab the gun's scope attachment slot and check whether it is empty or not.
 		// If the isEmpty function returns true, then we render the iron sights.
-		ItemStack attachmentStack = Gun.getAttachment(IAttachment.Type.SCOPE, stack);
-        if(attachmentStack.isEmpty())
+		ItemStack scopeStack = Gun.getAttachment(IAttachment.Type.SCOPE, stack);
+        if(scopeStack.isEmpty())
 		{
             RenderUtil.renderModel(ExpandedModelComponents.ASSAULT_RIFLE_SIGHTS.getModel(), transformType, null, stack, parent, poseStack, buffer, light, overlay);
 		}
@@ -77,7 +77,7 @@ public class AssaultRifleCustomModel implements IOverrideModel
 	            	disableAnimations = true;
 	    		}
         		catch(Exception e) {
-                	GunMod.LOGGER.error("NZGE encountered an error trying to apply animations.");
+                	GunMod.LOGGER.error("CGM Expanded encountered an error trying to apply animations (Should not happen!!)");
                 	e.printStackTrace();
                 	disableAnimations = true;
         		}
@@ -101,18 +101,18 @@ public class AssaultRifleCustomModel implements IOverrideModel
             float cooldown_c = Math.min(Math.max((-cooldown_a*intensity)+intensity,0),1);
             float cooldown_d = Math.min(cooldown_b,cooldown_c);
             
-            boltTranslations = boltTranslations.add(0, 0, cooldown_d * 3);
+            boltTranslations = boltTranslations.add(0, 0, cooldown_d * 2.3);
         }
 
 		// Assault Rifle charging handle. This animated part kicks backward on firing, then moves back to its resting position.
-        /*poseStack.pushPose();
+        poseStack.pushPose();
 		// Apply transformations to this part.
         if(isPlayer)
         poseStack.translate(0, 0, boltTranslations.z * 0.0625);
 		// Render the transformed model.
-        RenderUtil.renderModel(ExpandedModelComponents.BATTLE_RIFLE_BOLT_HANDLE.getModel(), transformType, null, stack, parent, poseStack, buffer, light, overlay);
+        RenderUtil.renderModel(ExpandedModelComponents.ASSAULT_RIFLE_BOLT_HANDLE.getModel(), transformType, null, stack, parent, poseStack, buffer, light, overlay);
 		// Pop pose to compile everything in the render matrix.
-        poseStack.popPose();*/
+        poseStack.popPose();
         
         // Magazine for Battle Rifle
         poseStack.pushPose();
@@ -125,7 +125,21 @@ public class AssaultRifleCustomModel implements IOverrideModel
                GunAnimationHelper.rotateAroundOffset(poseStack, magRotations, magRotOffset);
     	}
 		// Render the transformed model.
-        RenderUtil.renderModel(ExpandedModelComponents.ASSAULT_RIFLE_MAGAZINE.getModel(), transformType, null, stack, parent, poseStack, buffer, light, overlay);
+        ExpandedModelComponents magModel = ExpandedModelComponents.ASSAULT_RIFLE_MAGAZINE;
+        try {
+        	ItemStack magStack = Gun.getAttachment(IAttachment.Type.byTagKey("Magazine"), stack);
+            if(!magStack.isEmpty())
+            {
+	            if (magStack.getItem().builtInRegistryHolder().key().location().getPath().equals("light_magazine"))
+		    		magModel = ExpandedModelComponents.ASSAULT_RIFLE_LIGHT_MAG;
+	            else
+	            if (magStack.getItem().builtInRegistryHolder().key().location().getPath().equals("extended_magazine"))
+			    	magModel = ExpandedModelComponents.ASSAULT_RIFLE_EXTENDED_MAG;
+            }
+		}
+		catch(Error ignored) {} catch(Exception ignored) {}
+        
+        RenderUtil.renderModel(magModel.getModel(), transformType, null, stack, parent, poseStack, buffer, light, overlay);
 		// Pop pose to compile everything in the render matrix.
         poseStack.popPose();
     }

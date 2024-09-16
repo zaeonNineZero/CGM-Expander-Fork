@@ -2,8 +2,12 @@ package com.mrcrayfish.guns.common.container;
 
 import com.mrcrayfish.guns.common.Gun;
 import com.mrcrayfish.guns.common.container.slot.AttachmentSlot;
+import com.mrcrayfish.guns.common.network.ServerPlayHandler;
 import com.mrcrayfish.guns.init.ModContainers;
+import com.mrcrayfish.guns.item.GunItem;
 import com.mrcrayfish.guns.item.attachment.IAttachment;
+import com.mrcrayfish.guns.util.GunCompositeStatHelper;
+
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
@@ -54,14 +58,16 @@ public class AttachmentContainer extends AbstractContainerMenu
 
         for(int i = 0; i < IAttachment.Type.values().length; i++)
         {
-            this.addSlot(new AttachmentSlot(this, this.weaponInventory, this.weapon, IAttachment.Type.values()[i], playerInventory.player, i, 8, 17 + i * 18));
+        	int x = i<4 ? 8 : 170;
+        	int y = 17 + (i<4 ? i : i-4) * 18;
+            this.addSlot(new AttachmentSlot(this, this.weaponInventory, this.weapon, IAttachment.Type.values()[i], playerInventory.player, i, x, y));
         }
 
         for(int i = 0; i < 3; i++)
         {
             for(int j = 0; j < 9; j++)
             {
-                this.addSlot(new Slot(playerInventory, j + i * 9 + 9, 8 + j * 18, 102 + i * 18));
+                this.addSlot(new Slot(playerInventory, j + i * 9 + 9, 16 + j * 18, 102 + i * 18));
             }
         }
 
@@ -69,7 +75,7 @@ public class AttachmentContainer extends AbstractContainerMenu
         {
             if(i == playerInventory.selected)
             {
-                this.addSlot(new Slot(playerInventory, i, 8 + i * 18, 160)
+                this.addSlot(new Slot(playerInventory, i, 16 + i * 18, 160)
                 {
                     @Override
                     public boolean mayPickup(Player playerIn)
@@ -80,7 +86,7 @@ public class AttachmentContainer extends AbstractContainerMenu
             }
             else
             {
-                this.addSlot(new Slot(playerInventory, i, 8 + i * 18, 160));
+                this.addSlot(new Slot(playerInventory, i, 16 + i * 18, 160));
             }
         }
     }

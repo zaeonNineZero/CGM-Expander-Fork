@@ -125,7 +125,18 @@ public class PistolCustomModel implements IOverrideModel
                GunAnimationHelper.rotateAroundOffset(poseStack, magRotations, magRotOffset);
     	}
 		// Render the transformed model.
-        RenderUtil.renderModel(ExpandedModelComponents.PISTOL_MAGAZINE.getModel(), transformType, null, stack, parent, poseStack, buffer, light, overlay);
+        ExpandedModelComponents magModel = ExpandedModelComponents.PISTOL_MAGAZINE;
+        try {
+        	ItemStack magStack = Gun.getAttachment(IAttachment.Type.byTagKey("Magazine"), stack);
+            if(!magStack.isEmpty())
+            {
+	            if (magStack.getItem().builtInRegistryHolder().key().location().getPath().equals("extended_magazine"))
+			    	magModel = ExpandedModelComponents.PISTOL_EXTENDED_MAG;
+            }
+		}
+		catch(Error ignored) {} catch(Exception ignored) {}
+        
+        RenderUtil.renderModel(magModel.getModel(), transformType, null, stack, parent, poseStack, buffer, light, overlay);
 		// Pop pose to compile everything in the render matrix.
         poseStack.popPose();
     }

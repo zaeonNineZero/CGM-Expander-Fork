@@ -45,7 +45,7 @@ import java.util.List;
  */
 public class AttachmentScreen extends AbstractContainerScreen<AttachmentContainer>
 {
-    private static final ResourceLocation GUI_TEXTURES = new ResourceLocation("cgm:textures/gui/attachments.png");
+    private static final ResourceLocation GUI_TEXTURES = new ResourceLocation("cgm:textures/gui/attachments2.png");
     private static final Component CONFIG_TOOLTIP = Component.translatable("cgm.button.config.tooltip");
 
     private final Inventory playerInventory;
@@ -64,6 +64,7 @@ public class AttachmentScreen extends AbstractContainerScreen<AttachmentContaine
         super(screenContainer, playerInventory, titleIn);
         this.playerInventory = playerInventory;
         this.weaponInventory = screenContainer.getWeaponInventory();
+        this.imageWidth = 194;
         this.imageHeight = 184;
     }
 
@@ -96,7 +97,7 @@ public class AttachmentScreen extends AbstractContainerScreen<AttachmentContaine
         List<MiniButton> buttons = new ArrayList<>();
         if(!Config.CLIENT.hideConfigButton.get())
         {
-            buttons.add(new MiniButton(0, 0, 192, 0, GUI_TEXTURES, onPress -> {
+            buttons.add(new MiniButton(0, 0, 210, 0, GUI_TEXTURES, onPress -> {
                 this.openConfigScreen();
             }, (button, matrixStack, mouseX, mouseY) -> {
                 this.renderTooltip(matrixStack, CONFIG_TOOLTIP, mouseX, mouseY);
@@ -130,7 +131,9 @@ public class AttachmentScreen extends AbstractContainerScreen<AttachmentContaine
 
         for(int i = 0; i < IAttachment.Type.values().length; i++)
         {
-            if(RenderUtil.isMouseWithin(mouseX, mouseY, startX + 7, startY + 16 + i * 18, 18, 18))
+        	int x = i<4 ? 7 : 169;
+        	int y = 16 + (i<4 ? i : i-4) * 18;
+        	if(RenderUtil.isMouseWithin(mouseX, mouseY, startX + x, startY + y, 18, 18))
             {
                 IAttachment.Type type = IAttachment.Type.values()[i];
                 if(!this.menu.getSlot(i).isActive())
@@ -217,13 +220,15 @@ public class AttachmentScreen extends AbstractContainerScreen<AttachmentContaine
          * for the weapon, it will draw a cross instead. */
         for(int i = 0; i < IAttachment.Type.values().length; i++)
         {
+        	int x = i<4 ? 8 : 170;
+        	int y = 17 + (i<4 ? i : i-4) * 18;
             if(!this.canPlaceAttachmentInSlot(this.menu.getCarried(), this.menu.getSlot(i)))
             {
-                this.blit(poseStack, left + 8, top + 17 + i * 18, 176, 0, 16, 16);
+                this.blit(poseStack, left + x, top + y, 194, 0, 16, 16);
             }
             else if(this.weaponInventory.getItem(i).isEmpty())
             {
-                this.blit(poseStack, left + 8, top + 17 + i * 18, 176, 16 + i * 16, 16, 16);
+                this.blit(poseStack, left + x, top + y, 194, 16 + i * 16, 16, 16);
             }
         }
     }

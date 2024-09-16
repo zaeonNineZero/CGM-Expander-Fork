@@ -36,7 +36,9 @@ public interface IAttachment<T extends Attachment>
         SCOPE("scope", "Scope", "scope"),
         BARREL("barrel", "Barrel", "barrel"),
         STOCK("stock", "Stock", "stock"),
-        UNDER_BARREL("under_barrel", "Under_Barrel", "underBarrel");
+        UNDER_BARREL("under_barrel", "Under_Barrel", "underBarrel"),
+        TACTICAL("tactical", "Tactical", "tactical"),
+        MAGAZINE("magazine", "Magazine", "magazine");
 
         private final String translationKey;
         private final String tagKey;

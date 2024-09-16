@@ -20,10 +20,14 @@ public enum ExpandedModelComponents
     PISTOL_SLIDE("pistol_slide"),
     PISTOL_SIGHTMOUNT("pistol_sightmount"),
     PISTOL_MAGAZINE("pistol_magazine"),
+    PISTOL_EXTENDED_MAG("pistol_extended_mag"),
     
     ASSAULT_RIFLE_BASE("assault_rifle_base"),
     ASSAULT_RIFLE_SIGHTS("assault_rifle_sights"),
-    ASSAULT_RIFLE_MAGAZINE("assault_rifle_magazine");
+    ASSAULT_RIFLE_BOLT_HANDLE("assault_rifle_bolt_handle"),
+    ASSAULT_RIFLE_MAGAZINE("assault_rifle_magazine"),
+    ASSAULT_RIFLE_LIGHT_MAG("assault_rifle_light_mag"),
+    ASSAULT_RIFLE_EXTENDED_MAG("assault_rifle_extended_mag");
 
     /**
      * The location of an item model in the [MOD_ID]/models/special/[NAME] folder

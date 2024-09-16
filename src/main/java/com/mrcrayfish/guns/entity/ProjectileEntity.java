@@ -630,6 +630,7 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
         	else
         	player.getInventory().hurtArmor(source, 1, Inventory.ALL_ARMOR_SLOTS);
         }
+        // Send a message to the shooter's client for Hit Marker processing.
         if(this.shooter instanceof Player && (!isDead))
         {
             int hitType = critical ? S2CMessageProjectileHitEntity.HitType.CRITICAL : headshot ? S2CMessageProjectileHitEntity.HitType.HEADSHOT : S2CMessageProjectileHitEntity.HitType.NORMAL;

@@ -199,4 +199,8 @@ public class GunModifiers
             return spread * 0.5F;
         }
     };
+
+    public static final IGunModifier NONE = new IGunModifier()
+    {
+    };
 }

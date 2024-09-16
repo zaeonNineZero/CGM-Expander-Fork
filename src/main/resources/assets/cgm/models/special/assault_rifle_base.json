@@ -18,8 +18,8 @@
 			}
 		},
 		{
-			"from": [8.701, 3.35, 11.2],
-			"to": [8.801, 3.85, 12.95],
+			"from": [8.701, 3.35, 11.35],
+			"to": [8.801, 3.85, 13.25],
 			"rotation": {"angle": 0, "axis": "y", "origin": [8.055, 9.45, 8.6]},
 			"faces": {
 				"east": {"uv": [1, 8.5, 2, 9], "texture": "#1"}
@@ -27,7 +27,7 @@
 		},
 		{
 			"from": [8.701, 3.35, 10.95],
-			"to": [8.801, 3.85, 11.2],
+			"to": [8.801, 3.85, 11.35],
 			"rotation": {"angle": 0, "axis": "y", "origin": [8.055, 9.45, 8.35]},
 			"faces": {
 				"east": {"uv": [1, 8.5, 1.5, 9], "texture": "#1"}
@@ -99,7 +99,7 @@
 			"to": [7.766, 4, 16.199],
 			"rotation": {"angle": 45, "axis": "z", "origin": [7.2, 4, 10.5]},
 			"faces": {
-				"north": {"uv": [1.5, 1, 2, 1.5], "texture": "#1"},
+				"north": {"uv": [1.5, 1, 2, 1.5], "texture": "#1", "tintindex": 0},
 				"south": {"uv": [8, 1, 8.5, 1.5], "texture": "#1", "tintindex": 0},
 				"up": {"uv": [0, 1, 6, 1.5], "rotation": 90, "texture": "#1", "tintindex": 0}
 			}
@@ -108,7 +108,7 @@
 			"from": [7.6, 4, 10.2],
 			"to": [8.4, 4.4, 16.2],
 			"faces": {
-				"north": {"uv": [0.5, 1, 1.5, 1.5], "texture": "#1"},
+				"north": {"uv": [0.5, 1, 1.5, 1.5], "texture": "#1", "tintindex": 0},
 				"south": {"uv": [8.5, 1, 9.5, 1.5], "texture": "#1", "tintindex": 0},
 				"up": {"uv": [2, 0, 8, 1], "rotation": 90, "texture": "#1", "tintindex": 0}
 			}
@@ -118,7 +118,7 @@
 			"to": [8.8, 4, 16.199],
 			"rotation": {"angle": -45, "axis": "z", "origin": [8.8, 4, 10.5]},
 			"faces": {
-				"north": {"uv": [0, 1, 0.5, 1.5], "texture": "#1"},
+				"north": {"uv": [0, 1, 0.5, 1.5], "texture": "#1", "tintindex": 0},
 				"south": {"uv": [9.5, 1, 10, 1.5], "texture": "#1", "tintindex": 0},
 				"up": {"uv": [6, 1, 0, 1.5], "rotation": 270, "texture": "#1", "tintindex": 0}
 			}
@@ -342,6 +342,15 @@
 				"east": {"uv": [15.5, 0.5, 16, 0], "rotation": 270, "texture": "#1", "tintindex": 0},
 				"west": {"uv": [14.5, 0.5, 15, 0], "rotation": 90, "texture": "#1", "tintindex": 0},
 				"up": {"uv": [14.5, 0.5, 15, 0], "texture": "#1", "tintindex": 0}
+			}
+		},
+		{
+			"name": "bolt_track",
+			"from": [7.199, 3.35, 10.83],
+			"to": [7.299, 3.75, 13.43],
+			"rotation": {"angle": 0, "axis": "y", "origin": [7.945, 9.4, 9.23]},
+			"faces": {
+				"west": {"uv": [5.5, 9.5, 3, 10], "texture": "#1"}
 			}
 		}
 	]

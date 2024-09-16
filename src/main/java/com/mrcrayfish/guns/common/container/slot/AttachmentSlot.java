@@ -3,6 +3,7 @@ package com.mrcrayfish.guns.common.container.slot;
 import com.mrcrayfish.guns.common.Gun;
 import com.mrcrayfish.guns.common.container.AttachmentContainer;
 import com.mrcrayfish.guns.init.ModSounds;
+import com.mrcrayfish.guns.init.ModSyncedDataKeys;
 import com.mrcrayfish.guns.item.GunItem;
 import com.mrcrayfish.guns.item.attachment.IAttachment;
 import net.minecraft.sounds.SoundSource;
@@ -83,6 +84,6 @@ public class AttachmentSlot extends Slot
     public boolean mayPickup(Player player)
     {
         ItemStack itemstack = this.getItem();
-        return (itemstack.isEmpty() || player.isCreative() || !EnchantmentHelper.hasBindingCurse(itemstack)) && super.mayPickup(player);
+        return (itemstack.isEmpty() || player.isCreative() || !EnchantmentHelper.hasBindingCurse(itemstack)) && super.mayPickup(player) && (getType() != IAttachment.Type.MAGAZINE || !ModSyncedDataKeys.RELOADING.getValue(player));
     }
 }
