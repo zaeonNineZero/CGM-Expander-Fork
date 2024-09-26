@@ -150,9 +150,9 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         private int defaultColor = -1;
         private int maxAmmo;
         @Optional
-        private int lightMagAmmo = 0;
+        private int lightMagAmmo = -1;
         @Optional
-        private int extendedMagAmmo = 0;
+        private int extendedMagAmmo = -1;
         @Optional
         private int overCapacityAmmo = 0;
         @Optional
@@ -192,7 +192,7 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         @Optional
         private int magReloadFromEmptyTime = 0;
         @Optional
-        private double lightMagReloadTimeModifier = 0.87;
+        private double lightMagReloadTimeModifier = 0.84;
         @Optional
         private double extendedMagReloadTimeModifier = 1.12;
         @Optional
@@ -472,8 +472,8 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             Preconditions.checkArgument(this.rate > 0, "Rate must be more than zero");
             Preconditions.checkArgument(this.defaultColor == -1 || this.defaultColor>=0, "Default color must be a valid RGBA-integer-format color; use -1 to disable this.");
             Preconditions.checkArgument(this.maxAmmo > 0, "Maximum ammo must be more than zero");
-            Preconditions.checkArgument(this.lightMagAmmo >= 0, "Light magazine maximum ammo cannot be negative; set to zero to match base maximum ammo");
-            Preconditions.checkArgument(this.extendedMagAmmo >= 0, "Extended magazine maximum ammo cannot be negative; set to zero to match base maximum ammo");
+            Preconditions.checkArgument(this.lightMagAmmo >= 0 || this.lightMagAmmo == -1, "Light magazine maximum ammo cannot be negative unless set to -1.");
+            Preconditions.checkArgument(this.extendedMagAmmo >= 0 || this.extendedMagAmmo == -1, "Extended magazine maximum ammo cannot be negative unless set to -1.");
             Preconditions.checkArgument(this.burstCount >= 0, "Burst count cannot be negative; set to zero to disable bursts");
             Preconditions.checkArgument(this.burstCount != 1, "Burst count must be greater than one, or equal to zero; set to zero to disable bursts");
             Preconditions.checkArgument(this.burstCooldown >= 0, "Burst cooldown cannot be negative; set to zero to disable the cooldown");
@@ -507,8 +507,8 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
             object.addProperty("gripType", this.gripType.getId().toString());
             if(this.defaultColor != 1) object.addProperty("defaultColor", this.defaultColor);
             object.addProperty("maxAmmo", this.maxAmmo);
-            if(this.lightMagAmmo != 0) object.addProperty("lightMagAmmo", this.lightMagAmmo);
-            if(this.extendedMagAmmo != 0) object.addProperty("extendedMagAmmo", this.extendedMagAmmo);
+            if(this.lightMagAmmo != -1) object.addProperty("lightMagAmmo", this.lightMagAmmo);
+            if(this.extendedMagAmmo != -1) object.addProperty("extendedMagAmmo", this.extendedMagAmmo);
             object.addProperty("overCapacityAmmo", this.overCapacityAmmo);
             if(this.infiniteAmmo != false) object.addProperty("infiniteAmmo", this.infiniteAmmo);
             if(this.reloadAmount != 1) object.addProperty("reloadAmount", this.reloadAmount);
@@ -676,6 +676,8 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
          */
         public int getLightMagAmmo()
         {
+        	if (this.lightMagAmmo==-1)
+        		return (int) Math.ceil(getMaxAmmo()*0.75);
             return this.lightMagAmmo;
         }
 
@@ -684,6 +686,8 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
          */
         public int getExtendedMagAmmo()
         {
+        	if (this.extendedMagAmmo==-1)
+    		return (int) Math.floor(getMaxAmmo()*1.5);
             return this.extendedMagAmmo;
         }
 

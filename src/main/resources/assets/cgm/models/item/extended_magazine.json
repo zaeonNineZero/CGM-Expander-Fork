@@ -1,6 +1,137 @@
 {
-  "parent": "minecraft:item/handheld",
-  "textures": {
-    "layer0": "cgm:items/extended_magazine"
-  }
+	"credit": "Made with Blockbench",
+	"texture_size": [32, 32],
+	"textures": {
+		"1": "cgm:items/assault_rifle",
+		"particle": "cgm:items/light_magazine"
+	},
+	"elements": [
+		{
+			"from": [7.5, 6.45, 6.75],
+			"to": [8.5, 7.451, 9.25],
+			"rotation": {"angle": 0, "axis": "y", "origin": [0, 6.45, -3.95]},
+			"faces": {
+				"north": {"uv": [0, 7.5, 1, 8], "texture": "#1"},
+				"east": {"uv": [3.5, 7.5, 1, 8], "texture": "#1"},
+				"south": {"uv": [3.5, 7.5, 4.5, 8], "texture": "#1"},
+				"west": {"uv": [1, 7.5, 3.5, 8], "texture": "#1"},
+				"down": {"uv": [1, 10, 3.5, 11], "rotation": 90, "texture": "#1"}
+			}
+		},
+		{
+			"from": [7.499, 6.25, 7.25],
+			"to": [8.501, 6.85, 7.75],
+			"rotation": {"angle": 0, "axis": "y", "origin": [7.5, 5.95, 9.25]},
+			"faces": {
+				"east": {"uv": [2, 8, 1.5, 8.5], "texture": "#1"},
+				"west": {"uv": [1.5, 8, 2, 8.5], "texture": "#1"}
+			}
+		},
+		{
+			"from": [7.499, 6.25, 7.75],
+			"to": [8.501, 6.85, 8.25],
+			"rotation": {"angle": 0, "axis": "y", "origin": [7.5, 5.95, 9.25]},
+			"faces": {
+				"east": {"uv": [2.5, 8, 2, 8.5], "texture": "#1"},
+				"west": {"uv": [2, 8, 2.5, 8.5], "texture": "#1"}
+			}
+		},
+		{
+			"from": [7.499, 6.15, 8.25],
+			"to": [8.501, 6.85, 8.75],
+			"rotation": {"angle": 0, "axis": "y", "origin": [7.5, 5.95, 9.25]},
+			"faces": {
+				"east": {"uv": [3, 8, 2.5, 8.5], "texture": "#1"},
+				"west": {"uv": [2.5, 8, 3, 8.5], "texture": "#1"}
+			}
+		},
+		{
+			"from": [7.499, 5.95, 8.75],
+			"to": [8.501, 6.85, 9.2502],
+			"rotation": {"angle": 0, "axis": "y", "origin": [7.5, 5.95, 9.25]},
+			"faces": {
+				"east": {"uv": [3.5, 7.5, 3, 8], "texture": "#1"},
+				"south": {"uv": [3.5, 7.5, 4.5, 8], "texture": "#1"},
+				"west": {"uv": [3, 7.5, 3.5, 8], "texture": "#1"}
+			}
+		},
+		{
+			"from": [7.5001, 4.78, 6.75],
+			"to": [8.4999, 5.95, 9.25],
+			"rotation": {"angle": 22.5, "axis": "x", "origin": [7.5, 5.95, 9.25]},
+			"faces": {
+				"north": {"uv": [0, 7.5, 1, 8.5], "texture": "#1"},
+				"east": {"uv": [3.5, 7.5, 1, 8.5], "texture": "#1"},
+				"south": {"uv": [3.5, 7.5, 4.5, 8.5], "texture": "#1"},
+				"west": {"uv": [1, 7.5, 3.5, 8.5], "texture": "#1"},
+				"down": {"uv": [1, 10, 3.5, 11], "rotation": 90, "texture": "#1"}
+			}
+		},
+		{
+			"from": [7.5, 2.94, 6.75],
+			"to": [8.5, 5.03, 9.25],
+			"rotation": {"angle": 22.5, "axis": "x", "origin": [7.5, 5.95, 9.25]},
+			"faces": {
+				"north": {"uv": [0, 8, 1, 10], "texture": "#1"},
+				"east": {"uv": [3.5, 8, 1, 10], "texture": "#1"},
+				"south": {"uv": [3.5, 8, 4.5, 10], "texture": "#1"},
+				"west": {"uv": [1, 8, 3.5, 10], "texture": "#1"},
+				"down": {"uv": [1, 10, 3.5, 11], "rotation": 90, "texture": "#1"}
+			}
+		},
+		{
+			"from": [7.5, 7.45, 6.75],
+			"to": [8.5, 9, 9.25],
+			"rotation": {"angle": 0, "axis": "y", "origin": [0, 8.4, -3.95]},
+			"faces": {
+				"north": {"uv": [1, 7.5, 0, 8], "texture": "#1"},
+				"east": {"uv": [1, 7.5, 3.5, 8], "texture": "#1"},
+				"south": {"uv": [4.5, 7.5, 3.5, 8], "texture": "#1"},
+				"west": {"uv": [3.5, 7.5, 1, 8], "texture": "#1"},
+				"up": {"uv": [9, 8.5, 10.25, 9], "rotation": 90, "texture": "#1"}
+			}
+		}
+	],
+	"display": {
+		"thirdperson_righthand": {
+			"translation": [0, 1.5, 0.75],
+			"scale": [1.5, 1.5, 1.5]
+		},
+		"thirdperson_lefthand": {
+			"translation": [0, 1.5, 0.75],
+			"scale": [1.5, 1.5, 1.5]
+		},
+		"firstperson_righthand": {
+			"rotation": [1, 7, 1],
+			"translation": [-3, 4.5, 2],
+			"scale": [1.75, 1.75, 1.75]
+		},
+		"firstperson_lefthand": {
+			"rotation": [1, 7, 1],
+			"translation": [-3, 4.5, 2],
+			"scale": [1.75, 1.75, 1.75]
+		},
+		"ground": {
+			"translation": [0, 3.5, 0],
+			"scale": [1.5, 1.5, 1.5]
+		},
+		"gui": {
+			"rotation": [30, -135, 0],
+			"translation": [0, 3.75, 0],
+			"scale": [2.5, 2.5, 2.5]
+		},
+		"fixed": {
+			"rotation": [-180, 90, -180],
+			"translation": [0, 4.75, 0],
+			"scale": [2.8, 2.8, 2.8]
+		}
+	},
+	"groups": [
+		{
+			"name": "magazine",
+			"origin": [7.5, -0.8, 13.2],
+			"color": 0,
+			"children": [0, 1, 2, 3, 4, 5, 6, 7]
+		}
+	]
 }
