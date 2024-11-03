@@ -76,6 +76,12 @@ public class GunCompositeStatHelper
         }
         return capacity;
     }
+    
+	public static double getCompositeAimDownSightSpeed(ItemStack weapon)
+    {
+		double a = GunEnchantmentHelper.getAimDownSightSpeed(weapon);
+		return GunModifierHelper.getModifiedAimDownSightSpeed(weapon, a);
+    }
 	
 	public static int getRealReloadSpeed(ItemStack weapon, boolean magReload, boolean reloadFromEmpty)
     {

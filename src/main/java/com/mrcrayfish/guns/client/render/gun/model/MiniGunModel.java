@@ -43,7 +43,7 @@ public class MiniGunModel implements IOverrideModel
         ItemStack heldItem = player.getMainHandItem();
         int fireRate = GunCompositeStatHelper.getCompositeRate(heldItem, player);
         float maxSpinRate = Mth.clamp(90F/(float) fireRate,10F,85F);
-        if(!Gun.hasAmmo(heldItem) && !player.isCreative())
+        if(!Gun.hasAmmo(heldItem) && !Gun.canShoot(heldItem) && !player.isCreative())
         {
             shooting = false;
         }

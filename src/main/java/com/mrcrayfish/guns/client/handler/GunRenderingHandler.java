@@ -526,6 +526,7 @@ public class GunRenderingHandler
         poseStack.translate(0.56 * offset, -0.52, -0.72);
 
         /* Apply various transforms, such as for aiming, sprinting, reloading, and custom animations */
+        this.applyIdleTransforms(poseStack, heldItem, modifiedGun, offset);
         this.applyAimingTransforms(poseStack, heldItem, modifiedGun, translateX, translateY, translateZ, offset);
         this.applySwayTransforms(poseStack, modifiedGun, player, translateX, translateY, translateZ, event.getPartialTick());
         this.applySprintingTransforms(modifiedGun, hand, poseStack, event.getPartialTick());
@@ -576,6 +577,14 @@ public class GunRenderingHandler
             poseStack.mulPose(Vector3f.ZP.rotationDegrees((Mth.sin(distanceWalked * (float) Math.PI) * bobbing * 3.0F) * (float) invertZoomProgress));
             poseStack.mulPose(Vector3f.XP.rotationDegrees((Math.abs(Mth.cos(distanceWalked * (float) Math.PI - 0.2F) * bobbing) * 5.0F) * (float) invertZoomProgress));
         }
+    }
+
+    private void applyIdleTransforms(PoseStack poseStack, ItemStack heldItem, Gun modifiedGun, int offset)
+    {
+        float aiming = (float) Math.sin(Math.toRadians(AimingHandler.get().getNormalisedAdsProgress() * 180F));
+        aiming = PropertyHelper.getSightAnimations(heldItem, modifiedGun).getAimTransformCurve().apply(aiming);
+        Vec3 idleTranslations = PropertyHelper.getViewmodelPosition(heldItem, modifiedGun);
+        poseStack.translate(idleTranslations.x * offset,idleTranslations.y,idleTranslations.z);
     }
 
     private void applyAimingTransforms(PoseStack poseStack, ItemStack heldItem, Gun modifiedGun, float x, float y, float z, int offset)
@@ -1226,7 +1235,7 @@ public class GunRenderingHandler
             return;
     	
         //if(ReloadHandler.get().getReloadProgress(mc.getFrameTime())>0)
-        if(ReloadHandler.get().getReloading(mc.player))
+        if(ReloadHandler.get().getReloading(mc.player) || ReloadHandler.get().getReloadProgress(mc.getFrameTime()) >= 0.5F)
         {
 	    	float reloadInterval = GunCompositeStatHelper.getRealReloadSpeed(stack, ReloadHandler.get().isDoMagReload(), ReloadHandler.get().isReloadFromEmpty());
 	    	int reloadStartDelay = 5;

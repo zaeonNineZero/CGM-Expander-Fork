@@ -95,6 +95,8 @@ public class TwoHandedShortPose extends WeaponPose
         BakedModel model = Minecraft.getInstance().getItemRenderer().getModel(stack, player.level, player, 0);
         float translateX = model.getTransforms().firstPersonRightHand.translation.x();
         int side = hand.getOpposite() == HumanoidArm.RIGHT ? 1 : -1;
+        float handDiv = (float) GunAnimationHelper.getAnimationValuePublic(GunAnimationHelper.getSmartAnimationType(stack, player, partialTicks), GunAnimationHelper.getItemLocationKey(stack), "handScale");
+        float handScale = 1/(handDiv==0 ? 1 : handDiv);
         poseStack.translate(translateX * side, 0, 0);
 
         boolean slim = Minecraft.getInstance().player.getModelName().equals("slim");
@@ -132,7 +134,7 @@ public class TwoHandedShortPose extends WeaponPose
             poseStack.translate(-0.3125 * side, -0.1, -0.4375);
             
             String animType = GunAnimationHelper.getSmartAnimationType(stack, player, partialTicks);
-            poseStack.translate(translations.x * 0.0625 * side, translations.y * 0.0625, -translations.z * 0.0625);
+            poseStack.translate(translations.x * handScale * 0.0625 * side, translations.y * handScale * 0.0625, -translations.z * handScale * 0.0625);
             GunAnimationHelper.rotateAroundOffset(poseStack, rotations, animType, stack, "forwardHand");
             
             poseStack.mulPose(Vector3f.XP.rotationDegrees(80F));
@@ -163,7 +165,7 @@ public class TwoHandedShortPose extends WeaponPose
             //poseStack.translate((-4.0) * 0.0625 * side, (0) * 0.0625, (0) * 0.0625);
             
             String animType = GunAnimationHelper.getSmartAnimationType(stack, player, partialTicks);
-            poseStack.translate(translations.x * side * 0.0625, translations.y * 0.0625, -translations.z * 0.0625);
+            poseStack.translate(translations.x * handScale * side * 0.0625, translations.y * handScale * 0.0625, -translations.z * handScale * 0.0625);
             GunAnimationHelper.rotateAroundOffset(poseStack, rotations, animType, stack, "rearHand");
             
             poseStack.translate(-(armWidth / 2.0) * 0.0625 * side, 0, 0);

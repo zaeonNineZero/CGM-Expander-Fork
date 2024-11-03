@@ -45,8 +45,8 @@ public class ProjectileManager
     }
 
     /**
-     * Registers a projectile factory designed for override. This allows for control over the entity
-     * that is spawned when a weapon, that uses the given ammo, is fired.
+     * Registers a projectile factory that is decoupled from an item. This allows a specific entity
+     * to be spawned when a weapon is fired, regardless of the ammo item loaded.
      *
      * @param ammo    the ammo item
      * @param factory a custom projectile implementation
@@ -68,10 +68,10 @@ public class ProjectileManager
     }
 
     /**
-     * Gets the projectile factory for the given resource location.
+     * Gets the projectile factory override for the given factory ID string.
      *
-     * @param id the resource id of the projectile factory (the id of the item)
-     * @return the custom projectile factory or the default factory if nothing exists for the id
+     * @param id the string ID of the factory override.
+     * @return the custom projectile factory override for the id
      */
     public IProjectileFactory getOverride(String factoryID)
     {

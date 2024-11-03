@@ -346,6 +346,19 @@ public final class PropertyHelper
         return 0;
     }
     
+	public static Vec3 getViewmodelPosition(ItemStack weapon, Gun modifiedGun) {
+		double scaleFactor = getHandPosScalar(weapon);
+		DataObject viewmodelObject = getObjectByPath(weapon, WEAPON_KEY, "viewmodel");
+		if (viewmodelObject.has("offset", DataType.ARRAY))
+		{
+			DataArray translationArray = viewmodelObject.getDataArray("offset");
+			if (translationArray!=null)
+            return arrayToVec3(translationArray, Vec3.ZERO).scale(scaleFactor);
+		}
+		
+		return Vec3.ZERO;
+	}
+    
 	public static Vec3 getHandPosition(ItemStack weapon, Gun modifiedGun, boolean isRearHand) {
 		double scaleFactor = getHandPosScalar(weapon);
 		DataObject handObject = getObjectByPath(weapon, WEAPON_KEY, "hands", isRearHand ? "rear" : "forward");

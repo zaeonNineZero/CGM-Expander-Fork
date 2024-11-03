@@ -267,24 +267,11 @@ public final class GunAnimationHelper
     
 	public static Vec3 getAnimationTrans(String animationType, ItemStack weapon, float progress, String component)
 	{
-		boolean magReload = ReloadHandler.get().isDoMagReload();
-		boolean emptyReload = ReloadHandler.get().isReloadFromEmpty();
 		ResourceLocation weapKey = lookForParentAnimation(animationType, getItemLocationKey(weapon));
 		
-		String animSuffix = "";
-		if (animationType.contains("reload") && (magReload || emptyReload))
-		{
-			if (magReload && emptyReload && hasAnimation(animationType + "_EmptyMag", weapKey))
-			animSuffix = "_EmptyMag";
-			else
-			if (magReload && hasAnimation(animationType + "_Mag", weapKey))
-			animSuffix = "_Mag";
-			else
-			if (emptyReload && hasAnimation(animationType + "_Empty", weapKey))
-			animSuffix = "_Empty";
-
+		String animSuffix = getReloadAnimSuffix(animationType, weapKey);
+		if (!animationType.isEmpty())
 			animationType = animationType+animSuffix;
-		}
 		
 		Vec3 blendedTransforms = Vec3.ZERO;
 		float scaledProgress = getScaledProgress(animationType, weapKey, progress);
@@ -343,24 +330,11 @@ public final class GunAnimationHelper
     
 	public static Vec3 getAnimationRot(String animationType, ItemStack weapon, float progress, String component)
 	{
-		boolean magReload = ReloadHandler.get().isDoMagReload();
-		boolean emptyReload = ReloadHandler.get().isReloadFromEmpty();
 		ResourceLocation weapKey = lookForParentAnimation(animationType, getItemLocationKey(weapon));
 		
-		String animSuffix = "";
-		if (animationType.contains("reload") && (magReload || emptyReload))
-		{
-			if (magReload && emptyReload && hasAnimation(animationType + "_EmptyMag", weapKey))
-			animSuffix = "_EmptyMag";
-			else
-			if (magReload && hasAnimation(animationType + "_Mag", weapKey))
-			animSuffix = "_Mag";
-			else
-			if (emptyReload && hasAnimation(animationType + "_Empty", weapKey))
-			animSuffix = "_Empty";
-			
+		String animSuffix = getReloadAnimSuffix(animationType, weapKey);
+		if (!animationType.isEmpty())
 			animationType = animationType+animSuffix;
-		}
 		
 		Vec3 blendedTransforms = Vec3.ZERO;
 		float scaledProgress = getScaledProgress(animationType, weapKey, progress);
@@ -416,11 +390,26 @@ public final class GunAnimationHelper
 		
 		return blendedTransforms;
 	}
+	
+	public static double getAnimationValue(String animationType, ItemStack weapon, float progress, String component, String valueName)
+	{
+		ResourceLocation weapKey = lookForParentAnimation(animationType, getItemLocationKey(weapon));
+		
+		animationType = addReloadAnimSuffix(animationType, weapKey);
+		
+		float scaledProgress = getScaledProgress(animationType, weapKey, progress);
+		int currentFrame = getCurrentFrame(weapon, scaledProgress);
+		int priorFrame = findPriorFrameValue(animationType, weapKey, component, currentFrame, valueName);
+		
+		double animationValue = getAnimationValue(animationType, weapKey, component, priorFrame, valueName);
+		
+		return animationValue;
+	}
 
 	
     
-	/* Reload animation calculators methods for more advanced control */
-	public static String addReloadAnimSuffix(String animationType, ResourceLocation weapKey)
+	/* Reload animation suffix calculators */
+	static String getReloadAnimSuffix(String animationType, ResourceLocation weapKey)
 	{
 		boolean magReload = ReloadHandler.get().isDoMagReload();
 		boolean emptyReload = ReloadHandler.get().isReloadFromEmpty();
@@ -435,13 +424,21 @@ public final class GunAnimationHelper
 			else
 			if (emptyReload && hasAnimation(animationType + "_Empty", weapKey))
 			animSuffix = "_Empty";
-			
-			animationType = animationType+animSuffix;
 		}
+		
+		return animSuffix;
+	}
+	
+	static String addReloadAnimSuffix(String animationType, ResourceLocation weapKey)
+	{
+		String animSuffix = getReloadAnimSuffix(animationType, weapKey);
+		if (!animationType.isEmpty())
+			animationType = animationType+animSuffix;
 		
 		return animationType;
 	}
-	
+
+	/* Animation calculators methods for more advanced control */
     // Frames
 	public static float getScaledProgress(String animationType, ResourceLocation weapKey, float progress)
 	{
@@ -476,7 +473,7 @@ public final class GunAnimationHelper
 
 	
     
-	/* Reload animation application methods to speed up animation implementation */
+	/* Animation application methods to speed up animation implementation */
     // Rotations
 	public static void rotateAroundOffset(PoseStack poseStack, Vec3 rotations, Vec3 offsets)
 	{
@@ -495,9 +492,16 @@ public final class GunAnimationHelper
 	
 	
 	
+	// Public data getters for advanced animation manipulation.
+	public static Vec3 getAnimationArrayPublic(String animationType, ResourceLocation weapKey, String component, String transform) {
+		return getAnimationArray(animationType, weapKey, component, transform);
+	}
+	public static double getAnimationValuePublic(String animationType, ResourceLocation weapKey, String transform) {
+		return getAnimationValue(animationType, weapKey, transform);
+	}
 	
 	
-	/* Property Helpers for Reload Animations */
+	/* Property Helpers for animations */
 	// General
 	public static boolean hasAnimation(String animationType, ResourceLocation weapKey) {
 		DataObject animObject = getObjectByPath(weapKey, ANIMATION_KEY, animationType);
@@ -563,7 +567,7 @@ public final class GunAnimationHelper
 	}
 	
 	
-	// Rotation Offset Points
+	// Rotation offset points
 	public static Vec3 getRotationOffsetPoint(String animationType, ResourceLocation weapKey, String component) {
 		if (!animationType.contains("_"))
 			animationType = addReloadAnimSuffix(animationType, weapKey);
@@ -610,6 +614,24 @@ public final class GunAnimationHelper
 		return 0;
 	}
 	
+	static int findPriorFrameValue(String animationType, ResourceLocation weapKey, String component, int frame, String transform) {
+		int returnFrame=-1;
+		for (int i=frame; returnFrame==-1 && i>=0; i--)
+		{
+			DataObject frameObject = getObjectByPath(weapKey, ANIMATION_KEY, animationType, component, ""+i);
+			if (frameObject!=null)
+			{
+				if (frameObject.has(transform, DataType.NUMBER))
+					returnFrame = i;
+			}
+		}
+		
+		if (returnFrame!=-1)
+		return returnFrame;
+		else
+		return 0;
+	}
+	
 	static int findNextFrame(String animationType, ResourceLocation weapKey, String component, int frame, String transform) {
 		int returnFrame=-1;
 		for (int i=frame; returnFrame==-1 && i<=getAnimationFrames(animationType, weapKey); i++)
@@ -629,7 +651,21 @@ public final class GunAnimationHelper
 	}
 	
 	
-	// Animation Values
+	// Animation values
+	static Vec3 getAnimationArray(String animationType, ResourceLocation weapKey, String component, String transform) {
+		DataObject transformObject = getObjectByPath(weapKey, ANIMATION_KEY, animationType, component);
+		if (transformObject.has(transform, DataType.ARRAY))
+		{
+			DataArray transformArray = transformObject.getDataArray(transform);
+			if (transformArray!=null)
+			{
+				Vec3 transforms = PropertyHelper.arrayToVec3(transformArray, Vec3.ZERO);
+				return transforms;
+			}
+		}
+		
+		return Vec3.ZERO;
+	}
 	static Vec3 getAnimationArray(String animationType, ResourceLocation weapKey, String component, int frame, String transform) {
 		DataObject transformObject = getObjectByPath(weapKey, ANIMATION_KEY, animationType, component, ""+frame);
 		if (transformObject.has(transform, DataType.ARRAY))

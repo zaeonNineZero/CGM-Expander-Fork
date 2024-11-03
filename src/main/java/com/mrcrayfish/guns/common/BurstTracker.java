@@ -43,7 +43,7 @@ public class BurstTracker
     private final ItemStack stack;
     private final Gun gun;
     
-    // This tracker handles the accelerating fire-rate of guns with the Ramp Up enchantment/parameter.
+    // This tracker handles the burst-fire mode usable by some guns.
 
     private BurstTracker(Player player)
     {

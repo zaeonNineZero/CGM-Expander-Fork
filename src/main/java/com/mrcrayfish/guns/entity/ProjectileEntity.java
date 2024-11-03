@@ -6,6 +6,7 @@ import com.mrcrayfish.guns.common.BoundingBoxManager;
 import com.mrcrayfish.guns.common.Gun;
 import com.mrcrayfish.guns.common.Gun.Projectile;
 import com.mrcrayfish.guns.common.ModTags;
+import com.mrcrayfish.guns.common.ServerAimTracker;
 import com.mrcrayfish.guns.common.SpreadTracker;
 import com.mrcrayfish.guns.event.GunProjectileHitEvent;
 import com.mrcrayfish.guns.init.ModEnchantments;
@@ -178,14 +179,17 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
 
         if(shooter instanceof Player)
         {
+            float initialGunSpread = Mth.lerp(SpreadTracker.get((Player) shooter).getSpread(item),minSpread,gunSpread);
             if(!modifiedGun.getGeneral().isAlwaysSpread() || minSpread > 0)
             {
-                gunSpread = Mth.lerp(SpreadTracker.get((Player) shooter).getSpread(item),minSpread,gunSpread);
+                gunSpread = initialGunSpread;
             }
 
             if(ModSyncedDataKeys.AIMING.getValue((Player) shooter))
             {
-                gunSpread *= 1-(modifiedGun.getGeneral().getSpreadAdsReduction());
+                float aimingGunSpread = gunSpread * (1-(modifiedGun.getGeneral().getSpreadAdsReduction()));
+                float aimPosition = (float) Mth.clamp(ServerAimTracker.getAimingTicks((Player) shooter)/(5/GunCompositeStatHelper.getCompositeAimDownSightSpeed(weapon)),0,1);
+                gunSpread = Mth.lerp(aimPosition,initialGunSpread,aimingGunSpread);
             }
         }
 
