@@ -1,0 +1,41 @@
+{
+	"credit": "Made with Blockbench",
+	"texture_size": [32, 32],
+	"textures": {
+		"1": "cgm:items/rifle"
+	},
+	"elements": [
+		{
+			"from": [7.6, -0.975, 9.9],
+			"to": [8.4, 3.425, 12.5],
+			"rotation": {"angle": 0, "axis": "y", "origin": [15.6, 8.925, 18.05]},
+			"faces": {
+				"north": {"uv": [4.5, 3, 5.5, 3.5], "texture": "#1"},
+				"east": {"uv": [5.5, 3, 8, 3.5], "texture": "#1"},
+				"south": {"uv": [8, 3, 9, 3.5], "texture": "#1"},
+				"west": {"uv": [5.5, 3, 8, 3.5], "texture": "#1"},
+				"up": {"uv": [5.5, 4, 8, 5], "texture": "#1"}
+			}
+		},
+		{
+			"from": [7.6, -1.575, 9.9],
+			"to": [8.4, -0.975, 12.5],
+			"rotation": {"angle": 0, "axis": "y", "origin": [15.6, 6.475, 18.05]},
+			"faces": {
+				"north": {"uv": [4.5, 3.5, 5.5, 4], "texture": "#1"},
+				"east": {"uv": [5.5, 3.5, 8, 4], "texture": "#1"},
+				"south": {"uv": [8, 3.5, 9, 4], "texture": "#1"},
+				"west": {"uv": [5.5, 3.5, 8, 4], "texture": "#1"},
+				"down": {"uv": [5.5, 4, 8, 5], "texture": "#1"}
+			}
+		}
+	],
+	"groups": [
+		{
+			"name": "magazine",
+			"origin": [15.6, 8.675, 18],
+			"color": 0,
+			"children": [0, 1]
+		}
+	]
+}

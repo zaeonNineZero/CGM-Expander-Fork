@@ -1,0 +1,54 @@
+{
+	"credit": "Made with Blockbench",
+	"texture_size": [32, 32],
+	"textures": {
+		"1": "cgm:items/machine_pistol",
+		"particle": "cgm:items/machine_pistol"
+	},
+	"elements": [
+		{
+			"from": [7.6, 4.4, 15.25],
+			"to": [7.9, 4.65, 15.55],
+			"rotation": {"angle": 0, "axis": "y", "origin": [-0.2, 0, 4.35]},
+			"faces": {
+				"north": {"uv": [4, 7.5, 4.5, 8], "texture": "#1"},
+				"east": {"uv": [4, 7.5, 4.5, 8], "texture": "#1"},
+				"south": {"uv": [4, 7.5, 4.5, 8], "texture": "#1"},
+				"west": {"uv": [4, 7.5, 4.5, 8], "texture": "#1"},
+				"up": {"uv": [4.5, 8, 4, 7.5], "texture": "#1"}
+			}
+		},
+		{
+			"from": [8.1, 4.4, 15.25],
+			"to": [8.4, 4.65, 15.55],
+			"rotation": {"angle": 0, "axis": "y", "origin": [0.2, 0, 4.35]},
+			"faces": {
+				"north": {"uv": [4, 7.5, 4.5, 8], "texture": "#1"},
+				"east": {"uv": [4, 7.5, 4.5, 8], "texture": "#1"},
+				"south": {"uv": [4, 7.5, 4.5, 8], "texture": "#1"},
+				"west": {"uv": [4, 7.5, 4.5, 8], "texture": "#1"},
+				"up": {"uv": [4.5, 8, 4, 7.5], "texture": "#1"}
+			}
+		},
+		{
+			"from": [7.6, 4.2, 14.75],
+			"to": [8.4, 4.4, 15.56],
+			"rotation": {"angle": 0, "axis": "y", "origin": [0, -0.1, 4.35]},
+			"faces": {
+				"north": {"uv": [4.5, 10, 5, 10.5], "texture": "#1"},
+				"east": {"uv": [4.5, 10, 5, 10.5], "texture": "#1"},
+				"south": {"uv": [4.5, 10, 5, 10.5], "texture": "#1"},
+				"west": {"uv": [4.5, 10, 5, 10.5], "texture": "#1"},
+				"up": {"uv": [5, 10.5, 4.5, 10], "texture": "#1"}
+			}
+		}
+	],
+	"groups": [
+		{
+			"name": "rear_sight",
+			"origin": [0, 0, 4],
+			"color": 0,
+			"children": [0, 1, 2]
+		}
+	]
+}

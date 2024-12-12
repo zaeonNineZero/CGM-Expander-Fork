@@ -23,6 +23,7 @@
    "item.machine_pistol.fire":          { "subtitle": "subtitle.cgm.fire",           "sounds": [{ "name": "cgm:item/machine_pistol/fire" }]},
    "item.machine_pistol.silenced_fire": { "subtitle": "subtitle.cgm.fire.silenced",  "sounds": [{ "name": "cgm:item/machine_pistol/silenced_fire" }]},
    "item.machine_pistol.enchanted_fire":{ "subtitle": "subtitle.cgm.fire.enchanted", "sounds": [{ "name": "cgm:item/machine_pistol/enchanted_fire" }]},
+   "item.machine_pistol.cock":          { "subtitle": "subtitle.cgm.cock",           "sounds": [{ "name": "cgm:item/rifle/cock" }]},
    "item.heavy_rifle.fire":             { "subtitle": "subtitle.cgm.fire",           "sounds": [{ "name": "cgm:item/heavy_rifle/fire" }]},
    "item.heavy_rifle.silenced_fire":    { "subtitle": "subtitle.cgm.fire.silenced",  "sounds": [{ "name": "cgm:item/heavy_rifle/silenced_fire" }]},
    "item.heavy_rifle.enchanted_fire":   { "subtitle": "subtitle.cgm.fire.enchanted", "sounds": [{ "name": "cgm:item/heavy_rifle/enchanted_fire" }]},
@@ -57,5 +58,14 @@
 	"item.assault_rifle.mag_in": {
 		"subtitle":"subtitle.cgm.reload",
 		"sounds": [{"name":"cgm:item/assault_rifle/mag_in"}]
+	},
+	
+	
+	"item.rifle.mag_out": {
+		"sounds": [{"name":"cgm:item/rifle/mag_out"}]
+	},
+	"item.rifle.mag_in": {
+		"subtitle":"subtitle.cgm.reload",
+		"sounds": [{"name":"cgm:item/rifle/mag_in"}]
 	}
 }

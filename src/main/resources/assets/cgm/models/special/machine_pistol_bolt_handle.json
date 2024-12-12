@@ -1,0 +1,44 @@
+{
+	"credit": "Made with Blockbench",
+	"texture_size": [32, 32],
+	"textures": {
+		"1": "cgm:items/machine_pistol",
+		"particle": "cgm:items/machine_pistol"
+	},
+	"elements": [
+		{
+			"name": "handle",
+			"from": [6.549, 2.98, 11.33],
+			"to": [7.099, 3.47, 11.82],
+			"rotation": {"angle": -45, "axis": "x", "origin": [6.849, 3.225, 11.575]},
+			"faces": {
+				"north": {"uv": [4.5, 8, 5, 8.5], "rotation": 90, "texture": "#1"},
+				"east": {"uv": [4.5, 9, 5, 9.5], "rotation": 90, "texture": "#1"},
+				"south": {"uv": [4.5, 8, 5, 8.5], "rotation": 90, "texture": "#1"},
+				"west": {"uv": [4.5, 8, 5, 8.5], "rotation": 90, "texture": "#1"},
+				"up": {"uv": [4.5, 8, 5, 8.5], "rotation": 90, "texture": "#1"},
+				"down": {"uv": [4.5, 8, 5, 8.5], "rotation": 90, "texture": "#1"}
+			}
+		},
+		{
+			"name": "rod",
+			"from": [7.049, 3.055, 11.405],
+			"to": [7.549, 3.395, 11.745],
+			"rotation": {"angle": 0, "axis": "y", "origin": [-0.65, 0.3, 0.2]},
+			"faces": {
+				"north": {"uv": [4.5, 9.5, 5, 10], "rotation": 90, "texture": "#1"},
+				"south": {"uv": [4.5, 9.5, 5, 10], "rotation": 90, "texture": "#1"},
+				"up": {"uv": [4.5, 9.5, 5, 10], "rotation": 90, "texture": "#1"},
+				"down": {"uv": [4.5, 9.5, 5, 10], "rotation": 90, "texture": "#1"}
+			}
+		}
+	],
+	"groups": [
+		{
+			"name": "bolt_handle",
+			"origin": [-1.15, 0.3, 0.2],
+			"color": 0,
+			"children": [0, 1]
+		}
+	]
+}

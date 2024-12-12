@@ -1,0 +1,42 @@
+{
+	"credit": "Made with Blockbench",
+	"texture_size": [32, 32],
+	"textures": {
+		"1": "cgm:items/machine_pistol",
+		"particle": "cgm:items/machine_pistol"
+	},
+	"elements": [
+		{
+			"from": [7.5, -2.25, 11.6],
+			"to": [8.5, 0.3, 13.3],
+			"rotation": {"angle": 0, "axis": "y", "origin": [0, -1.25, -0.2]},
+			"faces": {
+				"north": {"uv": [0, 7.5, 1, 10], "texture": "#1"},
+				"east": {"uv": [1, 7.5, 3, 10], "texture": "#1"},
+				"south": {"uv": [3, 7.5, 4, 10], "texture": "#1"},
+				"west": {"uv": [3, 7.5, 1, 10], "texture": "#1"},
+				"down": {"uv": [1, 10, 3, 11], "rotation": 90, "texture": "#1"}
+			}
+		},
+		{
+			"from": [7.5, 0.3, 11.6],
+			"to": [8.5, 2.8, 13.3],
+			"rotation": {"angle": 0, "axis": "y", "origin": [0, 2.85, -0.2]},
+			"faces": {
+				"north": {"uv": [0, 9.5, 1, 7.5], "texture": "#1"},
+				"east": {"uv": [1, 9.5, 3, 7.5], "texture": "#1"},
+				"south": {"uv": [3, 9.5, 4, 7.5], "texture": "#1"},
+				"west": {"uv": [3, 9.5, 1, 7.5], "texture": "#1"},
+				"up": {"uv": [3, 10, 1, 11], "rotation": 90, "texture": "#1"}
+			}
+		}
+	],
+	"groups": [
+		{
+			"name": "mag",
+			"origin": [0, 0, 0],
+			"color": 0,
+			"children": [0, 1]
+		}
+	]
+}

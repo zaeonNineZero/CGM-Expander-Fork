@@ -883,7 +883,7 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         }
 
         /**
-         * @return The speed of magazine reloads in ticks. The lower the value, shorter the reload time.
+         * @return The energy capacity of the gun in Forge Energy (FE).
          */
         public int getEnergyCapacity()
         {
@@ -891,7 +891,9 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         }
 
         /**
-         * @return The speed of magazine reloads in ticks. The lower the value, shorter the reload time.
+         * @return How much energy (in Forge Energy) is consumed per shot.
+         * The gun will not fire if it has less energy than this number.
+         * Setting this to 0 disables energy consumption per shot.
          */
         public int getEnergyPerShot()
         {
@@ -899,7 +901,8 @@ public class Gun implements INBTSerializable<CompoundTag>, IEditorMenu
         }
 
         /**
-         * @return The amount of recoil this gun produces upon firing in degrees
+         * @return The point in the gun's cooldown when reloading can be started.
+         * 1 is immediately after firing, while 0 is after the cooldown expires.
          */
         public float getReloadAllowedCooldown()
         {

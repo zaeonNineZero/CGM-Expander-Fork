@@ -94,7 +94,7 @@ public class ClientHandler
             {
                 return stack.getTag().getInt("Color");
             }
-            if(index == 0 && stack.getItem() instanceof GunItem)
+            if(index == 0 && stack.hasTag() && !stack.getTag().contains("Color", Tag.TAG_INT) && stack.getItem() instanceof GunItem)
             {
                 ItemStack renderingWeapon = GunRenderingHandler.get().getRenderingWeapon();
                 if(renderingWeapon != null)
@@ -133,14 +133,16 @@ public class ClientHandler
         ModelOverrides.register(ModItems.BAZOOKA.get(), new SimpleModel(SpecialModels.BAZOOKA::getModel));
         ModelOverrides.register(ModItems.GRENADE_LAUNCHER.get(), new GrenadeLauncherModel());
         ModelOverrides.register(ModItems.HEAVY_RIFLE.get(), new SimpleModel(SpecialModels.HEAVY_RIFLE::getModel));
-        ModelOverrides.register(ModItems.MACHINE_PISTOL.get(), new SimpleModel(SpecialModels.MACHINE_PISTOL::getModel));
+        //ModelOverrides.register(ModItems.MACHINE_PISTOL.get(), new SimpleModel(SpecialModels.MACHINE_PISTOL::getModel));
         ModelOverrides.register(ModItems.MINI_GUN.get(), new MiniGunModel());
         //ModelOverrides.register(ModItems.PISTOL.get(), new SimpleModel(SpecialModels.PISTOL::getModel));
-        ModelOverrides.register(ModItems.RIFLE.get(), new SimpleModel(SpecialModels.RIFLE::getModel));
+        //ModelOverrides.register(ModItems.RIFLE.get(), new SimpleModel(SpecialModels.RIFLE::getModel));
         ModelOverrides.register(ModItems.SHOTGUN.get(), new SimpleModel(SpecialModels.SHOTGUN::getModel));
 
         ModelOverrides.register(ModItems.ASSAULT_RIFLE.get(), new AssaultRifleCustomModel());
+        ModelOverrides.register(ModItems.MACHINE_PISTOL.get(), new MachinePistolCustomModel());
         ModelOverrides.register(ModItems.PISTOL.get(), new PistolCustomModel());
+        ModelOverrides.register(ModItems.RIFLE.get(), new RifleCustomModel());
     }
 
     private static void registerScreenFactories()

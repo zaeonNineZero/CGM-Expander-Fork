@@ -239,7 +239,7 @@ public class RenderUtil
         	{
         		Gun gun = ((GunItem) stack.getItem()).getModifiedGun(stack);
         		int baseColor = gun.getGeneral().getDefaultColor();
-        		if (baseColor!=-1 /*&& !((IColored) stack.getItem()).hasColor(stack)*/)
+        		if (baseColor!=-1 && !((IColored) stack.getItem()).hasColor(stack))
         			return baseColor;
         	}
         	else

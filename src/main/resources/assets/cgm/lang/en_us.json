@@ -46,6 +46,7 @@
     "info.cgm.ignore_ammo": "Infinite Ammo",
     "info.cgm.ammo": "Ammo: %s",
     "info.cgm.ammo_type": "Ammo Type: %s",
+    "info.cgm.unlimited_reloads": "(Does not consume ammo on reload)",
     "info.cgm.energy": "Energy: %s",
     "info.cgm.attachment_help": "Press %s in-game for Attachments",
     "info.cgm.gun_details_help": "Hold Shift to view gun stats",

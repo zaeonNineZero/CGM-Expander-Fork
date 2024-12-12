@@ -61,7 +61,7 @@ public abstract class Attachment
             List<Component> perks = attachment.getProperties().getPerks();
             if(perks != null && perks.size() > 0)
             {
-                event.getToolTip().add(Component.translatable("perk.cgm.title").withStyle(ChatFormatting.GRAY, ChatFormatting.BOLD));
+                event.getToolTip().add(Component.translatable("perk.cgm.title").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD));
                 event.getToolTip().addAll(perks);
                 return;
             }

@@ -76,38 +76,42 @@ public class GunItem extends Item implements IColored, IMeta
     {
         Gun modifiedGun = this.getModifiedGun(stack);
 
-        Item ammo = ForgeRegistries.ITEMS.getValue(modifiedGun.getProjectile().getItem());
-        if(ammo != null && (!Gun.hasInfiniteAmmo(stack) && !Gun.usesEnergy(stack)))
-        {
-        	tooltip.add(Component.translatable("info.cgm.ammo_type", Component.translatable(ammo.getDescriptionId()).withStyle(ChatFormatting.WHITE)).withStyle(ChatFormatting.GRAY));
-        }
-
         String additionalDamageText = "";
         CompoundTag tagCompound = stack.getTag();
-        if(tagCompound != null)
-        {
-            if(Gun.hasInfiniteAmmo(stack))
-            {
-                if(!Gun.usesEnergy(stack))
-                	tooltip.add(Component.translatable("info.cgm.ignore_ammo").withStyle(ChatFormatting.AQUA));
-            }
-            else
-            {
-                int ammoCount = tagCompound.getInt("AmmoCount");
-                tooltip.add(Component.translatable("info.cgm.ammo", ChatFormatting.WHITE.toString() + ammoCount + "/" + GunCompositeStatHelper.getAmmoCapacity(stack, modifiedGun)).withStyle(ChatFormatting.GRAY));
-            }
-            if(Gun.usesEnergy(stack))
-            {
-                    int energy = tagCompound.getInt("Energy");
-                	tooltip.add(Component.translatable("info.cgm.energy", ChatFormatting.WHITE.toString() + energy + "/" + modifiedGun.getGeneral().getEnergyCapacity()).withStyle(ChatFormatting.DARK_AQUA));
-            }
-        }
         
         if (Screen.hasShiftDown())
         {
-        	tooltip.add(Component.translatable("info.cgm.gun_details").withStyle(ChatFormatting.GOLD));
-
-        	// Additional Damage
+        	tooltip.add(Component.translatable("info.cgm.gun_details").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD));
+        	
+        	// Ammo Count and Capacity
+            Item ammo = ForgeRegistries.ITEMS.getValue(modifiedGun.getProjectile().getItem());
+            if(ammo != null && (!Gun.hasInfiniteAmmo(stack) && !Gun.usesEnergy(stack)))
+            {
+            	tooltip.add(Component.translatable("info.cgm.ammo_type", Component.translatable(ammo.getDescriptionId()).withStyle(ChatFormatting.WHITE)).withStyle(ChatFormatting.GRAY));
+            }
+            if(tagCompound != null)
+            {
+                if(Gun.hasInfiniteAmmo(stack))
+                {
+                    if(!Gun.usesEnergy(stack))
+                    	tooltip.add(Component.translatable("info.cgm.ignore_ammo").withStyle(ChatFormatting.AQUA));
+                }
+                else
+                {
+                    int ammoCount = tagCompound.getInt("AmmoCount");
+                    tooltip.add(Component.translatable("info.cgm.ammo", ChatFormatting.WHITE.toString() + ammoCount + "/" + GunCompositeStatHelper.getAmmoCapacity(stack, modifiedGun)).withStyle(ChatFormatting.GRAY));
+                    if (Gun.hasUnlimitedReloads(stack))
+                    	tooltip.add(Component.translatable("info.cgm.unlimited_reloads").withStyle(ChatFormatting.GRAY));
+                    
+                }
+                if(Gun.usesEnergy(stack))
+                {
+                    int energy = tagCompound.getInt("Energy");
+                    tooltip.add(Component.translatable("info.cgm.energy", ChatFormatting.WHITE.toString() + energy + "/" + modifiedGun.getGeneral().getEnergyCapacity()).withStyle(ChatFormatting.DARK_AQUA));
+                }
+            }
+        	
+            // Additional Damage (To add onto the final damage)
         	if(tagCompound != null)
             {
                 if(tagCompound.contains("AdditionalDamage", Tag.TAG_ANY_NUMERIC))
@@ -126,7 +130,7 @@ public class GunItem extends Item implements IColored, IMeta
                 }
             }
         	
-        	// Damage
+        	// Displayed Damage Stat
             float damage = modifiedGun.getProjectile().getDamage();
             damage = GunModifierHelper.getModifiedProjectileDamage(stack, damage);
             damage = GunEnchantmentHelper.getAcceleratorDamage(stack, damage);
