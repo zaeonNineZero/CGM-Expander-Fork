@@ -29,7 +29,7 @@ public class GrenadeItem extends AmmoItem
     @Override
     public UseAnim getUseAnimation(ItemStack stack)
     {
-        return UseAnim.BOW;
+        return UseAnim.SPEAR;
     }
 
     @Override
