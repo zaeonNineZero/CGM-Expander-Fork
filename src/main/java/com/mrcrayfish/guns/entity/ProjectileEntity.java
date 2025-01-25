@@ -914,9 +914,10 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
             return;
 
         boolean isProjectile = entity instanceof ProjectileEntity projectile ? true : false;
+        boolean isGrenade = entity instanceof ThrowableGrenadeEntity projectile ? true : false;
         DamageSource source = isProjectile ? DamageSource.explosion(((ProjectileEntity) entity).getShooter()) : null;
         boolean hasGunProjectile = isProjectile ? (((ProjectileEntity) entity).getProjectile()!=null) : false;
-        float projectileDamage = (hasGunProjectile ? ((ProjectileEntity) entity).getDamage() : 20F );
+        float projectileDamage = (float) (hasGunProjectile ? ((ProjectileEntity) entity).getDamage() : (isGrenade ? Config.COMMON.grenades.grenadeDamage.get() : 20F) );
         Explosion.BlockInteraction mode = Config.COMMON.gameplay.griefing.enableBlockRemovalOnExplosions.get() && !forceNone ? Explosion.BlockInteraction.BREAK : Explosion.BlockInteraction.NONE;
         Explosion explosion = new ProjectileExplosion(world, entity, source, null, entity.getX(), entity.getY(), entity.getZ(), radius, false, mode, projectileDamage);
 
