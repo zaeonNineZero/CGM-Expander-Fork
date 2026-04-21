@@ -140,8 +140,9 @@ public class TwoHandedPose extends WeaponPose
         BakedModel model = Minecraft.getInstance().getItemRenderer().getModel(stack, player.level, player, 0);
         float translateX = model.getTransforms().firstPersonRightHand.translation.x();
         int side = hand.getOpposite() == HumanoidArm.RIGHT ? 1 : -1;
-        float handDiv = (float) GunAnimationHelper.getAnimationValuePublic(GunAnimationHelper.getSmartAnimationType(stack, player, partialTicks), GunAnimationHelper.getItemLocationKey(stack), "handScale");
-        float handScale = 1/(handDiv==0 ? 1 : handDiv);
+        //float handDiv = (float) GunAnimationHelper.getAnimationValuePublic(GunAnimationHelper.getSmartAnimationType(stack, player, partialTicks), GunAnimationHelper.getItemLocationKey(stack), "handScale");
+        float handScale = model.getTransforms().firstPersonRightHand.scale.x();
+        float handScaleDiv = 1/(handScale==0 ? 1 : handScale);
         poseStack.translate(translateX * side, 0, 0);
 
         boolean slim = Minecraft.getInstance().player.getModelName().equals("slim");
@@ -160,7 +161,8 @@ public class TwoHandedPose extends WeaponPose
         {
         	Vec3 posHand = PropertyHelper.getHandPosition(stack, gun, false);
         	
-        	Vec3 translations = GunAnimationHelper.getSmartAnimationTrans(stack, player, partialTicks, "forwardHand");
+        	double translationScale = GunAnimationHelper.getAnimationValuePublic(stack, player, partialTicks, "forwardHand", "translationScale", 1);
+        	Vec3 translations = GunAnimationHelper.getSmartAnimationTrans(stack, player, partialTicks, "forwardHand").scale(translationScale);
             Vec3 rotations = GunAnimationHelper.getSmartAnimationRot(stack, player, partialTicks, "forwardHand");
         	if(!GunAnimationHelper.hasAnimation("fire", stack) && GunAnimationHelper.getSmartAnimationType(stack, player, partialTicks)=="fire")
         	{
@@ -177,7 +179,7 @@ public class TwoHandedPose extends WeaponPose
             //poseStack.translate(4.0 * 0.0625 * side, 0, 0;
 
             String animType = GunAnimationHelper.getSmartAnimationType(stack, player, partialTicks);
-            poseStack.translate(translations.x * handScale * side * 0.0625, translations.y * handScale * 0.0625, -translations.z * handScale * 0.0625);
+            poseStack.translate(translations.x * handScaleDiv * side * 0.0625, translations.y * handScaleDiv * 0.0625, -translations.z * handScaleDiv * 0.0625);
             GunAnimationHelper.rotateAroundOffset(poseStack, rotations, animType, stack, "forwardHand");
             
             poseStack.translate((armWidth / 2.0) * 0.0625 * side, 0, 0);
@@ -196,8 +198,8 @@ public class TwoHandedPose extends WeaponPose
         poseStack.pushPose();
         {
         	Vec3 posHand = PropertyHelper.getHandPosition(stack, gun, true);
-        	
-        	Vec3 translations = GunAnimationHelper.getSmartAnimationTrans(stack, player, partialTicks, "rearHand");
+        	double translationScale = GunAnimationHelper.getAnimationValuePublic(stack, player, partialTicks, "rearHand", "translationScale", 1);
+        	Vec3 translations = GunAnimationHelper.getSmartAnimationTrans(stack, player, partialTicks, "rearHand").scale(translationScale);
             Vec3 rotations = GunAnimationHelper.getSmartAnimationRot(stack, player, partialTicks, "rearHand");
         	if(!GunAnimationHelper.hasAnimation("fire", stack) && GunAnimationHelper.getSmartAnimationType(stack, player, partialTicks)=="fire")
         	{
@@ -210,7 +212,7 @@ public class TwoHandedPose extends WeaponPose
             //poseStack.translate(-4.0 * 0.0625 * side, 0, 0);
 
             String animType = GunAnimationHelper.getSmartAnimationType(stack, player, partialTicks);
-            poseStack.translate(translations.x * handScale * side * 0.0625, translations.y * handScale * 0.0625, -translations.z * handScale * 0.0625);
+            poseStack.translate(translations.x * handScaleDiv * side * 0.0625, translations.y * handScaleDiv * 0.0625, -translations.z * handScaleDiv * 0.0625);
             GunAnimationHelper.rotateAroundOffset(poseStack, rotations, animType, stack, "rearHand");
             
             poseStack.translate(-(armWidth / 2.0) * 0.0625 * side, 0, 0);
