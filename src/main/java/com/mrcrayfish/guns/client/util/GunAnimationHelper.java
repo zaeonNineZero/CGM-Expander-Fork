@@ -638,9 +638,9 @@ public final class GunAnimationHelper
 	}
 	
 
-	public static double getAnimationValuePublic(ItemStack weapon, Player player, float partialTicks, String component, String transform) {
+	public static double getAnimationValuePublic(ItemStack weapon, Player player, float partialTicks, String component, String transform, double returnVal) {
 		String animationType = getSmartAnimationType(weapon, player, partialTicks);
-		return getAnimationValue(animationType, lookForParentAnimation(animationType, getItemLocationKey(weapon)), transform);
+		return getAnimationValue(animationType, lookForParentAnimation(animationType, getItemLocationKey(weapon)), transform, returnVal);
 	}
 	
 	
